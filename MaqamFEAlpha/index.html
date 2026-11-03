@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GoMaqam.com</title>
+    <!-- Preconnect to Google Fonts for optimal loading in production -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Mirza:wght@400;500;600;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (function () {
+        try {
+          var hasSession = Boolean(
+            localStorage.getItem('maqam_access_token') ||
+            localStorage.getItem('accessToken') ||
+            localStorage.getItem('maqam_crm_user') ||
+            localStorage.getItem('user')
+          );
+          var t = hasSession
+            ? (localStorage.getItem('maqam_theme') || localStorage.getItem('maqam-admin-theme'))
+            : 'light';
+          var dark = t === 'dark'; // default is light
+          var root = document.documentElement;
+          root.classList.toggle('dark', dark);
+          root.setAttribute('data-theme', dark ? 'dark' : 'light');
+          root.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <div id="initial-page-loader" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Inter',system-ui,sans-serif;background-color:#ffffff;color:#0f172a;z-index:99999;min-height:100dvh;">
+        <style>
+          @keyframes initLumaAnim {
+            0% { inset: 0 31px 31px 0; }
+            12.5% { inset: 0 31px 0 0; }
+            25% { inset: 31px 31px 0 0; }
+            37.5% { inset: 31px 0 0 0; }
+            50% { inset: 31px 0 0 31px; }
+            62.5% { inset: 0 0 0 31px; }
+            75% { inset: 0 0 31px 31px; }
+            87.5% { inset: 0 0 31px 0; }
+            100% { inset: 0 31px 31px 0; }
+          }
+          @keyframes initLumaBar {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(250%); }
+          }
+          .init-luma-box {
+            position: relative;
+            width: 58px;
+            height: 58px;
+            aspect-ratio: 1;
+            margin-bottom: 1.25rem;
+          }
+          .init-luma-capsule {
+            position: absolute;
+            border-radius: 9999px;
+            animation: initLumaAnim 2.4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+            box-shadow: inset 0 0 0 3px #00987A;
+          }
+          .init-luma-capsule.delay {
+            animation-delay: -1.2s;
+          }
+          .init-luma-shimmer {
+            animation: initLumaBar 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+          }
+          html.dark #initial-page-loader { background-color: #07131b !important; color: #f8fafc !important; }
+          html.dark .init-luma-capsule { box-shadow: inset 0 0 0 3px #10b981 !important; }
+          html.dark .init-text-sub { color: #94a3b8 !important; }
+          html.dark .init-bar-bg { background-color: #1e293b !important; }
+        </style>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:1rem;text-align:center;">
+          <div class="init-luma-box">
+            <span class="init-luma-capsule"></span>
+            <span class="init-luma-capsule delay"></span>
+          </div>
+          <div style="font-size:1.125rem;font-weight:600;letter-spacing:-0.02em;margin-bottom:0.25rem;">
+            Loading...
+          </div>
+          <div class="init-text-sub" style="font-size:0.875rem;color:#64748b;font-weight:400;margin-bottom:1rem;">
+            Preparing your travel experience, please wait a moment
+          </div>
+          <div class="init-bar-bg" style="width:13rem;height:6px;background-color:#e2e8f0;border-radius:9999px;overflow:hidden;position:relative;">
+            <div class="init-luma-shimmer" style="position:absolute;top:0;bottom:0;width:50%;border-radius:9999px;background:linear-gradient(90deg, #00987A, #10b981);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

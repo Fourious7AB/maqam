@@ -1,0 +1,9 @@
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Use JWT Bearer Authentication to access protected routes.
+        Provide the JWT token in the Authorization header as: `Bearer <token>`

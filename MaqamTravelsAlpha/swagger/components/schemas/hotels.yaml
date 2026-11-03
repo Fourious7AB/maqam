@@ -1,0 +1,797 @@
+components:
+  schemas:
+    # ──────────────────────────────────────────────────────────────────────────
+    # HOTEL SEARCH
+    # ──────────────────────────────────────────────────────────────────────────
+
+    HotelSearchRequest:
+      type: object
+      required:
+        - checkIn
+        - checkOut
+      description: >
+        **Hotel Discovery Search Payload**
+
+
+        Requires `cityName` (or `cityId`) + `checkIn` + `checkOut`. All other fields have smart defaults:
+        - `countryCode`: Auto-derived from city map when `cityName` is provided.
+        - `guestNationality`: Defaults to `IN`.
+        - `currency`: Defaults to `INR`.
+        - `rooms`: Auto-constructed from `adults` / `children` / `childAges` / `numRooms` shorthand if omitted.
+
+
+        Use `GET /api/v1/hotels/cities?q=<name>` to autocomplete city names and retrieve SRDV `cityId`s.
+      properties:
+        cityName:
+          type: string
+          example: "Mumbai"
+          description: "Human-readable city name. Use GET /api/v1/hotels/cities to search. Resolved against 136k-city DB."
+        cityId:
+          type: string
+          example: "725862"
+          description: "SRDV numeric city identifier (alternative to cityName). Takes precedence over cityName."
+        checkIn:
+          type: string
+          format: date
+          example: "2026-10-15"
+          description: "Check-in date (YYYY-MM-DD). Must be today or later."
+        checkOut:
+          type: string
+          format: date
+          example: "2026-10-17"
+          description: "Check-out date (YYYY-MM-DD). Must be strictly after checkIn."
+        adults:
+          type: integer
+          minimum: 1
+          maximum: 32
+          example: 2
+          description: "Total number of adult guests across all rooms (default 1). Used when `rooms[]` is omitted."
+        children:
+          type: integer
+          minimum: 0
+          maximum: 24
+          example: 0
+          description: "Number of children (optional, default 0). Used when `rooms[]` is omitted."
+        childAges:
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            maximum: 17
+          example: []
+          description: "Array of child ages corresponding to `children` count. Used when `rooms[]` is omitted."
+        numRooms:
+          type: integer
+          minimum: 1
+          maximum: 8
+          example: 1
+          description: "Number of rooms to request (default 1). Used when `rooms[]` is omitted."
+        countryCode:
+          type: string
+          minLength: 2
+          maxLength: 2
+          example: "IN"
+          description: "ISO 3166-1 alpha-2 country code. Auto-derived from city map when `cityName` is provided."
+        guestNationality:
+          type: string
+          minLength: 2
+          maxLength: 2
+          example: "IN"
+          description: "Guest nationality ISO country code (default IN)."
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: "INR"
+          description: "Three-letter ISO 4217 currency code (default INR). Convenience fee is only applied in INR."
+        minRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 3
+          description: "Minimum star rating filter (1-5, default 1)."
+        maxRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+          description: "Maximum star rating filter (1-5, default 5)."
+        rooms:
+          type: array
+          minItems: 1
+          maxItems: 8
+          description: "Full room allocation array — use this for multi-room bookings with different occupancy per room. Overrides top-level `adults`/`children`/`numRooms` shorthand."
+          items:
+            type: object
+            properties:
+              adults:
+                type: integer
+                minimum: 1
+                maximum: 8
+                example: 2
+              children:
+                type: integer
+                minimum: 0
+                maximum: 6
+                example: 0
+              childAges:
+                type: array
+                items:
+                  type: integer
+                  minimum: 0
+                  maximum: 17
+                example: []
+
+    HotelSearchResponse:
+      type: object
+      required:
+        - searchId
+        - expiresInSeconds
+        - nights
+        - hotels
+      properties:
+        searchId:
+          type: string
+          format: uuid
+          example: "c4a5cbda-1758-4fb3-8646-d93dfa020825"
+          description: >
+            Opaque search session UUID. Must be passed in subsequent
+            `GET /hotels/{hotelId}?searchId=` and `POST /hotels/recheck` calls.
+            Session expires after 5 minutes (300 seconds).
+        expiresInSeconds:
+          type: integer
+          example: 300
+          description: "Search session cache TTL — **5 minutes (300 seconds)**. Sessions cached and deduplicated by query key."
+        nights:
+          type: integer
+          example: 2
+          description: "Calculated duration of stay in nights (checkOut − checkIn)."
+        hotels:
+          type: array
+          description: "List of available hotel properties matching the search criteria."
+          items:
+            $ref: "#/components/schemas/HotelCard"
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # HOTEL CARD (search result item)
+    # ──────────────────────────────────────────────────────────────────────────
+
+    HotelCard:
+      type: object
+      description: "Single hotel search result card with pricing and metadata."
+      properties:
+        id:
+          type: string
+          example: "hsid4255550579-39676307"
+          description: "Provider hotel code. Use this as `hotelId` in subsequent GET /hotels/{hotelId} and POST /hotels/recheck calls."
+        resultIndex:
+          type: string
+          example: "1"
+          description: "SRDV result index used internally for subsequent API calls."
+        srdvIndex:
+          type: integer
+          example: 1
+          description: "SRDV provider shard index used in BlockRoom / HotelRoom calls."
+        name:
+          type: string
+          example: "Hotel Airport Crown- Near Saki Naka"
+          description: "Hotel property name."
+        category:
+          type: string
+          example: "3 Star"
+          description: "Hotel category label from supplier (e.g. '3 Star', 'Apartment')."
+        rating:
+          type: integer
+          example: 3
+          description: "Star rating (0–5). 0 means not rated."
+        description:
+          type: string
+          example: "Conveniently located budget hotel with modern amenities near Mumbai Airport."
+          description: "Hotel description text. May be empty for some properties in search results (enriched in hotel details)."
+        address:
+          type: string
+          example: "90 Feet Rd, Saki Naka, Mumbai, Maharashtra 400072"
+          description: "Street address or location summary."
+        city:
+          type: string
+          example: "Mumbai"
+          description: "City name from supplier data."
+        state:
+          type: string
+          example: "Maharashtra"
+          description: "State / province from supplier data."
+        country:
+          type: string
+          example: "India"
+          description: "Country name from supplier data."
+        pinCode:
+          type: string
+          example: "400072"
+          description: "Postal / PIN code."
+        latitude:
+          type: number
+          format: double
+          nullable: true
+          example: 19.0760
+          description: "GPS latitude (null when not provided by supplier)."
+        longitude:
+          type: number
+          format: double
+          nullable: true
+          example: 72.8777
+          description: "GPS longitude (null when not provided by supplier)."
+        contactNo:
+          type: string
+          example: "+91-22-12345678"
+          description: "Hotel contact number."
+        mapLink:
+          type: string
+          example: "https://maps.google.com/?q=Hotel+Airport+Crown"
+          description: "Google Maps link to the hotel property."
+        amenities:
+          type: array
+          items:
+            type: string
+          example: ["Security", "Clean Room", "WiFi", "Breakfast"]
+          description: "Deduplicated list of hotel amenities/facilities."
+        imageUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+          example:
+            - "https://i.travelapi.com/lodging/3000000/2660000/2658500/2658482/54e2e5ec_z.jpg"
+          description: "Hotel image URLs. May be empty for some properties."
+        fromPrice:
+          type: object
+          description: "Pricing summary for this hotel. Standard users see major-unit display fields only; admin/developer tokens receive full minor-unit financial breakdown."
+          properties:
+            perNightPrice:
+              type: number
+              format: float
+              example: 4522.59
+              description: "**Public**: Customer selling price per night in major currency units. Display as '₹4,523/night'."
+            totalPrice:
+              type: number
+              format: float
+              example: 9045.18
+              description: "**Public**: Customer total for entire stay in major currency units. Display as '₹9,045 total'."
+            nights:
+              type: integer
+              example: 2
+              description: "Number of stay nights."
+            currency:
+              type: string
+              example: "INR"
+              description: "Currency code (ISO 4217)."
+            amountMinor:
+              type: integer
+              example: 904518
+              description: "**Admin**: Customer total in minor units (paise for INR). Use for payment gateway charges."
+            supplierAmountMinor:
+              type: integer
+              example: 800480
+              description: "**Admin**: Raw supplier cost for stay in minor units."
+            markupMinor:
+              type: integer
+              example: 64038
+              description: "**Admin**: Applied markup amount in minor units."
+            feeMinor:
+              type: integer
+              example: 40000
+              description: "**Admin**: Flat convenience fee in minor units."
+            customerTotalMinor:
+              type: integer
+              example: 904518
+              description: "**Admin**: Final customer-payable amount in minor units."
+            pricingVersion:
+              type: string
+              example: "env-p8-f200-v1"
+              description: "**Admin**: Pricing engine version string (encodes markup % and fee applied)."
+        priceDisclosure:
+          type: object
+          properties:
+            includesTaxes:
+              type: boolean
+              example: true
+            includesFees:
+              type: boolean
+              example: true
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # HOTEL DETAILS
+    # ──────────────────────────────────────────────────────────────────────────
+
+    HotelDetailsResponse:
+      type: object
+      required:
+        - id
+        - name
+        - rooms
+      description: "Hotel property detail page data including description, images, and available room rate plans."
+      properties:
+        id:
+          type: string
+          example: "hsid4255550579-39676307"
+        name:
+          type: string
+          example: "Hotel Airport Crown- Near Saki Naka"
+        rating:
+          type: integer
+          example: 3
+        address:
+          type: string
+          example: "90 Feet Rd, Saki Naka, Mumbai, Maharashtra 400072"
+        description:
+          type: string
+          example: "Conveniently located budget hotel with modern amenities near Mumbai Airport."
+        imageUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+        currency:
+          type: string
+          example: "INR"
+        rooms:
+          type: array
+          description: "Available room rate plans. Pass the `id` of your chosen room to POST /hotels/recheck as `selectedRooms[].roomId`."
+          items:
+            $ref: "#/components/schemas/HotelRoom"
+
+    HotelRoom:
+      type: object
+      required:
+        - id
+        - name
+        - price
+        - totalPrice
+        - currency
+      description: "A selectable room rate plan for a hotel property."
+      properties:
+        id:
+          type: string
+          example: "8205fc1b-de0d-473c-aeed-d1d5ae7ebe11srlktsrlkthsid8789387822srlktsrlkt48cab9778a5c0c30ff1722ddb6f53e63"
+          description: "Opaque room rate identifier. Pass this as `selectedRooms[].roomId` in POST /hotels/recheck."
+        name:
+          type: string
+          example: "Deluxe Twin Room"
+        board:
+          type: string
+          example: "No meals included"
+          description: "Meal plan / board type (e.g. 'Room Only', 'Breakfast Included')."
+        capacity:
+          type: integer
+          example: 2
+          description: "Maximum adult occupancy for this room."
+        price:
+          type: number
+          format: float
+          example: 4522.59
+          description: "Customer selling price **per night** in major currency units (includes markup + fee)."
+        totalPrice:
+          type: number
+          format: float
+          example: 9045.18
+          description: "Customer total selling price for the **full stay** in major currency units."
+        nights:
+          type: integer
+          example: 2
+          description: "Number of stay nights used for `totalPrice` calculation."
+        currency:
+          type: string
+          example: "INR"
+        refundable:
+          type: boolean
+          example: false
+          description: "Whether this room rate is refundable per supplier cancellation policy."
+        cancellationPolicy:
+          description: >
+            Cancellation policy for this room. Can be either:
+            - A **structured array** of cancellation windows `CancellationPolicyEntry[]` (when supplier provides machine-readable data), or
+            - A **plain string** fallback (e.g. `"Standard cancellation policy applies."`) when structured data is unavailable.
+          oneOf:
+            - type: string
+              example: "Standard cancellation policy applies."
+            - type: array
+              items:
+                $ref: "#/components/schemas/CancellationPolicyEntry"
+        srdvRoomDetails:
+          type: object
+          description: "**Admin/Developer only**: Raw SRDV supplier room node used for BlockRoom and Book operations."
+        priceSnapshot:
+          type: object
+          description: "**Admin/Developer only**: Full minor-unit financial breakdown for this room."
+          properties:
+            supplierAmountMinor:
+              type: integer
+              example: 400240
+              description: "Supplier per-night cost in minor units."
+            markupMinor:
+              type: integer
+              example: 32019
+              description: "Applied markup per night in minor units."
+            feeMinor:
+              type: integer
+              example: 20000
+              description: "Flat convenience fee per night in minor units."
+            customerTotalMinor:
+              type: integer
+              example: 452259
+              description: "Customer per-night total in minor units."
+            currency:
+              type: string
+              example: "INR"
+            pricingVersion:
+              type: string
+              example: "env-p8-f200-v1"
+
+    CancellationPolicyEntry:
+      type: object
+      description: "A single cancellation charge window returned from the supplier."
+      properties:
+        fromDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-10-10T00:00:00"
+          description: "Start of the cancellation charge window (ISO 8601). Null means immediately."
+        toDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-10-15T00:00:00"
+          description: "End of the cancellation charge window. Null means open-ended."
+        charge:
+          type: number
+          format: float
+          example: 0.0
+          description: "Cancellation charge amount in major currency units for this window."
+        chargeType:
+          type: integer
+          example: 1
+          description: "Charge type code (1 = Fixed amount, 2 = Percentage of room rate)."
+        currency:
+          type: string
+          example: "INR"
+          description: "Currency for the cancellation charge."
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # RECHECK (BlockRoom)
+    # ──────────────────────────────────────────────────────────────────────────
+
+    HotelRecheckRequest:
+      type: object
+      required:
+        - searchId
+        - hotelId
+        - selectedRooms
+      description: >
+        Payload to revalidate room availability and lock a rate with the supplier (SRDV BlockRoom).
+        Must be completed before initiating payment.
+      properties:
+        searchId:
+          type: string
+          format: uuid
+          example: "c4a5cbda-1758-4fb3-8646-d93dfa020825"
+          description: "Active search session ID returned by POST /hotels/search."
+        hotelId:
+          type: string
+          example: "hsid4255550579-39676307"
+          description: "Selected hotel code (the `id` field from HotelCard)."
+        selectedRooms:
+          type: array
+          minItems: 1
+          maxItems: 8
+          description: "Array of selected room rate plan IDs with quantities."
+          items:
+            type: object
+            required:
+              - roomId
+            properties:
+              roomId:
+                type: string
+                example: "8205fc1b-de0d-473c-aeed-d1d5ae7ebe11srlktsrlkthsid8789387822srlktsrlkt48cab9778a5c0c30ff1722ddb6f53e63"
+                description: "Room rate ID from `HotelRoom.id` in GET /hotels/{hotelId} response."
+              quantity:
+                type: integer
+                example: 1
+                default: 1
+                description: "Number of this room type to book (default 1)."
+
+    HotelRecheckResponse:
+      type: object
+      required:
+        - recheckId
+        - expiresInSeconds
+        - priceChanged
+        - policyChanged
+        - hotel
+        - roomSnapshots
+        - price
+      description: >
+        Result of the BlockRoom price/policy revalidation.
+        If `priceChanged` or `policyChanged` is `true`, the client MUST re-confirm with `acceptChanges: true` in POST /hotels/bookings.
+      properties:
+        recheckId:
+          type: string
+          format: uuid
+          example: "d1a9c170-97d3-4fcd-ac53-c590a44aa2b9"
+          description: "Single-use recheck snapshot token. Pass this to POST /hotels/bookings as `recheckId`. **Expires in 3 minutes (180 seconds)** and is consumed atomically on first use."
+        expiresInSeconds:
+          type: integer
+          example: 180
+          description: "Recheck quote cache TTL — **3 minutes (180 seconds)**."
+        priceChanged:
+          type: boolean
+          example: false
+          description: "True if the supplier returned a different price during BlockRoom vs. the original search result."
+        policyChanged:
+          type: boolean
+          example: false
+          description: "True if the supplier's cancellation terms changed during BlockRoom."
+        hotel:
+          description: "Hotel property summary enriched with latest supplier data during BlockRoom."
+          allOf:
+            - $ref: "#/components/schemas/HotelCard"
+            - type: object
+              properties:
+                fromPrice:
+                  nullable: true
+                  description: "May be null if supplier did not return pricing in the BlockRoom enrichment response."
+        roomSnapshots:
+          type: array
+          description: "Confirmed room snapshots returned by the supplier. Selling prices are recalculated from BlockRoom response."
+          items:
+            $ref: "#/components/schemas/HotelRoom"
+        price:
+          type: object
+          description: "Aggregated price summary for the confirmed booking (customer-facing display values)."
+          properties:
+            perNightPrice:
+              type: number
+              format: float
+              example: 4522.59
+              description: "Customer selling price per night in major currency units."
+            totalPrice:
+              type: number
+              format: float
+              example: 9045.18
+              description: "Customer total for full stay in major currency units."
+            nights:
+              type: integer
+              example: 2
+            currency:
+              type: string
+              example: "INR"
+        cancellationPolicy:
+          type: array
+          description: "Array of cancellation policies per selected room snapshot."
+          items:
+            oneOf:
+              - type: string
+              - $ref: "#/components/schemas/CancellationPolicyEntry"
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # BOOKING
+    # ──────────────────────────────────────────────────────────────────────────
+
+    HotelBookingCreateRequest:
+      type: object
+      required:
+        - recheckId
+        - guests
+      description: >
+        Payload to create a hotel booking record in `AWAITING_PAYMENT` status.
+        The `recheckId` is **consumed atomically** (single-use token) and cannot be reused.
+        An `Idempotency-Key` header should be sent to prevent duplicate booking records.
+      properties:
+        recheckId:
+          type: string
+          format: uuid
+          example: "d1a9c170-97d3-4fcd-ac53-c590a44aa2b9"
+          description: "Single-use token generated by POST /hotels/recheck. Expires after 3 minutes."
+        acceptChanges:
+          type: boolean
+          example: true
+          description: "Required to be `true` when `priceChanged` or `policyChanged` was `true` in the recheck response. Otherwise the request returns HTTP 409."
+        guests:
+          type: array
+          minItems: 1
+          maxItems: 32
+          description: "List of all hotel guests. The first entry is treated as the lead passenger."
+          items:
+            $ref: "#/components/schemas/HotelGuest"
+
+    HotelGuest:
+      type: object
+      required:
+        - title
+        - firstName
+        - lastName
+        - type
+      description: "Guest / passenger detail for hotel booking."
+      properties:
+        title:
+          type: string
+          example: "Mr"
+          description: "Salutation (e.g. Mr, Mrs, Ms, Dr)."
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        type:
+          type: string
+          enum: [adult, child]
+          example: "adult"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+          description: "Guest email. Used for booking confirmation notifications."
+        phone:
+          type: string
+          example: "9999999999"
+          description: "Guest contact number."
+        age:
+          type: integer
+          minimum: 0
+          maximum: 120
+          example: 30
+          description: "Guest age. Defaults to 30 for adults and 10 for children if omitted."
+        pan:
+          type: string
+          example: "EXVPR5555M"
+          description: "Indian PAN number. Mandatory when supplier flags room as `IsPANMandatory`."
+        passportNo:
+          type: string
+          example: "Z1234567"
+          description: "Passport number. Mandatory for international stays when supplier flags `IsPassportMandatory`."
+
+    HotelBookingResponse:
+      type: object
+      description: "Hotel booking record in its current lifecycle state."
+      properties:
+        id:
+          type: string
+          example: "6a747b3f71465786694f90d7"
+          description: "MongoDB document ID of the hotel booking."
+        status:
+          type: string
+          enum:
+            - PAYMENT_PENDING
+            - PAYMENT_RECEIVED
+            - CONFIRMING
+            - CONFIRMED
+            - FAILED
+            - CANCELLED
+            - CANCELLATION_PENDING
+            - REFUND_PENDING
+            - REFUNDED
+            - COMPLETED
+          example: "PAYMENT_PENDING"
+          description: >
+            Normalized public booking lifecycle status:
+            - `PAYMENT_PENDING` — Booking created, awaiting payment (15-min countdown applies)
+            - `PAYMENT_RECEIVED` — Payment verified, supplier booking in progress
+            - `CONFIRMING` — Async worker is calling supplier API
+            - `CONFIRMED` — Supplier confirmed the reservation
+            - `FAILED` — Supplier rejected the booking (refund initiated automatically)
+            - `CANCELLED` — Booking cancelled by user
+            - `CANCELLATION_PENDING` — Cancellation request sent to supplier
+            - `REFUND_PENDING` — Refund is queued for gateway processing
+            - `REFUNDED` — Refund processed successfully
+            - `COMPLETED` — Stay completed
+        providerBookingId:
+          type: string
+          nullable: true
+          example: "2145"
+          description: "Supplier reservation reference ID (available after CONFIRMED status)."
+        bookingRefNo:
+          type: string
+          nullable: true
+          example: "TJ200502772719"
+          description: "Supplier partner booking reference number."
+        paymentStatus:
+          type: string
+          enum: [PENDING, PAID, FAILED, REFUNDED, REFUND_PENDING, UNKNOWN]
+          example: "PENDING"
+        amountMinor:
+          type: integer
+          example: 904518
+          description: "Total customer-payable amount in minor units (paise for INR). Use for payment gateway order creation."
+        currency:
+          type: string
+          example: "INR"
+        expiresInSeconds:
+          type: integer
+          example: 900
+          description: "Payment countdown timer in seconds. Only non-zero when status is `PAYMENT_PENDING`. Frontend should redirect to payment within this window."
+
+    HotelBookingSummary:
+      type: object
+      description: "Condensed hotel booking item for listing views."
+      properties:
+        id:
+          type: string
+          example: "6a747b3f71465786694f90d7"
+          description: "MongoDB document ID."
+        hotelName:
+          type: string
+          example: "Hotel Airport Crown- Near Saki Naka"
+        status:
+          type: string
+          enum:
+            - PAYMENT_PENDING
+            - PAYMENT_RECEIVED
+            - CONFIRMING
+            - CONFIRMED
+            - FAILED
+            - CANCELLED
+            - CANCELLATION_PENDING
+            - REFUND_PENDING
+            - REFUNDED
+            - COMPLETED
+          example: "CONFIRMED"
+        totalAmountMinor:
+          type: integer
+          example: 904518
+          description: "Total amount paid in minor units."
+        currency:
+          type: string
+          example: "INR"
+        checkIn:
+          type: string
+          format: date
+          example: "2026-10-15"
+          description: "Booking check-in date."
+        checkOut:
+          type: string
+          format: date
+          example: "2026-10-17"
+          description: "Booking check-out date."
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # CANCELLATION
+    # ──────────────────────────────────────────────────────────────────────────
+
+    HotelCancelResponse:
+      type: object
+      description: "Result of a hotel booking cancellation request."
+      properties:
+        status:
+          type: string
+          example: "cancelled"
+          description: "Cancellation outcome. Always `cancelled` on success."
+        cancellationReference:
+          type: string
+          example: "CR987654321"
+          description: "Supplier cancellation reference number. `LOCAL_CANCEL` when cancelled before supplier confirmation."
+        penalty:
+          type: number
+          format: float
+          example: 0.00
+          description: "Supplier cancellation charge in major currency units. 0 means fully refunded. Refund is processed asynchronously."
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # CITY AUTOCOMPLETE
+    # ──────────────────────────────────────────────────────────────────────────
+
+    HotelCitySuggestion:
+      type: object
+      description: "City autocomplete match item returned from the destination search."
+      properties:
+        cityName:
+          type: string
+          example: "Mumbai"
+          description: "Human-readable city name."
+        cityId:
+          type: string
+          example: "725862"
+          description: "SRDV numeric city identifier. Use as `cityId` in POST /hotels/search."
+        countryCode:
+          type: string
+          example: "IN"
+          description: "ISO 3166-1 alpha-2 country code for this city."

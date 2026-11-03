@@ -1,0 +1,127 @@
+components:
+  responses:
+    BadRequest:
+      description: The request could not be understood or was missing required parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            message: Bad request parameters
+            errors: null
+            details: null
+
+    ValidationError:
+      description: The request schema validation failed (e.g., email format, password complexity).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            message: Validation failed
+            errors:
+              - field: phone
+                message: Invalid phone number format
+              - field: password
+                message: Password must be at least 6 characters long
+            details: null
+
+    Unauthorized:
+      description: Access token is missing, invalid, or expired.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            message: Invalid or expired access token
+            errors: null
+            details: null
+
+    Forbidden:
+      description: The authenticated user has insufficient permissions (e.g., admin role required).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            message: Insufficient permissions to access this resource
+            errors: null
+            details: null
+
+    NotFound:
+      description: The requested resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            message: Resource not found
+            errors: null
+            details: null
+
+    Conflict:
+      description: The request conflicts with current server state (e.g., phone number already exists).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            message: Phone number already registered
+            errors: null
+            details:
+              field: phone
+              value: "+1234567890"
+
+    Gone:
+      description: The requested resource is no longer available and will not be available again (e.g., search or fare quote session expired).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            message: Search session expired, please search again
+            errors: null
+            details: null
+
+    Unprocessable:
+      description: Semantically invalid payload (e.g., booking transition not allowed).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            message: Cannot cancel a booking that is already completed
+            errors: null
+            details: null
+
+    TooManyRequests:
+      description: Rate limit exceeded. Too many requests have been sent in a given amount of time.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            message: Too many requests, please try again later.
+            errors: null
+            details: null
+
+    InternalServerError:
+      description: An unexpected server-side error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            message: Internal Server Error
+            errors: null
+            details: null

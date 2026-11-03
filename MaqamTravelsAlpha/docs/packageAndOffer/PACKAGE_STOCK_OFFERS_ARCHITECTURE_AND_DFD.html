@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Travel Platform — 3-Tier Pricing & Package Customization Architecture (Option A)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.3);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-blue: #38bdf8;
+      --accent-indigo: #6366f1;
+      --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .glow-bg {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at 50% 10%, rgba(99, 102, 241, 0.15) 0%, rgba(11, 15, 25, 0) 70%),
+                  radial-gradient(circle at 90% 40%, rgba(56, 189, 248, 0.1) 0%, rgba(11, 15, 25, 0) 60%),
+                  radial-gradient(circle at 10% 80%, rgba(168, 85, 247, 0.1) 0%, rgba(11, 15, 25, 0) 60%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 40px 24px 100px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: var(--accent-blue);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* 3-Tier Pillars Grid */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: var(--glass-shadow);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-accent);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--card-accent, var(--accent-indigo)), transparent);
+    }
+
+    .card-tier1 { --card-accent: var(--accent-purple); }
+    .card-tier2 { --card-accent: var(--accent-blue); }
+    .card-tier3 { --card-accent: var(--accent-emerald); }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 18px;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Diagram Containers */
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.65rem;
+      font-weight: 700;
+      margin: 48px 0 20px;
+      color: #fff;
+    }
+
+    .section-badge {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .diagram-container {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 36px;
+      box-shadow: var(--glass-shadow);
+      overflow-x: auto;
+    }
+
+    .diagram-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+      border-left: 3px solid var(--accent-indigo);
+      padding-left: 14px;
+    }
+
+    .rule-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-top: 24px;
+    }
+
+    .rule-box h4 {
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .rule-box p, .rule-box ul {
+      color: #cbd5e1;
+      font-size: 0.92rem;
+    }
+
+    .rule-box ul {
+      margin-left: 20px;
+      margin-top: 6px;
+    }
+
+    .rule-box li {
+      margin-bottom: 4px;
+    }
+
+    .notice-box {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin: 24px 0;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .notice-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .notice-text {
+      color: #d1fae5;
+      font-size: 0.92rem;
+    }
+
+    .notice-text strong {
+      color: #34d399;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 80px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-bg"></div>
+
+  <div class="container">
+    <header>
+      <div class="badge">3-Tier Pricing & Customization Architecture (Option A)</div>
+      <h1>Stock ➔ Offers (Extensible Catalog) ➔ Packages</h1>
+      <p class="subtitle">Complete Data Flow Diagrams (DFD) showing how Stock (Cost), standalone Offers (Retail Price), and Packages (Bundle Discount %) work with <strong>Option A (Anchored Base + Retail Deltas)</strong> to guarantee agency profit margins on customizations.</p>
+    </header>
+
+    <div class="notice-box">
+      <div class="notice-icon">✨</div>
+      <div class="notice-text">
+        <strong>Architecture Decoupling Note:</strong> Visa has been 100% decoupled from Packages and Offers. Visa services operate as independent standalone products via <code>/api/v1/visa/*</code>. Packages bundle <strong>pure Offers</strong> (Flights, Hotels, Tours/Activities, and future Guides/Insurance) with an extensible adapter pattern and a strict <strong>&ge; 2 component guardrail</strong>.
+      </div>
+    </div>
+
+    <!-- 3-Tier Architecture Cards -->
+    <div class="grid-3">
+      <!-- Tier 1 -->
+      <div class="card card-tier1">
+        <div class="card-header">
+          <div class="card-icon">🏛️</div>
+          <div class="card-title">Tier 1: Stock (Wholesale Cost)</div>
+        </div>
+        <p class="card-desc">Back-office inventory with vendor wholesale costs (<code>costPerUnit</code>), room blocks, group PNRs, and unit status tracking. Never exposed to retail customers.</p>
+        <div class="pill-list">
+          <span class="pill">TicketStock</span>
+          <span class="pill">HotelStock</span>
+          <span class="pill">TourStock / Activity</span>
+          <span class="pill">GuideStock (Future)</span>
+          <span class="pill">InsuranceStock (Future)</span>
+        </div>
+      </div>
+
+      <!-- Tier 2 -->
+      <div class="card card-tier2">
+        <div class="card-header">
+          <div class="card-icon">🏷️</div>
+          <div class="card-title">Tier 2: Retail Offers (Extensible)</div>
+        </div>
+        <p class="card-desc">Published standalone products sold directly on the storefront. Defines public <code>sellPrice</code> linked to wholesale inventory units. Can be bought standalone or bundled.</p>
+        <div class="pill-list">
+          <span class="pill">Flight Offers</span>
+          <span class="pill">Hotel Offers</span>
+          <span class="pill">Activity / Safari Offers</span>
+          <span class="pill">Standalone Bookings</span>
+        </div>
+      </div>
+
+      <!-- Tier 3 -->
+      <div class="card card-tier3">
+        <div class="card-header">
+          <div class="card-icon">🧳</div>
+          <div class="card-title">Tier 3: Packages (Option A)</div>
+        </div>
+        <p class="card-desc">Bundles <strong>&ge; 2 Offer components</strong> (e.g., Flight + Hotel). Anchors bundle discount to the base configuration. Customizations apply exact retail deltas (+delta).</p>
+        <div class="pill-list">
+          <span class="pill">Anchored Base Discount</span>
+          <span class="pill">Retail Delta Math</span>
+          <span class="pill">Margin Protection</span>
+          <span class="pill">Min-2 Item Rule</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1: 3-Tier Linkage Diagram -->
+    <div class="section-title">
+      <span>1. Complete 3-Tier Architecture & Pricing Flow</span>
+      <span class="section-badge">Data Flow Map</span>
+    </div>
+    <div class="diagram-container">
+      <div class="diagram-desc">
+        Packages bundle published <strong>Offers</strong> (Flights, Hotels, Activities). The base package sell price is computed with an anchored bundle discount. Upgrades and add-ons apply the exact retail price delta (+delta) to preserve agency margins. Standalone Visas operate completely independently.
+      </div>
+      <div class="mermaid">
+flowchart TD
+    classDef stockStyle fill:#1e1b4b,stroke:#6366f1,color:#e0e7ff,stroke-width:2px;
+    classDef offerStyle fill:#0c4a6e,stroke:#38bdf8,color:#e0f2fe,stroke-width:2px;
+    classDef pkgStyle fill:#064e3b,stroke:#10b981,color:#ecfdf5,stroke-width:2px;
+    classDef bookingStyle fill:#3b0764,stroke:#a855f7,color:#f3e8ff,stroke-width:2px;
+    classDef standaloneStyle fill:#431407,stroke:#ea580c,color:#ffedd5,stroke-width:2px,stroke-dasharray: 4 4;
+
+    subgraph Tier1_Inventory ["Tier 1: Internal Stock Inventory (Wholesale Cost)"]
+        TS["TicketStock (IndiGo DEL-DXB)<br/>costPerUnit: ₹9,500"]:::stockStyle
+        HS["HotelStock (Hyatt Regency 4-Star)<br/>costPerUnit: ₹17,500"]:::stockStyle
+        HS_LUX["HotelStock (Burj Al Arab 5-Star)<br/>costPerUnit: ₹23,000"]:::stockStyle
+        AS["ActivityStock (Desert Safari)<br/>costPerUnit: ₹2,800"]:::stockStyle
+    end
+
+    subgraph Tier2_Offers ["Tier 2: Standalone Retail Offers (Published Price)"]
+        OF1["Flight Offer: Direct Dubai<br/>sellPrice: ₹15,000"]:::offerStyle
+        OF2["Hotel Offer: 4-Star Hyatt 5-Nights<br/>sellPrice: ₹25,000"]:::offerStyle
+        OF2_LUX["Hotel Offer: 5-Star Burj Suite<br/>sellPrice: ₹31,000"]:::offerStyle
+        OF3["Activity Offer: Desert Safari + BBQ<br/>sellPrice: ₹4,500"]:::offerStyle
+    end
+
+    subgraph Standalone_Services ["Independent Standalone Services (Decoupled)"]
+        VISA["Visa Module (/api/v1/visa/*)<br/>• 30-Day UAE Tourist Visa: ₹3,500<br/>• 100% Standalone Purchases<br/>• Independent Case Officers"]:::standaloneStyle
+    end
+
+    subgraph Tier3_Package ["Tier 3: Curated Package (Option A: Anchored Base)"]
+        PKG["Package: 6D/5N Dubai Luxury Getaway<br/>─────────────────────────────────<br/>• Bundles: OF1 (Flight) + OF2 (Hotel)<br/>• Unbundled Sum: ₹15,000 + ₹25,000 = ₹40,000<br/>• bundleDiscountPercentage: 10%<br/>• Anchored Base sellPrice: ₹36,000<br/>• Wholesale Cost: ₹9,500 + ₹17,500 = ₹27,000<br/>• CRM Profit Margin: ₹9,000 (25.0%)"]:::pkgStyle
+    end
+
+    subgraph Booking_Execution ["Unified Execution & Customizer (Option A)"]
+        CUSTOM["Customer Customization:<br/>1. Swap 4-Star (₹25k) ➔ 5-Star (₹31k): Delta = +₹6,000<br/>2. Add-On: Desert Safari Tour (+₹4,500)<br/>─────────────────────────────────<br/>Final Total: ₹36,000 + ₹6,000 + ₹4,500 = ₹46,500"]
+        PB["PackageBooking Record<br/>• Frozen Snapshot with selected Offer choices<br/>• Atomically claims physical units from TS & HS_LUX"]:::bookingStyle
+    end
+
+    TS --> OF1
+    HS --> OF2
+    HS_LUX --> OF2_LUX
+    AS --> OF3
+
+    OF1 & OF2 ===>|offerRefs (>= 2)| PKG
+    PKG --> CUSTOM --> PB
+    PB -->|Atomic Unit Lock| TS & HS_LUX
+      </div>
+
+      <div class="rule-box">
+        <h4>🛡️ Option A Margin Protection Guarantee:</h4>
+        <p>Because upgrades are calculated as <code>Base Package sellPrice + (Replacement Retail Price - Original Retail Price)</code>, the agency's initial bundle discount remains anchored to the base items and never inflates on luxury upgrades. When a customer swaps a ₹25,000 hotel for a ₹31,000 hotel, they pay the exact ₹6,000 difference, protecting the agency's ₹9,000 base gross margin!</p>
+      </div>
+    </div>
+
+    <!-- Section 2: DFD Admin Package Creation -->
+    <div class="section-title">
+      <span>2. DFD: How Admin Creates a Package</span>
+      <span class="section-badge">Admin Workflow</span>
+    </div>
+    <div class="diagram-container">
+      <div class="diagram-desc">
+        Admin selects active published Offers (Flight, Hotel, Activities), sets an optional bundle discount percentage, and the system automatically calculates the anchored base package sell price, total wholesale cost, and profit margin.
+      </div>
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Admin as CRM / Admin
+    participant UI as Admin Package Builder
+    participant API as Package Controller & Validator
+    participant Service as Package Service
+    participant DB_Offer as Offer Collection
+    participant DB_Stock as Stock Collection
+    participant DB_Pkg as Package Collection
+
+    Admin->>UI: 1. Open Package Builder Wizard
+    UI->>DB_Offer: 2. Fetch active published Offers by destination (e.g. Dubai)
+    DB_Offer-->>UI: Return Active Flight, Hotel & Activity Offers
+
+    Admin->>UI: 3. Select items for the bundle (>= 2 Offers required)
+    Admin->>UI: 4. Set bundle discount (e.g. 10%)
+    Note over Admin,UI: Auto-Sum: ₹15,000 (Flight) + ₹25,000 (Hotel) = ₹40,000<br/>With 10% discount: Anchored Base sellPrice = ₹36,000
+
+    Admin->>UI: 5. Submit "Create Package"
+    UI->>API: POST /api/v1/crm/packages { title, destination, offerRefs: [OF1, OF2], bundleDiscountPercentage: 10, ... }
+
+    API->>API: 6. Validate offerRefs.length >= 2
+    API->>Service: 7. calculatePackagePricingAndMargin(pkg)
+    Service->>DB_Offer: Fetch selected Offers (sellPrices: ₹15,000 + ₹25,000)
+    Service->>DB_Stock: Fetch underlying Stock wholesale costs (costPerUnits: ₹9,500 + ₹17,500)
+    Service->>Service: Compute Base sellPrice (₹36,000), totalCost (₹27,000), Gross Profit (₹9,000 / 25%)
+
+    Service->>DB_Pkg: 8. Save Package document
+    DB_Pkg-->>API: Package Saved
+    API-->>UI: 201 Created (Package live + CRM Margin stats)
+    UI-->>Admin: Show Success Dashboard with Profit Analytics
+      </div>
+    </div>
+
+    <!-- Section 3: DFD User Customization & Booking Flow -->
+    <div class="section-title">
+      <span>3. DFD: How User Customizes, Edits & Books a Package (Option A)</span>
+      <span class="section-badge">User Customization</span>
+    </div>
+    <div class="diagram-container">
+      <div class="diagram-desc">
+        Customer views the package, swaps items for luxury upgrades or adds optional activities. The pricing engine enforces the &ge; 2 component guardrail, calculates retail deltas (+delta), and performs atomic stock claims upon booking.
+      </div>
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor User as Customer / Traveler
+    participant App as Website / Mobile App
+    participant PkgAPI as Package Pricing Engine
+    participant StockClaim as Atomic Stock Claim Service
+    participant DB as MongoDB (Package, Offer, Stock, PackageBooking)
+
+    User->>App: 1. Views Package (e.g. "Dubai Luxury Getaway")
+    App->>PkgAPI: GET /api/v1/packages/:id
+    PkgAPI->>DB: Fetch Package with populated Offers + eligible swap alternatives in destination
+    DB-->>PkgAPI: Package + available alternatives (e.g. 5-Star Burj Suite, Desert Safari)
+    PkgAPI-->>App: Package detail with itemized retail prices & anchored base sellPrice (₹36,000)
+
+    %% User Customization
+    Note over User,App: User customizes:<br/>• Swaps 4-Star Hotel (₹25k) ➔ 5-Star Hotel (₹31k) [+₹6,000 delta]<br/>• Adds Desert Safari Tour [+₹4,500]
+
+    User->>App: 2. Clicks "Recalculate Price"
+    App->>PkgAPI: POST /api/v1/packages/:id/quote<br/>{ swappedOffers: [{ original: 'hotel_4star_id', replacement: 'hotel_5star_id' }], additionalOfferIds: ['desert_safari_id'] }
+
+    PkgAPI->>PkgAPI: 3. Verify remaining active Offer components >= 2
+    alt Active Offers < 2
+        PkgAPI-->>App: 400 Bad Request: "Package must contain at least 2 items."
+    else Active Offers >= 2
+        PkgAPI->>PkgAPI: 4. Option A Math:<br/>Base (₹36,000) + Hotel Delta (+₹6,000) + Safari Tour (+₹4,500) = ₹46,500
+        PkgAPI-->>App: 200 OK: Updated price breakdown receipt & total ₹46,500
+    end
+
+    %% Booking & Claim
+    User->>App: 5. Submits Traveller info & clicks "Book Package"
+    App->>PkgAPI: POST /api/v1/packages/book (customized selections + travellers)
+
+    PkgAPI->>StockClaim: 6. Resolve underlying stock IDs for each selected Offer
+    critical Atomic Unit Claim
+        StockClaim->>DB: Lock 1 unit in TicketStock (IndiGo DEL-DXB)
+        StockClaim->>DB: Lock 1 unit in 5-Star HotelStock
+        StockClaim->>DB: Lock 1 unit in Desert Safari Stock
+    option If any unit sold out
+        StockClaim->>DB: Rollback and release all locked units
+        StockClaim-->>App: 409 Conflict: "Selected inventory sold out"
+    end
+
+    PkgAPI->>DB: 7. Save PackageBooking (Frozen snapshot + claimed unit IDs + totalAmount ₹46,500)
+    PkgAPI->>DB: 8. Create Master Booking (status: 'pending', bookingType: 'package')
+    PkgAPI-->>App: 201 Created: Redirect to Payment Gateway
+    App-->>User: 9. Show Payment / Order Confirmation
+      </div>
+
+      <div class="rule-box">
+        <h4>📐 Option A Formula Reference:</h4>
+        <ul>
+          <li><strong>Min-2 Guardrail:</strong> $\text{Active Offers} \ge 2$</li>
+          <li><strong>Swap Delta:</strong> $\Delta = \text{Replacement Retail Price} - \text{Original Retail Price}$</li>
+          <li><strong>Customized Final Total:</strong> $\text{Final Total} = \text{Base Package sellPrice} + \sum (\text{Add-On Offers}) - \sum (\text{Removed Offers}) + \sum \Delta$</li>
+          <li><strong>Atomic Claim:</strong> Atomically claims physical seats in <code>TicketStock</code> and rooms in <code>HotelStock</code>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <footer>
+      <p>Travel Agency Platform &bull; Package, Stock & Offers Engineering Specification (Option A) &bull; Updated September 2026</p>
+    </footer>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#111827',
+        primaryColor: '#6366f1',
+        primaryTextColor: '#f3f4f6',
+        primaryBorderColor: 'rgba(255, 255, 255, 0.1)',
+        lineColor: '#38bdf8',
+        secondaryColor: '#10b981',
+        tertiaryColor: '#1e293b'
+      },
+      flowchart: { curve: 'basis' },
+      sequence: {
+        actorFontSize: 14,
+        noteFontSize: 13,
+        messageFontSize: 13,
+        boxMargin: 10
+      }
+    });
+  </script>
+</body>
+</html>

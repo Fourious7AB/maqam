@@ -1,0 +1,2539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phone OTP Authentication System — Architecture & Implementation Guide | Maqam Travels</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <!-- Highlight.js for Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+
+  <!-- Mermaid.js for Diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #080b12;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(245, 158, 11, 0.35);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --accent-amber: #f59e0b;
+      --accent-amber-glow: rgba(245, 158, 11, 0.25);
+      --accent-indigo: #6366f1;
+      --accent-indigo-glow: rgba(99, 102, 241, 0.25);
+      --accent-cyan: #06b6d4;
+      --accent-cyan-glow: rgba(6, 182, 212, 0.2);
+      --accent-blue: #38bdf8;
+      --accent-emerald: #10b981;
+      --accent-emerald-glow: rgba(16, 185, 129, 0.2);
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      
+      --code-bg: #030712;
+      --sidebar-width: 320px;
+      --header-height: 60px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.65;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Background Glows */
+    .ambient-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 10% 15%, rgba(245, 158, 11, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 88% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
+    }
+
+    /* Scroll Progress Bar */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-amber), var(--accent-indigo), var(--accent-cyan));
+      z-index: 1000;
+      transition: width 0.1s ease-out;
+    }
+
+    /* Mobile Header */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 99;
+    }
+
+    .mobile-header .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .mobile-menu-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    /* Sidebar Navigation */
+    aside.sidebar {
+      width: var(--sidebar-width);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px 18px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.98);
+      z-index: 10;
+    }
+
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(245, 158, 11, 0.18);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      margin-bottom: 8px;
+    }
+
+    .sidebar-header h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff, #fde68a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-header p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Search Box in Sidebar */
+    .search-box {
+      margin-top: 14px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 8px 12px 8px 34px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(3, 7, 18, 0.6);
+      color: #fff;
+      font-size: 0.82rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent-amber);
+      box-shadow: 0 0 0 2px var(--accent-amber-glow);
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .sidebar-nav {
+      padding: 16px 12px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex-grow: 1;
+    }
+
+    .nav-group-title {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      font-weight: 700;
+      padding: 14px 12px 6px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-link i {
+      font-size: 0.85rem;
+      width: 16px;
+      text-align: center;
+      color: var(--text-dim);
+      transition: color 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+      transform: translateX(3px);
+    }
+
+    .nav-link:hover i {
+      color: var(--accent-amber);
+    }
+
+    .nav-link.active {
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.12);
+      border-left: 3px solid #f59e0b;
+      font-weight: 600;
+    }
+
+    .nav-link.active i {
+      color: #fbbf24;
+    }
+
+    .nav-sub-link {
+      padding-left: 38px;
+      font-size: 0.8rem;
+    }
+
+    /* Main Content Wrapper */
+    main.content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 48px 56px 120px;
+      max-width: 1400px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      position: relative;
+      padding: 42px;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      margin-bottom: 48px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fde68a;
+      margin-bottom: 16px;
+    }
+
+    .hero-banner h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 40%, #fed7aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 14px;
+    }
+
+    .hero-banner p {
+      color: #94a3b8;
+      font-size: 1.08rem;
+      max-width: 820px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .stat-chip {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border);
+      padding: 10px 18px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stat-chip i {
+      font-size: 1.2rem;
+      color: var(--accent-amber);
+    }
+
+    .stat-chip .stat-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-chip .stat-value {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Section Styles */
+    section {
+      margin-bottom: 64px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-header i {
+      font-size: 1.5rem;
+      color: var(--accent-amber);
+    }
+
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: -0.01em;
+    }
+
+    .section-tag {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--accent-amber);
+      background: rgba(245, 158, 11, 0.12);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin: 28px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    p {
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    /* Cards & Containers */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card:hover {
+      border-color: rgba(245, 158, 11, 0.3);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Grid Layouts */
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .feature-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(245, 158, 11, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-amber), var(--accent-indigo));
+      opacity: 0.7;
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 14px;
+    }
+
+    .feature-card h4 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 0;
+    }
+
+    /* Comparison Dual Cards */
+    .compare-box {
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border);
+    }
+    .compare-box.b2c {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+    .compare-box.b2b {
+      background: rgba(99, 102, 241, 0.05);
+      border-color: rgba(99, 102, 241, 0.25);
+    }
+    .compare-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .b2c .compare-badge {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+    .b2b .compare-badge {
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.6);
+      margin: 18px 0 28px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    thead th {
+      background: rgba(3, 7, 18, 0.7);
+      padding: 14px 16px;
+      color: #cbd5e1;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border);
+      font-family: 'Outfit', sans-serif;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.15s ease;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    td {
+      padding: 13px 16px;
+      color: var(--text-muted);
+      vertical-align: middle;
+    }
+
+    td strong {
+      color: #f1f5f9;
+    }
+
+    td code, p code, li code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2px 7px;
+      border-radius: 5px;
+      color: #fde68a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Badges & Tags */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-post {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-get {
+      background: rgba(56, 189, 248, 0.18);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-rose {
+      background: rgba(244, 63, 94, 0.18);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .badge-indigo {
+      background: rgba(99, 102, 241, 0.18);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    /* Code Blocks */
+    .code-wrapper {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 18px 0 24px;
+      border: 1px solid var(--border);
+      background: var(--code-bg);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent-amber);
+      color: #000;
+      border-color: var(--accent-amber);
+    }
+
+    pre {
+      margin: 0;
+      padding: 18px 20px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    /* Tabbed Code Windows */
+    .tab-container {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .tabs-header {
+      display: flex;
+      background: rgba(15, 23, 42, 0.9);
+      border-bottom: 1px solid var(--border);
+      padding: 0 8px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 12px 18px;
+      font-size: 0.82rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      color: #fbbf24;
+      border-bottom-color: var(--accent-amber);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Mermaid Diagrams */
+    .diagram-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin: 24px 0;
+      overflow-x: auto;
+    }
+
+    .diagram-card .mermaid {
+      display: flex;
+      justify-content: center;
+      background: transparent;
+    }
+
+    /* Alerts */
+    .alert {
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      border-left: 4px solid;
+    }
+
+    .alert-info {
+      background: rgba(6, 182, 212, 0.08);
+      border-color: var(--accent-cyan);
+      color: #a5f3fc;
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: var(--accent-amber);
+      color: #fde68a;
+    }
+
+    .alert-danger {
+      background: rgba(244, 63, 94, 0.08);
+      border-color: var(--accent-rose);
+      color: #fecdd3;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: var(--accent-emerald);
+      color: #a7f3d0;
+    }
+
+    .alert i {
+      font-size: 1.25rem;
+      margin-top: 2px;
+    }
+
+    .alert-content p {
+      margin-bottom: 4px;
+      color: inherit;
+    }
+
+    .alert-content small {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Interactive Simulator */
+    .simulator-container {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(8, 11, 18, 0.95));
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 18px;
+      padding: 32px;
+      margin: 36px 0;
+      box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .simulator-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-amber), var(--accent-indigo), var(--accent-cyan));
+    }
+
+    .sim-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sim-header h3 {
+      margin: 0;
+      color: #f8fafc;
+      font-size: 1.35rem;
+    }
+
+    .sim-stage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    .sim-card {
+      background: rgba(3, 7, 18, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .sim-card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .input-wrapper input:focus {
+      border-color: var(--accent-amber);
+      box-shadow: 0 0 0 2px var(--accent-amber-glow);
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 0.88rem;
+    }
+
+    .btn-sim {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #000;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s;
+    }
+
+    .btn-sim:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px -5px rgba(245, 158, 11, 0.5);
+    }
+
+    .btn-sim:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-sim-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+      margin-top: 10px;
+    }
+
+    .btn-sim-secondary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: none;
+    }
+
+    .sim-log {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      background: #02040a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      height: 240px;
+      overflow-y: auto;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .sim-log .log-entry {
+      margin-bottom: 6px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .sim-log .time {
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .sim-log .tag-send { color: #38bdf8; }
+    .sim-log .tag-verify { color: #34d399; }
+    .sim-log .tag-warn { color: #fbbf24; }
+    .sim-log .tag-error { color: #fb7185; }
+
+    /* Interactive Checklist */
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .checklist-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .checklist-item.completed {
+      border-color: rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.04);
+    }
+
+    .checklist-checkbox {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid var(--text-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 3px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .checklist-item.completed .checklist-checkbox {
+      background: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+      color: #000;
+    }
+
+    .checklist-text {
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    .checklist-item.completed .checklist-text {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    /* Back to Top */
+    #back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 99;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s;
+    }
+
+    #back-to-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #back-to-top:hover {
+      background: var(--accent-amber);
+      color: #000;
+      transform: translateY(-3px);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .mobile-header { display: flex; }
+      aside.sidebar {
+        transform: translateX(-100%);
+        top: var(--header-height);
+      }
+      aside.sidebar.open {
+        transform: translateX(0);
+      }
+      main.content {
+        margin-left: 0;
+        padding: 80px 24px 80px;
+      }
+      .hero-banner { padding: 28px 20px; }
+      .hero-banner h1 { font-size: 2rem; }
+      .sim-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Backdrop -->
+  <div class="ambient-glow"></div>
+  <div id="progress-bar"></div>
+
+  <!-- Mobile Top Bar -->
+  <header class="mobile-header">
+    <div class="logo-area">
+      <i class="fa-solid fa-shield-halved" style="color: #f59e0b;"></i>
+      <span>Maqam IAM Docs</span>
+    </div>
+    <button class="mobile-menu-btn" id="mobile-toggle" aria-label="Toggle navigation menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="brand-tag"><i class="fa-solid fa-lock"></i> Identity & Access</span>
+      <h2>Maqam Travels</h2>
+      <p>auth/otp-system.v1.0</p>
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="nav-search" placeholder="Search documentation..." />
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group-title">Architecture & System</div>
+      <a href="#overview" class="nav-link"><i class="fa-solid fa-compass"></i> 1. Executive Overview</a>
+      <a href="#dual-store" class="nav-link"><i class="fa-solid fa-server"></i> 2. Dual-Store Resilience</a>
+      <a href="#workflows" class="nav-link"><i class="fa-solid fa-diagram-project"></i> 3. End-to-End Workflows</a>
+      <a href="#workflow-send" class="nav-link nav-sub-link"><i class="fa-solid fa-paper-plane"></i> 3.1 Send OTP Flow</a>
+      <a href="#workflow-verify" class="nav-link nav-sub-link"><i class="fa-solid fa-check-double"></i> 3.2 Verify & Provision</a>
+      <a href="#workflow-refresh" class="nav-link nav-sub-link"><i class="fa-solid fa-arrows-rotate"></i> 3.3 Token Refresh Flow</a>
+      <a href="#codebase-map" class="nav-link"><i class="fa-solid fa-sitemap"></i> 4. Codebase Map</a>
+
+      <div class="nav-group-title">API Reference</div>
+      <a href="#api-send-otp" class="nav-link"><i class="fa-solid fa-bolt"></i> POST /send-otp</a>
+      <a href="#api-verify-otp" class="nav-link"><i class="fa-solid fa-key"></i> POST /verify-otp</a>
+      <a href="#api-refresh-token" class="nav-link"><i class="fa-solid fa-rotate"></i> POST /refresh-token</a>
+
+      <div class="nav-group-title">Data & Gateway</div>
+      <a href="#data-models" class="nav-link"><i class="fa-solid fa-database"></i> 6. Data Models & Schemas</a>
+      <a href="#telecom-dlt" class="nav-link"><i class="fa-solid fa-tower-broadcast"></i> 7. Fast2SMS & TRAI DLT</a>
+      <a href="#security-controls" class="nav-link"><i class="fa-solid fa-shield-virus"></i> 8. Security & Attack Matrix</a>
+      <a href="#env-config" class="nav-link"><i class="fa-solid fa-gears"></i> 9. Environment Config</a>
+
+      <div class="nav-group-title">Verification & Tools</div>
+      <a href="#qa-playbook" class="nav-link"><i class="fa-solid fa-terminal"></i> 10. Developer Playbook</a>
+      <a href="#interactive-simulator" class="nav-link"><i class="fa-solid fa-flask"></i> 11. Interactive Simulator</a>
+      <a href="#checklist" class="nav-link"><i class="fa-solid fa-list-check"></i> 12. Deployment Checklist</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content Body -->
+  <main class="content">
+
+    <!-- Hero Banner -->
+    <header class="hero-banner">
+      <span class="hero-badge"><i class="fa-solid fa-mobile-screen"></i> Production IAM Spec</span>
+      <h1>Phone OTP Authentication System</h1>
+      <p>High-resilience, passwordless traveler authentication combining Redis in-memory speed, MongoDB durable fallbacks, TRAI-compliant Fast2SMS DLT routing, and single-use cryptographic security.</p>
+      
+      <div class="hero-stats">
+        <div class="stat-chip">
+          <i class="fa-solid fa-bolt-lightning"></i>
+          <div>
+            <div class="stat-label">Cache Latency</div>
+            <div class="stat-value">&lt; 1 ms (Redis)</div>
+          </div>
+        </div>
+        <div class="stat-chip">
+          <i class="fa-solid fa-stopwatch"></i>
+          <div>
+            <div class="stat-label">OTP TTL</div>
+            <div class="stat-value">5 Minutes (300s)</div>
+          </div>
+        </div>
+        <div class="stat-chip">
+          <i class="fa-solid fa-shield-halved"></i>
+          <div>
+            <div class="stat-label">Brute Force Limit</div>
+            <div class="stat-value">5 Attempts Max</div>
+          </div>
+        </div>
+        <div class="stat-chip">
+          <i class="fa-solid fa-tower-cell"></i>
+          <div>
+            <div class="stat-label">SMS Gateway</div>
+            <div class="stat-value">Fast2SMS DLT (MAQAMH)</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Section 1: Executive Overview -->
+    <section id="overview">
+      <div class="section-header">
+        <i class="fa-solid fa-compass"></i>
+        <h2>1. Executive Overview & Design Philosophy</h2>
+        <span class="section-tag">IAM ARCHITECTURE</span>
+      </div>
+
+      <p>The OTP Authentication subsystem provides <strong>frictionless, passwordless registration and login</strong> for consumer travelers on the Maqam Travels platform. It replaces traditional email/password registration with phone number verification compliant with Indian telecommunication (TRAI / DLT) mandates.</p>
+
+      <div class="grid-4">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-stopwatch-20"></i></div>
+          <h4>Zero Password Fatigue</h4>
+          <p>Travelers log in or register in under 10 seconds with a 10-digit mobile number and instant 6-digit verification code.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-shuffle"></i></div>
+          <h4>Unified Auth Endpoint</h4>
+          <p>Both new account registration and existing traveler login use the identical two endpoints (`/send-otp` & `/verify-otp`).</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-fire"></i></div>
+          <h4>Cryptographic Burn</h4>
+          <p>Single-use security guarantee: OTP tokens are burned from cache immediately upon first successful use or 5 failures.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-certificate"></i></div>
+          <h4>TRAI DLT Compliance</h4>
+          <p>Dispatches SMS via registered sender ID <code>MAQAMH</code> and approved message template <code>224018</code>.</p>
+        </div>
+      </div>
+
+      <h3>Architectural Boundary: B2C Travelers vs B2B Back-Office</h3>
+      <p>To preserve organizational security, the Maqam Travels platform strictly bifurcates consumer traveler authentication from staff back-office access:</p>
+
+      <div class="grid-2">
+        <div class="compare-box b2c">
+          <span class="compare-badge"><i class="fa-solid fa-users"></i> Consumer Public Portal (B2C)</span>
+          <ul style="list-style: none; padding: 0; font-size: 0.88rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 8px;">
+            <li><i class="fa-solid fa-circle-check" style="color: #34d399; margin-right: 6px;"></i> <strong>Primary Mode:</strong> Passwordless Phone OTP</li>
+            <li><i class="fa-solid fa-circle-check" style="color: #34d399; margin-right: 6px;"></i> <strong>Self-Registration:</strong> Automatic upon first OTP verification</li>
+            <li><i class="fa-solid fa-circle-check" style="color: #34d399; margin-right: 6px;"></i> <strong>Role Assignment:</strong> Strictly enforced as <code>'customer'</code></li>
+            <li><i class="fa-solid fa-circle-check" style="color: #34d399; margin-right: 6px;"></i> <strong>Endpoints:</strong> <code>/api/v1/auth/send-otp</code>, <code>/verify-otp</code></li>
+          </ul>
+        </div>
+        <div class="compare-box b2b">
+          <span class="compare-badge"><i class="fa-solid fa-user-shield"></i> Back-Office / CRM / Staff (B2B)</span>
+          <ul style="list-style: none; padding: 0; font-size: 0.88rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 8px;">
+            <li><i class="fa-solid fa-circle-xmark" style="color: #f43f5e; margin-right: 6px;"></i> <strong>OTP Authentication:</strong> STRICTLY PROHIBITED</li>
+            <li><i class="fa-solid fa-circle-check" style="color: #818cf8; margin-right: 6px;"></i> <strong>Credential Mode:</strong> Email/Username + Bcrypt Password</li>
+            <li><i class="fa-solid fa-circle-check" style="color: #818cf8; margin-right: 6px;"></i> <strong>Provisioning:</strong> Super Admin manual onboarding</li>
+            <li><i class="fa-solid fa-circle-check" style="color: #818cf8; margin-right: 6px;"></i> <strong>Roles:</strong> <code>'sales_agent'</code>, <code>'accountant'</code>, <code>'admin'</code></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Dual-Store Resilience -->
+    <section id="dual-store">
+      <div class="section-header">
+        <i class="fa-solid fa-server"></i>
+        <h2>2. Dual-Store Architecture & Resilience</h2>
+        <span class="section-tag">HIGH AVAILABILITY</span>
+      </div>
+
+      <p>The authentication service employs a multi-tiered storage fallback strategy to ensure OTP generation and verification never fail, even during external infrastructure degradation:</p>
+
+      <div class="diagram-card">
+        <div class="mermaid">
+flowchart TD
+    Client["📱 Incoming Client Request (/send-otp or /verify-otp)"] --> AuthCtrl["modules/auth/auth.controller.js"]
+    AuthCtrl --> AuthSvc["modules/auth/auth.service.js"]
+    
+    subgraph Tier1 ["Tier 1: High-Speed Cache (Primary)"]
+        AuthSvc -->|"Fast get/set (PX 300,000)"| Redis["⚡ Redis Singleton (utils/cache.js)"]
+    end
+    
+    subgraph Tier2 ["Tier 2: In-Process Fallback"]
+        Redis -.->|"If Redis down/offline"| MemMap["💾 MemoryStore (Map in Node.js)"]
+    end
+    
+    subgraph Tier3 ["Tier 3: Durable Fallback"]
+        AuthSvc -->|"Durable TTL Record"| MongoDB["🗄️ MongoDB (models/otp.model.js)"]
+    end
+
+    Tier1 --> Verification["✅ Atomic Single-Use Verification & JWT Issuance"]
+    Tier2 --> Verification
+    Tier3 --> Verification
+
+    classDef primary fill:#1e293b,stroke:#f59e0b,stroke-width:2px;
+    classDef fallback fill:#0f172a,stroke:#6366f1,stroke-width:1px;
+    classDef success fill:#064e3b,stroke:#10b981,stroke-width:2px;
+    class Redis primary;
+    class MemMap,MongoDB fallback;
+    class Verification success;
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Storage Tier</th>
+              <th>Backend</th>
+              <th>Key / Collection</th>
+              <th>TTL / Expiry</th>
+              <th>Lookup Latency</th>
+              <th>Primary Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Primary</strong></td>
+              <td>Redis (ioredis)</td>
+              <td><code>otp:{normalizedPhone}</code></td>
+              <td><code>300,000 ms</code> (5m)</td>
+              <td>&lt; 1 ms</td>
+              <td>Sub-millisecond lookup, attempt counters, auto-purge</td>
+            </tr>
+            <tr>
+              <td><strong>Secondary</strong></td>
+              <td>In-Memory Map</td>
+              <td><code>memoryStore.get(key)</code></td>
+              <td><code>Date.now() + 300,000</code></td>
+              <td>&lt; 0.1 ms</td>
+              <td>Seamless in-process buffer if Redis server drops</td>
+            </tr>
+            <tr>
+              <td><strong>Durable</strong></td>
+              <td>MongoDB Mongoose</td>
+              <td><code>otps</code> collection</td>
+              <td><code>expireAfterSeconds: 0</code></td>
+              <td>5 - 15 ms</td>
+              <td>Persistent fallback with database-level TTL cleanup</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 3: End-to-End Workflows -->
+    <section id="workflows">
+      <div class="section-header">
+        <i class="fa-solid fa-diagram-project"></i>
+        <h2>3. End-to-End System Workflows</h2>
+        <span class="section-tag">SEQUENCE FLOWS</span>
+      </div>
+
+      <!-- 3.1 Send OTP -->
+      <h3 id="workflow-send"><i class="fa-solid fa-paper-plane" style="color: #38bdf8;"></i> Workflow A: OTP Generation & Dispatch (`/send-otp`)</h3>
+      <p>Initiated when a customer submits their 10-digit phone number in the web app or mobile app:</p>
+
+      <div class="diagram-card">
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Traveler as 📱 Traveler (App/Web)
+    participant Route as auth.routes.js
+    participant Controller as auth.controller.js
+    participant Service as auth.service.js
+    participant Cache as Redis (utils/cache.js)
+    participant DB as MongoDB (User & OTP)
+    participant SMS as Fast2SMS (DLT Gateway)
+
+    Traveler->>Route: POST /api/v1/auth/send-otp { phone: "9876543210" }
+    Route->>Controller: sendOtpController(req, res)
+    Controller->>Controller: Normalize phone (trim whitespace)
+    Controller->>DB: User.findOne({ phone: "9876543210" })
+    alt Account is Deactivated (user.isActive === false)
+        Controller-->>Traveler: 403 Forbidden ("Account is deactivated")
+    else Account Active or New
+        Controller->>Service: sendOtpService(phone)
+        Service->>Service: Validate regex: /^[6-9]\d{9}$/
+        Service->>Service: Generate crypto OTP: crypto.randomInt(100000, 999999)
+        Service->>Service: Calculate expiresAt = Date.now() + 300,000ms
+        Service->>Cache: cache.set("otp:9876543210", { otp, attempts: 0 }, 300000)
+        Service->>DB: (Fallback) OTP.findOneAndUpdate(...)
+        alt Production Mode (NODE_ENV === 'production')
+            Service->>SMS: sendOtpSMS("9876543210", otp)
+            SMS-->>Service: { return: true, request_id: "..." }
+        else Development Mode
+            Service->>Service: Log to server console [DEV OTP: 482931]
+        end
+        Service-->>Controller: { success: true, phone, expiresInSeconds: 300 }
+        Controller-->>Traveler: 200 OK ("OTP dispatched successfully")
+    end
+        </div>
+      </div>
+
+      <!-- 3.2 Verify OTP -->
+      <h3 id="workflow-verify"><i class="fa-solid fa-check-double" style="color: #34d399;"></i> Workflow B: OTP Verification & Auto-Provisioning (`/verify-otp`)</h3>
+      <p>Validates code, enforces retry counters, auto-registers new users, and issues dual tokens:</p>
+
+      <div class="diagram-card">
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Traveler as 📱 Traveler (App/Web)
+    participant Controller as auth.controller.js
+    participant Service as auth.service.js
+    participant Cache as Redis (utils/cache.js)
+    participant DB as MongoDB (User & OTP)
+    participant Token as JWT Engine
+
+    Traveler->>Controller: POST /api/v1/auth/verify-otp { phone: "9876543210", otp: "482931" }
+    Controller->>Service: verifyOtpService(phone, otp)
+    Service->>Cache: cache.get("otp:9876543210")
+    alt Missing in Redis
+        Service->>DB: OTP.findOne({ phone: "9876543210" })
+    end
+    alt No Record or Already Expired
+        Service-->>Controller: Error ("OTP not found or expired")
+        Controller-->>Traveler: 400 Bad Request
+    else Record Active
+        alt Wrong OTP (Mismatch)
+            Service->>Service: attempts = attempts + 1
+            alt attempts >= 5 (Max Exceeded)
+                Service->>Cache: cache.del("otp:9876543210") (BURN)
+                Service->>DB: OTP.deleteOne({ phone })
+                Service-->>Traveler: 400 Bad Request ("Max attempts exceeded. Request new OTP.")
+            else attempts < 5
+                Service->>Cache: Update remaining attempts in Redis
+                Service-->>Traveler: 400 Bad Request ("Invalid OTP. 4 attempts remaining.")
+            end
+        else Correct OTP (Match!)
+            Service->>Cache: cache.del("otp:9876543210") (SINGLE-USE BURN)
+            Service->>DB: OTP.deleteOne({ phone })
+            Service->>DB: User.findOne({ phone })
+            alt User Already Exists
+                Service->>DB: user.isPhoneVerified = true, user.lastLogin = Date.now()
+            else New Traveler
+                Service->>DB: User.create({ phone, role: 'customer', randomBcryptPassword })
+            end
+            Service->>Token: generateTokens(user._id, user.role)
+            Token-->>Service: { accessToken (120m), refreshToken (7d) }
+            Service-->>Controller: { user, accessToken, refreshToken }
+            Controller->>Controller: Set-Cookie: refreshToken (HttpOnly, Secure)
+            Controller-->>Traveler: 200 OK (User Profile + Access Token)
+        end
+    end
+        </div>
+      </div>
+
+      <!-- 3.3 Session Refresh -->
+      <h3 id="workflow-refresh"><i class="fa-solid fa-arrows-rotate" style="color: #a855f7;"></i> Workflow C: Session Management & Refresh Token Flow</h3>
+      <p>Maintains persistent authentication without requiring repeated OTP entries:</p>
+
+      <div class="grid-3">
+        <div class="feature-card">
+          <div class="feature-icon" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8;"><i class="fa-solid fa-key"></i></div>
+          <h4>1. Access Token</h4>
+          <p>Lifespan: <strong>120 minutes</strong>. Transmitted in <code>Authorization: Bearer &lt;token&gt;</code> header for stateless API validation.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon" style="background: rgba(168, 85, 247, 0.12); color: #a855f7;"><i class="fa-solid fa-cookie-bite"></i></div>
+          <h4>2. Refresh Cookie</h4>
+          <p>Lifespan: <strong>7 days</strong>. Stored in <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite=None</code> cookie to eliminate XSS token theft.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;"><i class="fa-solid fa-rotate-right"></i></div>
+          <h4>3. Transparent Renewal</h4>
+          <p>When API returns <code>401</code>, frontend calls <code>POST /refresh-token</code> to receive a fresh access token without user friction.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Codebase Map -->
+    <section id="codebase-map">
+      <div class="section-header">
+        <i class="fa-solid fa-sitemap"></i>
+        <h2>4. Component & Codebase Map</h2>
+        <span class="section-tag">SOURCE ARCHITECTURE</span>
+      </div>
+
+      <p>All core files that implement the OTP authentication pipeline within the <code>MaqamTravelsAlpha</code> repository:</p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>File Path</th>
+              <th>Layer</th>
+              <th>Key Exports / Responsibilities</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>app.js</code></td>
+              <td>Routing Hub</td>
+              <td>Mounts auth router at <code>app.use('/api/v1/auth', authRoutes)</code>.</td>
+            </tr>
+            <tr>
+              <td><code>modules/auth/auth.routes.js</code></td>
+              <td>Router</td>
+              <td>Exposes <code>POST /send-otp</code>, <code>POST /verify-otp</code>, <code>POST /refresh-token</code> with Swagger annotations.</td>
+            </tr>
+            <tr>
+              <td><code>modules/auth/auth.controller.js</code></td>
+              <td>Controller</td>
+              <td>Sanitizes phone input, formats standard API responses, writes HttpOnly refresh cookie.</td>
+            </tr>
+            <tr>
+              <td><code>modules/auth/auth.service.js</code></td>
+              <td>Business Service</td>
+              <td>Generates crypto OTP, coordinates Redis & MongoDB fallback, enforces 5-attempt retry limit, auto-registers new users.</td>
+            </tr>
+            <tr>
+              <td><code>modules/auth/auth.model.js</code></td>
+              <td>Domain Model</td>
+              <td>MongoDB Mongoose User schema with phone, role, verified flags, and password hashes.</td>
+            </tr>
+            <tr>
+              <td><code>models/otp.model.js</code></td>
+              <td>Data Fallback</td>
+              <td>MongoDB fallback schema with automatic TTL indexing (<code>expireAfterSeconds: 0</code>).</td>
+            </tr>
+            <tr>
+              <td><code>services/fast2sms.service.js</code></td>
+              <td>Gateway Layer</td>
+              <td>Fast2SMS Bulk SMS V2 HTTP POST integration with DLT header <code>MAQAMH</code> and template <code>224018</code>.</td>
+            </tr>
+            <tr>
+              <td><code>utils/cache.js</code></td>
+              <td>Cache Layer</td>
+              <td>ioredis client wrapper with transparent in-memory Map fallback.</td>
+            </tr>
+            <tr>
+              <td><code>middleware/auth.js</code></td>
+              <td>Security Middleware</td>
+              <td>Issues JWT access & refresh tokens, validates Bearer tokens, guards RBAC routes.</td>
+            </tr>
+            <tr>
+              <td><code>scripts/test-fast2sms.js</code></td>
+              <td>Test Utility</td>
+              <td>CLI utility for live telecom carrier testing with custom phone numbers.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 5: REST API Endpoint Specifications -->
+    <section id="api-send-otp">
+      <div class="section-header">
+        <i class="fa-solid fa-code"></i>
+        <h2>5. REST API Endpoint Specifications</h2>
+        <span class="section-tag">SWAGGER / OPENAPI SPEC</span>
+      </div>
+
+      <!-- Endpoint 1: Send OTP -->
+      <div class="card">
+        <div class="card-title">
+          <div>
+            <span class="badge badge-post">POST</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; margin-left: 8px;">/api/v1/auth/send-otp</span>
+          </div>
+          <span class="badge badge-amber">Public (No Auth Required)</span>
+        </div>
+        <p>Generates a cryptographically random 6-digit OTP, stores it with a 5-minute TTL in Redis/MongoDB, and dispatches an SMS via Fast2SMS DLT.</p>
+
+        <div class="table-container" style="margin: 12px 0;">
+          <table>
+            <thead>
+              <tr>
+                <th>Body Field</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Validation</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>phone</code></td>
+                <td><code>string</code></td>
+                <td><strong>Yes</strong></td>
+                <td><code>/^[6-9]\d{9}$/</code></td>
+                <td>10-digit Indian mobile number (e.g. <code>"9876543210"</code>).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tab-container">
+          <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab(this, 'tab-send-curl')"><i class="fa-solid fa-terminal"></i> cURL</button>
+            <button class="tab-btn" onclick="switchTab(this, 'tab-send-js')"><i class="fa-brands fa-js"></i> JavaScript / Axios</button>
+            <button class="tab-btn" onclick="switchTab(this, 'tab-send-res')"><i class="fa-solid fa-code"></i> Response (200 OK)</button>
+          </div>
+          <div id="tab-send-curl" class="tab-content active">
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span>Terminal / Bash</span>
+                <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button>
+              </div>
+              <pre><code class="language-bash">curl -X POST http://localhost:5000/api/v1/auth/send-otp \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "9876543210"}'</code></pre>
+            </div>
+          </div>
+          <div id="tab-send-js" class="tab-content">
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span>Node.js / Axios</span>
+                <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button>
+              </div>
+              <pre><code class="language-javascript">const axios = require('axios');
+
+const response = await axios.post('http://localhost:5000/api/v1/auth/send-otp', {
+  phone: '9876543210'
+});
+
+console.log(response.data);
+// { success: true, message: "OTP dispatched successfully.", data: { ... } }</code></pre>
+            </div>
+          </div>
+          <div id="tab-send-res" class="tab-content">
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span>JSON Response Payload</span>
+                <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button>
+              </div>
+              <pre><code class="language-json">{
+  "success": true,
+  "message": "OTP dispatched successfully.",
+  "data": {
+    "phone": "9876543210",
+    "otp": "482931",
+    "isNewUser": true,
+    "userExists": false,
+    "expiresInSeconds": 300
+  }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-info">
+          <i class="fa-solid fa-circle-info"></i>
+          <div class="alert-content">
+            <p><strong>Development Mode Convenience:</strong> When <code>NODE_ENV !== 'production'</code>, the generated OTP is included in <code>data.otp</code> to enable effortless automated unit/integration testing without carrier SMS costs.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Endpoint 2: Verify OTP -->
+      <div class="card" id="api-verify-otp">
+        <div class="card-title">
+          <div>
+            <span class="badge badge-post">POST</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; margin-left: 8px;">/api/v1/auth/verify-otp</span>
+          </div>
+          <span class="badge badge-amber">Public (No Auth Required)</span>
+        </div>
+        <p>Verifies the 6-digit OTP code against Redis/MongoDB, single-use burns the OTP token, creates the user if new, updates audit timestamps, and issues JWT access and refresh tokens.</p>
+
+        <div class="table-container" style="margin: 12px 0;">
+          <table>
+            <thead>
+              <tr>
+                <th>Body Field</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>phone</code></td>
+                <td><code>string</code></td>
+                <td><strong>Yes</strong></td>
+                <td>10-digit mobile number matching the send request.</td>
+              </tr>
+              <tr>
+                <td><code>otp</code></td>
+                <td><code>string</code></td>
+                <td><strong>Yes</strong></td>
+                <td>6-digit numeric string entered by the user.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tab-container">
+          <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab(this, 'tab-verify-curl')"><i class="fa-solid fa-terminal"></i> cURL</button>
+            <button class="tab-btn" onclick="switchTab(this, 'tab-verify-res')"><i class="fa-solid fa-code"></i> Success (200 OK)</button>
+            <button class="tab-btn" onclick="switchTab(this, 'tab-verify-err')"><i class="fa-solid fa-triangle-exclamation"></i> Error States</button>
+          </div>
+          <div id="tab-verify-curl" class="tab-content active">
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span>Terminal / Bash</span>
+                <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button>
+              </div>
+              <pre><code class="language-bash">curl -X POST http://localhost:5000/api/v1/auth/verify-otp \
+  -i \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "9876543210", "otp": "482931"}'</code></pre>
+            </div>
+          </div>
+          <div id="tab-verify-res" class="tab-content">
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span>Headers & JSON Payload</span>
+                <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button>
+              </div>
+              <pre><code class="language-json">HTTP/1.1 200 OK
+Set-Cookie: refreshToken=eyJhbGciOi...; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800
+
+{
+  "success": true,
+  "message": "OTP verified successfully. Login successful.",
+  "data": {
+    "user": {
+      "id": "66d4b555e944f7b6b199e825",
+      "phone": "9876543210",
+      "firstName": "User",
+      "lastName": "3210",
+      "email": null,
+      "avatar": null,
+      "role": "customer",
+      "isPhoneVerified": true,
+      "isVerified": true
+    },
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDRiNTU1ZTk0NGY3YjZiMTk5ZTgyNSIsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTcyNzgxOTAwMCwiZXhwIjoxNzI3ODI2MjAwfQ...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}</code></pre>
+            </div>
+          </div>
+          <div id="tab-verify-err" class="tab-content">
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span>Common Error Envelopes</span>
+                <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button>
+              </div>
+              <pre><code class="language-json">// 1. Wrong OTP (Attempts remaining)
+{ "success": false, "message": "Invalid OTP provided. 4 attempt(s) remaining." }
+
+// 2. Max attempts exceeded (Burn triggered)
+{ "success": false, "message": "Maximum OTP verification attempts exceeded. Please request a new OTP." }
+
+// 3. Expired or already consumed
+{ "success": false, "message": "No OTP request found for this phone number or OTP has expired. Please request a new OTP." }</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Endpoint 3: Refresh Token -->
+      <div class="card" id="api-refresh-token">
+        <div class="card-title">
+          <div>
+            <span class="badge badge-post">POST</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; margin-left: 8px;">/api/v1/auth/refresh-token</span>
+          </div>
+          <span class="badge badge-indigo">Cookie / Bearer Required</span>
+        </div>
+        <p>Re-issues a new short-lived access token using the HttpOnly refresh token cookie without requiring another SMS OTP.</p>
+
+        <div class="code-wrapper">
+          <div class="code-header">
+            <span>cURL Refresh Execution</span>
+            <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button>
+          </div>
+          <pre><code class="language-bash">curl -X POST http://localhost:5000/api/v1/auth/refresh-token \
+  -H "Cookie: refreshToken=eyJhbGciOi..."</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Data Models & Schemas -->
+    <section id="data-models">
+      <div class="section-header">
+        <i class="fa-solid fa-database"></i>
+        <h2>6. Data Models & Key Schemas</h2>
+        <span class="section-tag">DATA CONTRACTS</span>
+      </div>
+
+      <div class="grid-2">
+        <!-- Redis Schema -->
+        <div class="card">
+          <div class="card-title">
+            <span><i class="fa-brands fa-redhat" style="color: #f43f5e;"></i> Redis Cache Object</span>
+            <span class="badge badge-rose">TTL: 300,000 ms</span>
+          </div>
+          <p>Stored under key <code>otp:{phone}</code> as a serialized JSON string:</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>Redis Schema</span>
+              <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button>
+            </div>
+            <pre><code class="language-json">{
+  "otp": "482931",
+  "phone": "9876543210",
+  "attempts": 0,
+  "maxAttempts": 5,
+  "createdAt": "2026-09-15T12:00:00.000Z",
+  "expiresAt": "2026-09-15T12:05:00.000Z"
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- MongoDB User Model -->
+        <div class="card">
+          <div class="card-title">
+            <span><i class="fa-solid fa-user" style="color: #38bdf8;"></i> Auto-Provisioned User</span>
+            <span class="badge badge-emerald">MongoDB Document</span>
+          </div>
+          <p>Created on first OTP verification in <code>modules/auth/auth.model.js</code>:</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>User Schema</span>
+              <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button>
+            </div>
+            <pre><code class="language-javascript">{
+  phone: "9876543210",
+  password: "<bcrypt_hash_10_rounds>",
+  firstName: "User",
+  lastName: "3210",
+  role: "customer",
+  isActive: true,
+  isPhoneVerified: true,
+  isVerified: true,
+  lastLogin: ISODate("2026-09-15T12:05:00Z")
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Telecom & DLT Gateway -->
+    <section id="telecom-dlt">
+      <div class="section-header">
+        <i class="fa-solid fa-tower-broadcast"></i>
+        <h2>7. Telecom & TRAI DLT Regulatory Gateway (Fast2SMS)</h2>
+        <span class="section-tag">REGULATORY COMPLIANCE</span>
+      </div>
+
+      <p>Under Telecom Regulatory Authority of India (TRAI) directives, bulk transactional SMS must be dispatched through registered Distributed Ledger Technology (DLT) entities. Maqam Travels integrates directly with Fast2SMS Bulk V2:</p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>DLT Parameter</th>
+              <th>Configuration / Value</th>
+              <th>TRAI Regulatory Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>API Endpoint</strong></td>
+              <td><code>https://www.fast2sms.com/dev/bulkV2</code></td>
+              <td>Fast2SMS Bulk SMS V2 API endpoint</td>
+            </tr>
+            <tr>
+              <td><strong>Auth Header</strong></td>
+              <td><code>authorization: process.env.FAST2SMS_API_KEY</code></td>
+              <td>Merchant authentication token</td>
+            </tr>
+            <tr>
+              <td><strong>Route</strong></td>
+              <td><code>dlt</code></td>
+              <td>Mandates strict DLT registry compliance</td>
+            </tr>
+            <tr>
+              <td><strong>Sender ID (Header)</strong></td>
+              <td><code>MAQAMH</code> (<code>FAST2SMS_SENDER_ID</code>)</td>
+              <td>Registered 6-letter enterprise header for Maqam Travels</td>
+            </tr>
+            <tr>
+              <td><strong>Template ID</strong></td>
+              <td><code>224018</code> (<code>FAST2SMS_OTP_TEMPLATE_ID</code>)</td>
+              <td>TRAI pre-approved transactional message body template</td>
+            </tr>
+            <tr>
+              <td><strong>Template Variable</strong></td>
+              <td><code>{#var#}</code> &rarr; 6-digit numeric OTP</td>
+              <td>Dynamic variable replacement for security code</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="alert alert-success">
+        <i class="fa-solid fa-plug-circle-check"></i>
+        <div class="alert-content">
+          <p><strong>Non-Production Safe Guard:</strong> In development and staging environments, if <code>FAST2SMS_API_KEY</code> is missing or gateway rejects the call, the system transparently logs the OTP to stdout console and succeeds, preventing test suites from hanging.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: Security Controls -->
+    <section id="security-controls">
+      <div class="section-header">
+        <i class="fa-solid fa-shield-virus"></i>
+        <h2>8. Security Controls & Attack Matrix</h2>
+        <span class="section-tag">CYBER DEFENSE</span>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Threat Vector</th>
+              <th>Risk</th>
+              <th>Mitigation Mechanism</th>
+              <th>Technical Implementation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Brute-Force Guessing</strong></td>
+              <td><span class="badge badge-rose">High</span></td>
+              <td>Max 5 Failed Attempts Limit</td>
+              <td>Redis key tracks <code>attempts</code>. On the 5th failure, OTP is deleted instantly from Redis and MongoDB.</td>
+            </tr>
+            <tr>
+              <td><strong>Replay Attacks</strong></td>
+              <td><span class="badge badge-rose">High</span></td>
+              <td>Single-Use Cryptographic Burning</td>
+              <td>Immediately after code match, <code>cache.del()</code> and <code>OTP.deleteOne()</code> run before JWT token creation.</td>
+            </tr>
+            <tr>
+              <td><strong>Predictable OTP</strong></td>
+              <td><span class="badge badge-rose">High</span></td>
+              <td>CSPRNG Entropy</td>
+              <td>Uses Node.js native <code>crypto.randomInt(100000, 999999)</code>, avoiding pseudo-random <code>Math.random()</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Stale Token Reuse</strong></td>
+              <td><span class="badge badge-amber">Medium</span></td>
+              <td>Strict Millisecond TTL</td>
+              <td>Redis <code>PX 300000</code> auto-expiration + manual service timestamp check against <code>expiresAt</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Deactivated Account Bypass</strong></td>
+              <td><span class="badge badge-amber">Medium</span></td>
+              <td>Pre-dispatch User State Validation</td>
+              <td><code>/send-otp</code> queries MongoDB User record; if <code>isActive: false</code>, returns <code>403 Forbidden</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Token Theft via XSS</strong></td>
+              <td><span class="badge badge-amber">Medium</span></td>
+              <td>HttpOnly Cookie Transport</td>
+              <td>Refresh token is delivered via <code>HttpOnly, Secure, SameSite=None</code> cookie inaccessible to browser scripts.</td>
+            </tr>
+            <tr>
+              <td><strong>Staff Privilege Escalation</strong></td>
+              <td><span class="badge badge-rose">High</span></td>
+              <td>Strict Role Hardcoding</td>
+              <td>OTP auto-registration strictly hardcodes <code>role: 'customer'</code>. Admin/staff roles cannot be obtained via OTP.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 9: Environment Configuration -->
+    <section id="env-config">
+      <div class="section-header">
+        <i class="fa-solid fa-gears"></i>
+        <h2>9. Environment Configuration Reference</h2>
+        <span class="section-tag">CONFIGURATION</span>
+      </div>
+
+      <p>Configure the following variables in your <code>.env</code> file:</p>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>.env Configuration Template</span>
+          <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy</button>
+        </div>
+        <pre><code class="language-ini"># ─── Fast2SMS Telecom Gateway ─────────────────────────────────
+FAST2SMS_API_KEY=Vt1l9nkQasFWNzO34py7wMfA0oHJ8mCxZUP5DIGqcgXdRj2LBvHfUzTS97GZXnvcQEV86ClpLaIskAwW
+FAST2SMS_SENDER_ID=MAQAMH
+FAST2SMS_OTP_TEMPLATE_ID=224018
+
+# ─── OTP Expiration & Security Policy ─────────────────────────
+OTP_EXPIRY_MS=300000                   # 5 minutes (300,000 milliseconds)
+OTP_MAX_ATTEMPTS=5                     # Maximum wrong OTP attempts before burn
+OTP_RATE_LIMIT_WINDOW_MS=900000        # 15 minutes window
+OTP_RATE_LIMIT_MAX=5                   # Max requests per window
+
+# ─── Redis Connection ─────────────────────────────────────────
+REDIS_URL=redis://127.0.0.1:6379
+
+# ─── JWT Authentication Secrets ───────────────────────────────
+ACCESS_TOKEN_SECRET=MAQAM_TRAVELS_VAIS_ACCESS_KEY_2026
+REFRESH_TOKEN_SECRET=MAQAM_TRAVELS_REFRESH_VAIS_KEY_2026
+NODE_ENV=development</code></pre>
+      </div>
+    </section>
+
+    <!-- Section 10: Developer & QA Playbook -->
+    <section id="qa-playbook">
+      <div class="section-header">
+        <i class="fa-solid fa-terminal"></i>
+        <h2>10. Developer & QA Verification Playbook</h2>
+        <span class="section-tag">TEST SUITE</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="feature-card">
+          <h4>1. Gateway CLI Test</h4>
+          <p>Direct carrier SMS test via script:</p>
+          <pre><code class="language-bash">node scripts/test-fast2sms.js 9876543210</code></pre>
+        </div>
+        <div class="feature-card">
+          <h4>2. Send OTP API Test</h4>
+          <p>Dispatches OTP and returns token in dev mode:</p>
+          <pre><code class="language-bash">curl -X POST http://localhost:5000/api/v1/auth/send-otp \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "9876543210"}'</code></pre>
+        </div>
+        <div class="feature-card">
+          <h4>3. Test Wrong Attempt Counter</h4>
+          <p>Verify decrementing attempt counter:</p>
+          <pre><code class="language-bash">curl -X POST http://localhost:5000/api/v1/auth/verify-otp \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "9876543210", "otp": "000000"}'</code></pre>
+        </div>
+        <div class="feature-card">
+          <h4>4. Test Verify & Single-Use Burn</h4>
+          <p>Verify success followed by immediate 400 rejection:</p>
+          <pre><code class="language-bash">curl -X POST http://localhost:5000/api/v1/auth/verify-otp \
+  -H "Content-Type: application/json" \
+  -d '{"phone": "9876543210", "otp": "<valid_otp>"}'</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 11: Interactive Simulator -->
+    <section id="interactive-simulator">
+      <div class="section-header">
+        <i class="fa-solid fa-flask"></i>
+        <h2>11. Interactive OTP Simulator & State Visualizer</h2>
+        <span class="section-tag">LIVE TESTBED</span>
+      </div>
+
+      <p>Test the end-to-end phone OTP state machine interactively in real time. Experience dispatch, live Redis cache creation, 5-minute countdown timer, retry counter decrement, and single-use burn:</p>
+
+      <div class="simulator-container">
+        <div class="sim-header">
+          <div>
+            <h3><i class="fa-solid fa-microchip" style="color: #f59e0b;"></i> OTP State Machine Simulator</h3>
+            <p style="margin: 0; font-size: 0.82rem; color: #94a3b8;">Simulates client requests, Redis cache state, and token issuance directly in your browser.</p>
+          </div>
+          <div class="sim-stage-badge" id="sim-stage">STAGE: IDLE</div>
+        </div>
+
+        <div class="sim-grid">
+          <!-- Left: Actions & Form -->
+          <div>
+            <div class="sim-card">
+              <div class="sim-card-title"><i class="fa-solid fa-mobile"></i> 1. Dispatch OTP</div>
+              <div class="input-group">
+                <label>Mobile Number (10 Digits)</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-phone"></i>
+                  <input type="text" id="sim-phone" maxlength="10" value="9876543210" placeholder="e.g. 9876543210" />
+                </div>
+              </div>
+              <button class="btn-sim" id="sim-btn-send" onclick="simSendOtp()"><i class="fa-solid fa-paper-plane"></i> Send OTP (/send-otp)</button>
+            </div>
+
+            <div class="sim-card" style="margin-top: 18px;">
+              <div class="sim-card-title"><i class="fa-solid fa-shield-halved"></i> 2. Verify OTP</div>
+              <div class="input-group">
+                <label>Enter 6-Digit Code</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-key"></i>
+                  <input type="text" id="sim-otp-input" maxlength="6" placeholder="------" disabled />
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <button class="btn-sim" id="sim-btn-verify" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="simVerifyOtp()" disabled><i class="fa-solid fa-check"></i> Verify (/verify-otp)</button>
+                <button class="btn-sim" id="sim-btn-wrong" style="background: linear-gradient(135deg, #f43f5e, #e11d48); color: #fff;" onclick="simWrongOtp()" disabled><i class="fa-solid fa-xmark"></i> Test Wrong OTP</button>
+              </div>
+              <button class="btn-sim btn-sim-secondary" onclick="simReset()"><i class="fa-solid fa-arrow-rotate-left"></i> Reset Simulator</button>
+            </div>
+          </div>
+
+          <!-- Right: Live State & Logs -->
+          <div>
+            <div class="sim-card">
+              <div class="sim-card-title">
+                <span><i class="fa-brands fa-redhat" style="color: #f43f5e;"></i> Redis Cache Inspector</span>
+                <span id="sim-timer" style="margin-left: auto; font-family: 'JetBrains Mono'; font-size: 0.8rem; color: #fbbf24;">TTL: --:--</span>
+              </div>
+              <pre style="padding: 10px; font-size: 0.78rem; max-height: 110px;"><code id="sim-cache-view" class="language-json">{ "status": "No active Redis key" }</code></pre>
+            </div>
+
+            <div class="sim-card" style="margin-top: 18px;">
+              <div class="sim-card-title"><i class="fa-solid fa-list"></i> Real-time Activity Log</div>
+              <div class="sim-log" id="sim-log-stream">
+                <div class="log-entry"><span class="time">[00:00:00]</span> <span>System initialized. Enter phone number to test.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 12: Deployment Checklist -->
+    <section id="checklist">
+      <div class="section-header">
+        <i class="fa-solid fa-list-check"></i>
+        <h2>12. Production Readiness Checklist</h2>
+        <span class="section-tag">VERIFICATION</span>
+      </div>
+
+      <p>Interactive verification checklist. Progress is automatically persisted in your local browser storage:</p>
+
+      <div id="qa-checklist">
+        <div class="checklist-item" onclick="toggleChecklist(this, 'otp_c1')">
+          <div class="checklist-checkbox"><i class="fa-solid fa-check" style="display: none; font-size: 0.7rem;"></i></div>
+          <div class="checklist-text"><strong>CSPRNG Randomness:</strong> OTP is generated using <code>crypto.randomInt(100000, 999999)</code>.</div>
+        </div>
+        <div class="checklist-item" onclick="toggleChecklist(this, 'otp_c2')">
+          <div class="checklist-checkbox"><i class="fa-solid fa-check" style="display: none; font-size: 0.7rem;"></i></div>
+          <div class="checklist-text"><strong>Primary Cache Tier:</strong> Redis key <code>otp:{phone}</code> is stored with <code>PX 300000</code> (5-minute TTL).</div>
+        </div>
+        <div class="checklist-item" onclick="toggleChecklist(this, 'otp_c3')">
+          <div class="checklist-checkbox"><i class="fa-solid fa-check" style="display: none; font-size: 0.7rem;"></i></div>
+          <div class="checklist-text"><strong>Resilient Fallback:</strong> MongoDB <code>OTP</code> model has native TTL index <code>{ expiresAt: 1 }, { expireAfterSeconds: 0 }</code>.</div>
+        </div>
+        <div class="checklist-item" onclick="toggleChecklist(this, 'otp_c4')">
+          <div class="checklist-checkbox"><i class="fa-solid fa-check" style="display: none; font-size: 0.7rem;"></i></div>
+          <div class="checklist-text"><strong>Brute-Force Guardrail:</strong> Maximum 5 wrong verification attempts before automatic cache burning.</div>
+        </div>
+        <div class="checklist-item" onclick="toggleChecklist(this, 'otp_c5')">
+          <div class="checklist-checkbox"><i class="fa-solid fa-check" style="display: none; font-size: 0.7rem;"></i></div>
+          <div class="checklist-text"><strong>Single-Use Burn:</strong> Verified OTP is deleted immediately from cache before JWT generation.</div>
+        </div>
+        <div class="checklist-item" onclick="toggleChecklist(this, 'otp_c6')">
+          <div class="checklist-checkbox"><i class="fa-solid fa-check" style="display: none; font-size: 0.7rem;"></i></div>
+          <div class="checklist-text"><strong>Auto-Provisioning:</strong> New travelers are auto-registered with <code>role: 'customer'</code> and random Bcrypt hash.</div>
+        </div>
+        <div class="checklist-item" onclick="toggleChecklist(this, 'otp_c7')">
+          <div class="checklist-checkbox"><i class="fa-solid fa-check" style="display: none; font-size: 0.7rem;"></i></div>
+          <div class="checklist-text"><strong>HttpOnly Transport:</strong> Long-lived refresh token is transmitted strictly in an <code>HttpOnly, Secure</code> cookie.</div>
+        </div>
+        <div class="checklist-item" onclick="toggleChecklist(this, 'otp_c8')">
+          <div class="checklist-checkbox"><i class="fa-solid fa-check" style="display: none; font-size: 0.7rem;"></i></div>
+          <div class="checklist-text"><strong>DLT Compliance:</strong> Fast2SMS uses registered sender ID <code>MAQAMH</code> and DLT template <code>224018</code>.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="margin-top: 80px; padding-top: 30px; border-top: 1px solid var(--border); text-align: center; color: var(--text-dim); font-size: 0.85rem;">
+      <p>Maqam Travels Alpha &copy; 2026 • Identity & Access Management (IAM) Subsystem • All rights reserved.</p>
+      <p style="font-size: 0.78rem; margin-top: 6px;">Document generated from <a href="file:///d:/Debanjan/joydeb_folder/MaqamTravelsAlpha/docs/auth/OTP_AUTHENTICATION_DOCUMENTATION.md" style="color: var(--accent-amber); text-decoration: none;">OTP_AUTHENTICATION_DOCUMENTATION.md</a></p>
+    </footer>
+
+  </main>
+
+  <!-- Back to Top Button -->
+  <button id="back-to-top" aria-label="Back to Top"><i class="fa-solid fa-arrow-up"></i></button>
+
+  <!-- Scripts -->
+  <script>
+    // Initialize Highlight.js
+    hljs.highlightAll();
+
+    // Initialize Mermaid
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#080b12',
+        primaryColor: '#1e293b',
+        primaryBorderColor: '#f59e0b',
+        primaryTextColor: '#f8fafc',
+        lineColor: '#38bdf8',
+        secondaryColor: '#0f172a',
+        tertiaryColor: '#030712'
+      }
+    });
+
+    // Copy to Clipboard
+    function copyCode(button) {
+      const codeBlock = button.closest('.code-wrapper').querySelector('code');
+      const text = codeBlock.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const origHtml = button.innerHTML;
+        button.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+        button.style.background = '#10b981';
+        button.style.color = '#000';
+        setTimeout(() => {
+          button.innerHTML = origHtml;
+          button.style.background = '';
+          button.style.color = '';
+        }, 2000);
+      });
+    }
+
+    // Tab Switching
+    function switchTab(btn, targetId) {
+      const container = btn.closest('.tab-container');
+      container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      const target = document.getElementById(targetId);
+      if (target) target.classList.add('active');
+    }
+
+    // Scroll Progress & Active Nav Spy & Back-to-Top
+    const progressBar = document.getElementById('progress-bar');
+    const backToTop = document.getElementById('back-to-top');
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
+
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      progressBar.style.width = scrolled + '%';
+
+      if (winScroll > 400) {
+        backToTop.classList.add('visible');
+      } else {
+        backToTop.classList.remove('visible');
+      }
+
+      let currentSectionId = '';
+      sections.forEach(section => {
+        const top = section.offsetTop - 120;
+        if (winScroll >= top) {
+          currentSectionId = section.getAttribute('id');
+        }
+      });
+
+      if (currentSectionId) {
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === `#${currentSectionId}`) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Mobile Drawer Toggle
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const sidebar = document.getElementById('sidebar');
+
+    mobileToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      const icon = mobileToggle.querySelector('i');
+      if (sidebar.classList.contains('open')) {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-xmark');
+      } else {
+        icon.classList.remove('fa-xmark');
+        icon.classList.add('fa-bars');
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+          sidebar.classList.remove('open');
+          const icon = mobileToggle.querySelector('i');
+          icon.classList.remove('fa-xmark');
+          icon.classList.add('fa-bars');
+        }
+      });
+    });
+
+    // Sidebar Live Filter Search
+    const navSearch = document.getElementById('nav-search');
+    navSearch.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      navLinks.forEach(link => {
+        const text = link.innerText.toLowerCase();
+        if (text.includes(q)) {
+          link.style.display = 'flex';
+        } else {
+          link.style.display = 'none';
+        }
+      });
+    });
+
+    // Interactive Checklist Persistence
+    function toggleChecklist(el, key) {
+      el.classList.toggle('completed');
+      const isCompleted = el.classList.contains('completed');
+      const checkIcon = el.querySelector('.checklist-checkbox i');
+      checkIcon.style.display = isCompleted ? 'block' : 'none';
+      localStorage.setItem('maqam_otp_checklist_' + key, isCompleted ? 'true' : 'false');
+    }
+
+    ['otp_c1', 'otp_c2', 'otp_c3', 'otp_c4', 'otp_c5', 'otp_c6', 'otp_c7', 'otp_c8'].forEach(key => {
+      const saved = localStorage.getItem('maqam_otp_checklist_' + key);
+      const items = document.querySelectorAll('#qa-checklist .checklist-item');
+      items.forEach(item => {
+        if (item.getAttribute('onclick').includes(key)) {
+          if (saved === 'true') {
+            item.classList.add('completed');
+            item.querySelector('.checklist-checkbox i').style.display = 'block';
+          }
+        }
+      });
+    });
+
+    // ==========================================
+    // Interactive OTP Simulator Logic
+    // ==========================================
+    let simState = {
+      phone: '',
+      otp: '',
+      attempts: 0,
+      maxAttempts: 5,
+      timerInterval: null,
+      secondsRemaining: 300
+    };
+
+    function addSimLog(type, message) {
+      const stream = document.getElementById('sim-log-stream');
+      const now = new Date().toTimeString().split(' ')[0];
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      let tagClass = 'tag-send';
+      if (type === 'VERIFY') tagClass = 'tag-verify';
+      if (type === 'WARN') tagClass = 'tag-warn';
+      if (type === 'ERROR') tagClass = 'tag-error';
+      entry.innerHTML = `<span class="time">[${now}]</span> <strong class="${tagClass}">[${type}]</strong> <span>${message}</span>`;
+      stream.appendChild(entry);
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    function updateSimCacheView() {
+      const view = document.getElementById('sim-cache-view');
+      if (!simState.otp) {
+        view.innerText = JSON.stringify({ status: "No active Redis key" }, null, 2);
+      } else {
+        view.innerText = JSON.stringify({
+          key: `otp:${simState.phone}`,
+          otp: simState.otp,
+          phone: simState.phone,
+          attempts: simState.attempts,
+          maxAttempts: simState.maxAttempts,
+          ttlSeconds: simState.secondsRemaining,
+          storageTier: "Redis (Primary)"
+        }, null, 2);
+      }
+      hljs.highlightElement(view);
+    }
+
+    function simSendOtp() {
+      const phoneInput = document.getElementById('sim-phone');
+      const phone = phoneInput.value.trim();
+      const phoneRegex = /^[6-9]\d{9}$/;
+
+      if (!phoneRegex.test(phone)) {
+        addSimLog('ERROR', 'Validation Failed: Phone must be a valid 10-digit Indian mobile number.');
+        return;
+      }
+
+      // Generate 6 digit OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      simState.phone = phone;
+      simState.otp = otp;
+      simState.attempts = 0;
+      simState.secondsRemaining = 300;
+
+      // Update UI
+      document.getElementById('sim-stage').innerText = 'STAGE: OTP DISPATCHED';
+      document.getElementById('sim-otp-input').disabled = false;
+      document.getElementById('sim-otp-input').value = '';
+      document.getElementById('sim-btn-verify').disabled = false;
+      document.getElementById('sim-btn-wrong').disabled = false;
+
+      addSimLog('SEND', `POST /api/v1/auth/send-otp -> 200 OK. Generated OTP: ${otp} for phone ${phone}`);
+      addSimLog('SEND', `Fast2SMS DLT packet dispatched via Header MAQAMH, Template 224018.`);
+      addSimLog('SEND', `Redis key 'otp:${phone}' cached with 300,000ms TTL.`);
+
+      if (simState.timerInterval) clearInterval(simState.timerInterval);
+      simState.timerInterval = setInterval(() => {
+        simState.secondsRemaining--;
+        const mins = Math.floor(simState.secondsRemaining / 60);
+        const secs = simState.secondsRemaining % 60;
+        document.getElementById('sim-timer').innerText = `TTL: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+        if (simState.secondsRemaining <= 0) {
+          clearInterval(simState.timerInterval);
+          addSimLog('WARN', 'OTP Expired! Redis automatically purged key otp:' + simState.phone);
+          simReset();
+        }
+      }, 1000);
+
+      updateSimCacheView();
+    }
+
+    function simVerifyOtp() {
+      const input = document.getElementById('sim-otp-input').value.trim();
+      if (!input) {
+        addSimLog('WARN', 'Please enter the 6-digit OTP in the input field.');
+        return;
+      }
+
+      if (input !== simState.otp) {
+        simWrongOtp();
+        return;
+      }
+
+      // SUCCESS!
+      clearInterval(simState.timerInterval);
+      addSimLog('VERIFY', `POST /api/v1/auth/verify-otp -> Match verified for OTP ${input}!`);
+      addSimLog('VERIFY', `🔥 SINGLE-USE BURN: cache.del("otp:${simState.phone}") executed!`);
+      addSimLog('VERIFY', `New customer provisioned: { id: "cust_99a8f", phone: "${simState.phone}", role: "customer" }`);
+      addSimLog('VERIFY', `Issued Access Token (valid 120m) and set HttpOnly Refresh Cookie (valid 7d).`);
+
+      document.getElementById('sim-stage').innerText = 'STAGE: AUTHENTICATED';
+      document.getElementById('sim-stage').style.background = 'rgba(16, 185, 129, 0.2)';
+      document.getElementById('sim-stage').style.color = '#34d399';
+      document.getElementById('sim-stage').style.borderColor = 'rgba(16, 185, 129, 0.4)';
+
+      simState.otp = '';
+      document.getElementById('sim-otp-input').disabled = true;
+      document.getElementById('sim-btn-verify').disabled = true;
+      document.getElementById('sim-btn-wrong').disabled = true;
+      document.getElementById('sim-timer').innerText = 'EXPIRED / BURNED';
+      updateSimCacheView();
+    }
+
+    function simWrongOtp() {
+      simState.attempts++;
+      const remaining = simState.maxAttempts - simState.attempts;
+
+      if (remaining <= 0) {
+        clearInterval(simState.timerInterval);
+        addSimLog('ERROR', `Maximum attempts exceeded (5/5). 🚨 BRUTE-FORCE DEFENSE: Burned OTP immediately!`);
+        document.getElementById('sim-stage').innerText = 'STAGE: BURNED (LOCKED)';
+        document.getElementById('sim-stage').style.background = 'rgba(244, 63, 94, 0.2)';
+        document.getElementById('sim-stage').style.color = '#fb7185';
+        document.getElementById('sim-stage').style.borderColor = 'rgba(244, 63, 94, 0.4)';
+
+        simState.otp = '';
+        document.getElementById('sim-otp-input').disabled = true;
+        document.getElementById('sim-btn-verify').disabled = true;
+        document.getElementById('sim-btn-wrong').disabled = true;
+        document.getElementById('sim-timer').innerText = 'BURNED';
+        updateSimCacheView();
+      } else {
+        addSimLog('WARN', `POST /api/v1/auth/verify-otp -> 400 Bad Request. Invalid OTP. ${remaining} attempt(s) remaining.`);
+        updateSimCacheView();
+      }
+    }
+
+    function simReset() {
+      if (simState.timerInterval) clearInterval(simState.timerInterval);
+      simState = {
+        phone: '',
+        otp: '',
+        attempts: 0,
+        maxAttempts: 5,
+        timerInterval: null,
+        secondsRemaining: 300
+      };
+      document.getElementById('sim-stage').innerText = 'STAGE: IDLE';
+      document.getElementById('sim-stage').style.background = 'rgba(245, 158, 11, 0.15)';
+      document.getElementById('sim-stage').style.color = '#fbbf24';
+      document.getElementById('sim-stage').style.borderColor = 'rgba(245, 158, 11, 0.3)';
+      document.getElementById('sim-otp-input').value = '';
+      document.getElementById('sim-otp-input').disabled = true;
+      document.getElementById('sim-btn-verify').disabled = true;
+      document.getElementById('sim-btn-wrong').disabled = true;
+      document.getElementById('sim-timer').innerText = 'TTL: --:--';
+      addSimLog('WARN', 'Simulator reset to clean state.');
+      updateSimCacheView();
+    }
+  </script>
+</body>
+</html>

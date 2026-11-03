@@ -1,0 +1,138 @@
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 665b128522fc2d3f741ad41a
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        phone:
+          type: string
+          example: "+1234567890"
+        avatar:
+          type: string
+          example: https://cdn-icons-png.flaticon.com/512/3135/3135715.png
+        role:
+          type: string
+          enum: [customer, sales_agent, support_agent, admin, super_admin]
+          example: customer
+        isActive:
+          type: boolean
+          example: true
+        isVerified:
+          type: boolean
+          example: false
+        lastLogin:
+          type: string
+          format: date-time
+          example: 2026-07-13T10:00:00.000Z
+        createdAt:
+          type: string
+          format: date-time
+          example: 2026-07-13T09:00:00.000Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2026-07-13T10:00:00.000Z
+
+    RegisterRequest:
+      type: object
+      required:
+        - phone
+        - password
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        password:
+          type: string
+          minLength: 6
+          example: strong_password_123
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        phone:
+          type: string
+          example: "+1234567890"
+        avatar:
+          type: string
+          example: https://cdn-icons-png.flaticon.com/512/3135/3135715.png
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: "example@gmail.com"
+        password:
+          type: string
+          example: strong_password_123
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+          minLength: 6
+          example: new_secure_password_987
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        user:
+          $ref: '#/components/schemas/User'
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        phone:
+          type: string
+          example: "9876543210"
+        avatar:
+          type: string
+          example: https://cdn-icons-png.flaticon.com/512/3135/3135715.png
+

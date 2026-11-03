@@ -1,0 +1,35 @@
+components:
+  schemas:
+    ErrorEnvelope:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: An error occurred
+        errors:
+          type: array
+          nullable: true
+          description: Field-level validation errors
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                example: email
+              message:
+                type: string
+                example: Please provide a valid email address
+        details:
+          type: object
+          nullable: true
+          description: Additional contextual details for debugging or CRM operations
+          example: null

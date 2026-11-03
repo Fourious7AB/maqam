@@ -1,0 +1,26 @@
+{
+  "traceId": "274513",
+  "resultIndex": "OB6_0_2",
+  "passengers": [
+    {
+      "isLeadPax": true,
+      "saveToProfile": false,
+      "travellerDetails": {
+        "title": "Mr",
+        "firstName": "Test",
+        "lastName": "Sharma",
+        "passengerType": "Adult",
+        "gender": "Male",
+        "dateOfBirth": "1992-08-15",
+        "email": "rahul.sharma@example.com",
+        "phone": "9876543210",
+        "cellCountryCode": "+91",
+        "addressLine1": "Flat 402 Sunshine Apartments",
+        "city": "Mumbai",
+        "countryCode": "IN",
+        "countryName": "INDIA"
+      }
+    }
+  ],
+  "gstDetails": null
+}

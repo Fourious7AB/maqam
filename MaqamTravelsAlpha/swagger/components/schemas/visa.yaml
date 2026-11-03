@@ -1,0 +1,421 @@
+# swagger/components/schemas/visa.yaml
+components:
+  schemas:
+    DocumentRequirement:
+      type: object
+      required:
+        - docType
+        - label
+      properties:
+        docType:
+          type: string
+          example: "passportScan"
+          description: "Machine identifier for document (e.g., passportScan, photo, bankStatement)"
+        label:
+          type: string
+          example: "Passport Front & Back Scan"
+          description: "User friendly title shown in the UI"
+        description:
+          type: string
+          example: "Color scan of valid passport with at least 6 months validity"
+        isRequired:
+          type: boolean
+          default: true
+        allowedMimes:
+          type: array
+          items:
+            type: string
+          example: ["image/jpeg", "image/png", "application/pdf"]
+        maxSizeBytes:
+          type: integer
+          default: 5242880
+          example: 5242880
+
+    VisaFees:
+      type: object
+      required:
+        - totalPrice
+      properties:
+        basePrice:
+          type: number
+          example: 2000
+          description: "Wholesale cost paid to Embassy or Visa processing partner"
+        governmentFee:
+          type: number
+          example: 1000
+          description: "Mandatory Government consulate tax / fee"
+        serviceFee:
+          type: number
+          example: 500
+          description: "Agency processing service fee / margin"
+        tax:
+          type: number
+          example: 0
+        totalPrice:
+          type: number
+          example: 3500
+          description: "Public standalone customer retail price"
+        currency:
+          type: string
+          default: "INR"
+          example: "INR"
+
+    VisaInventory:
+      type: object
+      required:
+        - country
+        - visaType
+        - title
+        - fees
+      properties:
+        _id:
+          type: string
+          example: "66d4a303e944f7b6b199e821"
+        country:
+          type: string
+          example: "UNITED ARAB EMIRATES"
+        countryCode:
+          type: string
+          example: "AE"
+        countryPicture:
+          type: string
+          example: "https://res.cloudinary.com/travelagency/image/upload/dubai.jpg"
+        countryFlag:
+          type: string
+          example: "https://res.cloudinary.com/travelagency/image/upload/flags/ae.png"
+        flagEmoji:
+          type: string
+          example: "🇦🇪"
+        bannerImage:
+          type: string
+          example: "https://res.cloudinary.com/travelagency/image/upload/dubai_banner.jpg"
+        visaType:
+          type: string
+          example: "Tourist"
+        title:
+          type: string
+          example: "Dubai 30 Days Tourist Visa"
+        entryType:
+          type: string
+          enum: ["Single Entry", "Multiple Entry"]
+          default: "Single Entry"
+        validity:
+          type: string
+          example: "30 Days"
+        stayDuration:
+          type: string
+          example: "30 Days"
+        processingTime:
+          type: string
+          example: "3-5 Working Days"
+        documentRequirements:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentRequirement"
+        fees:
+          $ref: "#/components/schemas/VisaFees"
+        status:
+          type: string
+          enum: ["active", "inactive"]
+          default: "active"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    VisaDocuments:
+      type: object
+      properties:
+        passportScan:
+          type: string
+          example: "https://res.cloudinary.com/travelagency/image/upload/passport_front.jpg"
+        photo:
+          type: string
+          example: "https://res.cloudinary.com/travelagency/image/upload/photo_passport.jpg"
+        additionalDocs:
+          type: array
+          items:
+            type: string
+          example: ["https://res.cloudinary.com/travelagency/image/upload/bank_statement.pdf"]
+
+    TravelerDetails:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - passportNumber
+        - dateOfBirth
+        - nationality
+      properties:
+        firstName:
+          type: string
+          example: "Arun"
+        lastName:
+          type: string
+          example: "Shaw"
+        passportNumber:
+          type: string
+          example: "Z1234567"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1992-05-15"
+        nationality:
+          type: string
+          example: "Indian"
+        gender:
+          type: string
+          enum: ["male", "female", "other"]
+          default: "male"
+
+    VisaGroup:
+      type: object
+      required:
+        - submittedBy
+        - destinationCountry
+        - visaType
+        - totalApplicants
+        - totalAmount
+      properties:
+        _id:
+          type: string
+          example: "66d4c101e944f7b6b199e830"
+        submittedBy:
+          type: string
+          description: "User ID of account holder"
+          example: "66c1b011e944f7b6b199e801"
+        destinationCountry:
+          type: string
+          example: "UNITED ARAB EMIRATES"
+        visaType:
+          type: string
+          example: "Tourist Visa"
+        totalApplicants:
+          type: integer
+          example: 2
+        bookingSource:
+          type: string
+          enum: ["standalone", "package"]
+          default: "standalone"
+          example: "package"
+        packageBookingId:
+          type: string
+          nullable: true
+          example: "66d4b555e944f7b6b199e825"
+        packageId:
+          type: string
+          nullable: true
+          example: "66d4a8e2e944f7b6b199e815"
+        totalAmount:
+          type: number
+          example: 7000
+        paymentStatus:
+          type: string
+          enum: ["pending", "paid", "failed"]
+          default: "pending"
+          example: "paid"
+        paymentId:
+          type: string
+          nullable: true
+          example: "66d4d202e944f7b6b199e840"
+        groupStatus:
+          type: string
+          enum: ["processing", "completed", "partially_approved", "rejected"]
+          default: "processing"
+          example: "processing"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    VisaApplication:
+      type: object
+      required:
+        - groupId
+        - submittedBy
+        - travelerDetails
+      properties:
+        _id:
+          type: string
+          example: "66d4c202e944f7b6b199e831"
+        applicationNumber:
+          type: string
+          example: "VA-1725278400000-1-5821"
+        groupId:
+          type: string
+          description: "Parent VisaGroup ID"
+          example: "66d4c101e944f7b6b199e830"
+        submittedBy:
+          type: string
+          description: "User ID who created the application"
+          example: "66c1b011e944f7b6b199e801"
+        assignedAgent:
+          type: string
+          nullable: true
+          description: "User ID of the assigned CRM Case Officer"
+          example: "66ce08f0e944f7b6b199e810"
+        travelerDetails:
+          $ref: "#/components/schemas/TravelerDetails"
+        documents:
+          $ref: "#/components/schemas/VisaDocuments"
+        status:
+          type: string
+          enum: ["submitted", "assigned", "in_review", "action_required", "approved", "rejected"]
+          default: "submitted"
+          example: "approved"
+        adminNotes:
+          type: string
+          example: "Visa approved and e-visa PDF issued by GDRFA"
+        rejectionReason:
+          type: string
+          example: ""
+        issuedVisaUrl:
+          type: string
+          nullable: true
+          example: "https://res.cloudinary.com/travelagency/raw/upload/issued_evisa_123.pdf"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # Request Payloads
+    CreateVisaInventoryRequest:
+      type: object
+      required:
+        - country
+        - visaType
+        - title
+        - fees
+      properties:
+        country:
+          type: string
+          example: "UNITED ARAB EMIRATES"
+        countryCode:
+          type: string
+          example: "AE"
+        visaType:
+          type: string
+          example: "Tourist"
+        title:
+          type: string
+          example: "Dubai 30 Days Tourist Visa"
+        entryType:
+          type: string
+          enum: ["Single Entry", "Multiple Entry"]
+          default: "Single Entry"
+        validity:
+          type: string
+          example: "30 Days"
+        stayDuration:
+          type: string
+          example: "30 Days"
+        processingTime:
+          type: string
+          example: "3-5 Working Days"
+        documentRequirements:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentRequirement"
+        fees:
+          $ref: "#/components/schemas/VisaFees"
+        status:
+          type: string
+          enum: ["active", "inactive"]
+          default: "active"
+
+    CreateVisaBatchApplicantItem:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - passportNumber
+        - dateOfBirth
+        - nationality
+      properties:
+        firstName:
+          type: string
+          example: "Ali"
+        lastName:
+          type: string
+          example: "Khan"
+        passportNumber:
+          type: string
+          example: "Z1234567"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1994-08-20"
+        nationality:
+          type: string
+          example: "Indian"
+        gender:
+          type: string
+          enum: ["male", "female", "other"]
+          default: "male"
+        passportScan:
+          type: string
+          example: "https://res.cloudinary.com/travelagency/image/upload/passport_ali.jpg"
+        photo:
+          type: string
+          example: "https://res.cloudinary.com/travelagency/image/upload/photo_ali.jpg"
+
+    CreateVisaApplicationBatchRequest:
+      type: object
+      required:
+        - destinationCountry
+        - visaType
+        - applicants
+      properties:
+        destinationCountry:
+          type: string
+          example: "UNITED ARAB EMIRATES"
+        visaType:
+          type: string
+          example: "Tourist Visa"
+        totalAmount:
+          type: number
+          example: 7000
+        applicants:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateVisaBatchApplicantItem"
+
+    AssignCaseOfficerRequest:
+      type: object
+      required:
+        - caseOfficerId
+      properties:
+        caseOfficerId:
+          type: string
+          example: "66ce08f0e944f7b6b199e810"
+        adminRemarks:
+          type: string
+          example: "Assigned to Dubai visa processing desk"
+
+    UpdateVisaStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: ["submitted", "assigned", "in_review", "action_required", "approved", "rejected"]
+          example: "approved"
+        adminNotes:
+          type: string
+          example: "Visa issued successfully by GDRFA Dubai"
+        adminRemarks:
+          type: string
+          example: "Applicant notified via email"
+        rejectionReason:
+          type: string
+          example: ""
+        issuedVisaUrl:
+          type: string
+          example: "https://res.cloudinary.com/travelagency/raw/upload/issued_evisa_123.pdf"

@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice - {{invoiceNumber}} | Maqam Travels</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --navy-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --emerald-600: #059669;
+      --emerald-50: #ecfdf5;
+      --amber-600: #d97706;
+      --amber-50: #fffbeb;
+      --border-color: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f1f5f9;
+      color: var(--slate-800);
+      line-height: 1.5;
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Action Bar (Screen Only) */
+    .action-bar {
+      max-width: 860px;
+      margin: 20px auto 10px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease-in-out;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--slate-200);
+      color: var(--slate-700);
+    }
+
+    .btn-outline:hover {
+      background: var(--slate-50);
+    }
+
+    /* Invoice Page Sheet */
+    .invoice-container {
+      max-width: 860px;
+      margin: 0 auto 30px auto;
+      background: #ffffff;
+      padding: 36px 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Header Section */
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--slate-100);
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--slate-500);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    .agency-address {
+      font-size: 11px;
+      color: var(--slate-600);
+      line-height: 1.4;
+      margin-top: 8px;
+      max-width: 330px;
+    }
+
+    .invoice-title-block {
+      text-align: right;
+    }
+
+    .invoice-heading {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--navy-900);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-group {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .badge-status-confirmed {
+      background: var(--emerald-50);
+      color: var(--emerald-600);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    .badge-status-pending {
+      background: var(--amber-50);
+      color: var(--amber-600);
+      border: 1px solid rgba(217, 119, 6, 0.2);
+    }
+
+    .badge-service {
+      background: #eff6ff;
+      color: #2563eb;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+
+    /* Details Grid */
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+      background: var(--slate-50);
+      padding: 16px 20px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .detail-col h4 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--slate-500);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .detail-row {
+      display: flex;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .detail-label {
+      width: 140px;
+      color: var(--slate-600);
+      font-weight: 500;
+    }
+
+    .detail-val {
+      flex: 1;
+      font-weight: 600;
+      color: var(--slate-800);
+    }
+
+    .highlight-mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    /* Hotel Property Card */
+    .hotel-property-card {
+      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hotel-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--navy-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hotel-stars {
+      color: #eab308;
+      font-size: 14px;
+      letter-spacing: 2px;
+    }
+
+    .hotel-address {
+      font-size: 12px;
+      color: var(--slate-600);
+      margin-top: 4px;
+    }
+
+    .hotel-category-badge {
+      background: #0284c7;
+      color: #ffffff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* Stay Summary Grid */
+    .stay-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 14px 18px;
+      text-align: center;
+    }
+
+    .stay-item-title {
+      font-size: 10px;
+      color: var(--slate-500);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .stay-item-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--slate-800);
+    }
+
+    /* Table Styles */
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--slate-700);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 12px;
+    }
+
+    .data-table th {
+      background: var(--slate-100);
+      color: var(--slate-700);
+      text-align: left;
+      padding: 9px 12px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-color);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--slate-100);
+      vertical-align: middle;
+    }
+
+    .data-table tbody tr:hover {
+      background-color: var(--slate-50);
+    }
+
+    /* Financial Fare Box */
+    .fare-box {
+      background: var(--slate-50);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 18px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .fare-table {
+      width: 380px;
+      font-size: 12px;
+    }
+
+    .fare-table td {
+      padding: 5px 0;
+    }
+
+    .fare-table td:last-child {
+      text-align: right;
+      font-weight: 600;
+      color: var(--slate-800);
+    }
+
+    .fare-divider {
+      border-top: 1px solid var(--border-color);
+      margin: 8px 0;
+    }
+
+    .fare-total-row td {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      padding-top: 8px;
+    }
+
+    /* Payment & Security Footer */
+    .payment-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      background: #f8fafc;
+      border: 1px dashed var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 24px;
+      font-size: 12px;
+    }
+
+    .policy-box {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 24px;
+      font-size: 11px;
+      color: #92400e;
+      line-height: 1.5;
+    }
+
+    .invoice-footer {
+      border-top: 1px solid var(--slate-200);
+      padding-top: 16px;
+      font-size: 11px;
+      color: var(--slate-500);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* Print Formatting */
+    @media print {
+      body {
+        background: #ffffff;
+      }
+      .action-bar {
+        display: none !important;
+      }
+      .invoice-container {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Action Bar -->
+  <div class="action-bar">
+    <div style="font-weight: 700; color: var(--slate-700);">
+      Official Tax Invoice &amp; Hotel Receipt
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-primary" onclick="window.print()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"></path></svg>
+        Print / Save PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Invoice Document -->
+  <div class="invoice-container">
+
+    <!-- Header -->
+    <header class="invoice-header">
+      <div>
+        <div class="brand-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><path d="M3 21h18M3 7v14M21 7v14M6 7V3h12v4M9 10h1M14 10h1M9 14h1M14 14h1M9 18h1M14 18h1"/></svg>
+          MAQAM TRAVELS
+        </div>
+        <div class="brand-sub">Premium Hospitality &amp; Hotel Accommodations</div>
+        <div class="agency-address">
+          {{agencyAddress}}<br>
+          <strong>GSTIN:</strong> {{agencyGst}}<br>
+          <strong>PAN:</strong> {{agencyPan}} | <strong>SAC Code:</strong> {{sacCode}}<br>
+          <strong>Email:</strong> {{agencyEmail}} | <strong>Support:</strong> {{agencyPhone}}
+        </div>
+      </div>
+
+      <div class="invoice-title-block">
+        <div class="invoice-heading">TAX INVOICE</div>
+        <div class="badge-group">
+          <span class="badge {{statusBadgeClass}}">{{bookingStatus}}</span>
+          <span class="badge badge-service">{{serviceTypeBadge}}</span>
+        </div>
+        <div style="margin-top: 10px; font-size: 11px; color: var(--slate-600);">
+          <div>Invoice Date: <strong>{{invoiceDate}}</strong></div>
+          <div>Place of Supply: <strong>{{placeOfSupply}}</strong></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Details Grid: Invoice & Customer/GST -->
+    <div class="details-grid">
+      <div class="detail-col">
+        <h4>Booking &amp; Confirmation Reference</h4>
+        <div class="detail-row">
+          <span class="detail-label">Invoice Number:</span>
+          <span class="detail-val highlight-mono">{{invoiceNumber}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Confirmation No:</span>
+          <span class="detail-val highlight-mono" style="font-size: 13px;">{{confirmationNo}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Booking Reference:</span>
+          <span class="detail-val">{{bookingReference}}</span>
+        </div>
+        {{supplierBookingIdRow}}
+        {{supplierInvoiceRow}}
+      </div>
+
+      <div class="detail-col">
+        <h4>Billed To (Customer / Corporate)</h4>
+        <div class="detail-row">
+          <span class="detail-label">Customer Name:</span>
+          <span class="detail-val">{{customerName}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Email:</span>
+          <span class="detail-val">{{customerEmail}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Contact:</span>
+          <span class="detail-val">{{customerPhone}}</span>
+        </div>
+        {{corporateGstBlock}}
+      </div>
+    </div>
+
+    <!-- Hotel Property Overview Card -->
+    <div class="hotel-property-card">
+      <div>
+        <div class="hotel-name">
+          {{hotelName}}
+          <span class="hotel-stars">{{starRatingDisplay}}</span>
+        </div>
+        <div class="hotel-address">
+          {{hotelAddress}}
+        </div>
+        <div style="margin-top: 4px; font-size: 11px; color: var(--slate-500);">
+          <strong>Destination:</strong> {{destination}} | <strong>Property Contact:</strong> {{propertyContact}}
+        </div>
+      </div>
+      <div>
+        <span class="hotel-category-badge">{{hotelCategory}}</span>
+      </div>
+    </div>
+
+    <!-- Stay Summary Grid -->
+    <div class="stay-summary-grid">
+      <div>
+        <div class="stay-item-title">Check-in Date</div>
+        <div class="stay-item-value">{{checkInDate}}</div>
+        <div style="font-size: 10px; color: var(--slate-500);">From 14:00</div>
+      </div>
+      <div>
+        <div class="stay-item-title">Check-out Date</div>
+        <div class="stay-item-value">{{checkOutDate}}</div>
+        <div style="font-size: 10px; color: var(--slate-500);">Until 12:00</div>
+      </div>
+      <div>
+        <div class="stay-item-title">Duration</div>
+        <div class="stay-item-value">{{nightsCount}} Night(s)</div>
+      </div>
+      <div>
+        <div class="stay-item-title">Total Rooms</div>
+        <div class="stay-item-value">{{roomsCount}} Room(s)</div>
+      </div>
+      <div>
+        <div class="stay-item-title">Total Guests</div>
+        <div class="stay-item-value">{{guestsCount}} Guest(s)</div>
+      </div>
+    </div>
+
+    <!-- Room Details Table -->
+    <div class="section-title">Room &amp; Accommodation Details</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 35px;">#</th>
+          <th>Room Category</th>
+          <th>Meal Plan / Board</th>
+          <th>Occupancy</th>
+          <th>Rate / Night</th>
+          <th>Total Room Tariff</th>
+          <th>Policy</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{roomsRows}}
+      </tbody>
+    </table>
+
+    <!-- Guest Manifest Table -->
+    <div class="section-title">Guest Manifest &amp; Identification</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 35px;">#</th>
+          <th>Guest Full Name</th>
+          <th>Type</th>
+          <th>Lead Guest</th>
+          <th>Contact Number</th>
+          <th>Passport / ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{guestsRows}}
+      </tbody>
+    </table>
+
+    <!-- Financial Fare Breakdown -->
+    <div class="fare-box">
+      <table class="fare-table">
+        <tr>
+          <td>Hotel Accommodation Charges:</td>
+          <td>{{currency}} {{roomCharges}}</td>
+        </tr>
+        <tr>
+          <td>Agency Convenience &amp; Service Fee:</td>
+          <td>{{currency}} {{serviceFee}}</td>
+        </tr>
+        {{gstTaxRows}}
+        <tr>
+          <td colspan="2"><div class="fare-divider"></div></td>
+        </tr>
+        <tr class="fare-total-row">
+          <td>Total Gross Amount Paid:</td>
+          <td>{{currency}} {{totalAmount}}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Cancellation & Reservation Policy -->
+    {{cancellationPolicyBlock}}
+
+    <!-- Payment Information -->
+    <div class="payment-box">
+      <div>
+        <strong>Payment Mode:</strong> {{paymentGateway}} &nbsp;|&nbsp;
+        <strong>Transaction Ref:</strong> <span class="highlight-mono">{{paymentTransactionId}}</span>
+      </div>
+      <div>
+        <strong>Status:</strong>
+        <span style="color: var(--emerald-600); font-weight: 700;">{{paymentStatus}}</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="invoice-footer">
+      <div><strong>Maqam Travels Private Limited</strong> &bull; Licensed Travel &amp; Umrah Service Provider</div>
+      <div>This is a computer-generated tax invoice and requires no physical signature. In case of any billing inquiries, please contact {{agencyEmail}} or call {{agencyPhone}}.</div>
+    </footer>
+
+  </div>
+
+</body>
+</html>

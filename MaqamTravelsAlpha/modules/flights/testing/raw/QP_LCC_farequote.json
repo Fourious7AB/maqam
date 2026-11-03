@@ -1,0 +1,121 @@
+{
+  "Error": {
+    "ErrorCode": "0",
+    "ErrorMessage": ""
+  },
+  "TraceId": "273937",
+  "SrdvType": "MixAPI",
+  "IsPriceChanged": false,
+  "Results": {
+    "SrdvIndex": "2",
+    "ResultIndex": "30-9582113405_0DELBOMQP1826~5681910488353996",
+    "Source": "Publish",
+    "ButtonColor": "#0000ff",
+    "TextColor": "#ffffff",
+    "SingleSlotBooking": "Yes",
+    "IsLCC": true,
+    "IsRefundable": true,
+    "IsPriceChanged": false,
+    "AirlineRemark": [],
+    "IsPassportRequiredAtBook": true,
+    "IsPassportFullDetailRequiredAtBook": true,
+    "IsPassportExpiryRequired": true,
+    "IsPassportIssueDateRequired": true,
+    "DocumentRequired": false,
+    "GSTAllowed": true,
+    "IsGSTMandatory": false,
+    "AdultDobRequired": true,
+    "ChildDobRequired": true,
+    "InfantDobRequired": true,
+    "SeatSelectAllowed": true,
+    "HoldAllowed": true,
+    "Fare": {
+      "Currency": "INR",
+      "BaseFare": 3449,
+      "Tax": 1669.5,
+      "YQTax": 0,
+      "OtherCharges": 0,
+      "TransactionFee": 0,
+      "AdditionalTxnFeeOfrd": 0,
+      "AdditionalTxnFeePub": 0,
+      "AirTransFee": 0,
+      "Discount": 0,
+      "PublishedFare": 5118.5,
+      "OfferedFare": 5119,
+      "CommissionEarned": 0,
+      "TdsOnCommission": 0
+    },
+    "FareBreakdown": [
+      {
+        "PassengerType": 1,
+        "PassengerCount": 1,
+        "BaseFare": 3449,
+        "Tax": 1669.5,
+        "YQTax": "",
+        "AdditionalTxnFeeOfrd": "",
+        "AdditionalTxnFeePub": ""
+      }
+    ],
+    "Segments": [
+      [
+        {
+          "IsRefundable": true,
+          "Baggage": "15 Kg",
+          "CabinBaggage": "7 Kg",
+          "CabinClassName": "Economy",
+          "CabinClassCode": 2,
+          "TripIndicator": 1,
+          "SegmentIndicator": 1,
+          "Airline": {
+            "AirlineCode": "QP",
+            "AirlineName": "AkasaAir",
+            "FlightNumber": "1826",
+            "FareClass": "SP",
+            "OperatingCarrier": ""
+          },
+          "NoOfSeatAvailable": 9,
+          "Origin": {
+            "AirportCode": "DEL",
+            "AirportName": "Delhi Indira Gandhi Intl",
+            "Terminal": "Terminal 1",
+            "CityCode": "DEL",
+            "CityName": "Delhi",
+            "CountryCode": "IN",
+            "CountryName": "India"
+          },
+          "DepTime": "2026-08-15T19:55",
+          "Destination": {
+            "AirportCode": "BOM",
+            "AirportName": "Chhatrapati Shivaji",
+            "Terminal": "Terminal 1",
+            "CityCode": "BOM",
+            "CityName": "Mumbai",
+            "CountryCode": "IN",
+            "CountryName": "India"
+          },
+          "ArrTime": "2026-08-15T22:20",
+          "Duration": 145,
+          "GroundTime": "",
+          "AccumulatedDuration": 145,
+          "Mile": "",
+          "StopOver": "",
+          "StopPoint": "",
+          "StopPointArrivalTime": "",
+          "StopPointDepartureTime": "",
+          "Craft": "",
+          "Remark": "",
+          "IsETicketEligible": "",
+          "FlightStatus": "",
+          "Status": ""
+        }
+      ]
+    ],
+    "AirlineCode": "",
+    "ValidatingAirline": "",
+    "AirlineRules": {
+      "FirstNameMinChar": 1,
+      "LastNameMinChar": 1
+    }
+  },
+  "LogPath": "2026/07/27"
+}

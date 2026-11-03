@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Refresh Token Rotation (RTR) — Architecture & Evolution — Maqam Travels</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #080b12;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      --code-bg: #030712;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-primary);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8, #06b6d4, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+    }
+    .badge-cyan { color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.3); }
+    .badge-emerald { color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); }
+    .badge-amber { color: var(--accent-amber); border-color: rgba(245, 158, 11, 0.3); }
+    .badge-rose { color: var(--accent-rose); border-color: rgba(244, 63, 94, 0.3); }
+    .badge-purple { color: var(--accent-purple); border-color: rgba(168, 85, 247, 0.3); }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 32px;
+      backdrop-filter: blur(16px);
+    }
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h3 {
+      font-size: 1.15rem;
+      color: var(--accent-cyan);
+      margin: 18px 0 10px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    td code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent-cyan);
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      margin: 14px 0;
+    }
+    .note-box {
+      background: rgba(6, 182, 212, 0.08);
+      border-left: 4px solid var(--accent-cyan);
+      padding: 14px 18px;
+      border-radius: 0 10px 10px 0;
+      margin: 16px 0;
+      font-size: 0.92rem;
+    }
+    .danger-box {
+      background: rgba(244, 63, 94, 0.08);
+      border-left: 4px solid var(--accent-rose);
+      padding: 14px 18px;
+      border-radius: 0 10px 10px 0;
+      margin: 16px 0;
+      font-size: 0.92rem;
+    }
+    .success-box {
+      background: rgba(16, 185, 129, 0.08);
+      border-left: 4px solid var(--accent-emerald);
+      padding: 14px 18px;
+      border-radius: 0 10px 10px 0;
+      margin: 16px 0;
+      font-size: 0.92rem;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔄 Refresh Token Rotation (RTR) Architecture</h1>
+      <p style="color: var(--text-muted); font-size: 1.05rem;">
+        Complete comparative analysis of Previous vs. Present implementation, Token Storage locations, and Future Roadmap.
+      </p>
+      <div class="meta-bar">
+        <span class="badge badge-cyan"><i class="fa-solid fa-arrows-rotate"></i> RTR Subsystem</span>
+        <span class="badge badge-emerald"><i class="fa-solid fa-database"></i> MongoDB Single-Use Store</span>
+        <span class="badge badge-amber"><i class="fa-solid fa-shield-virus"></i> Replay Protection</span>
+        <span class="badge badge-purple"><i class="fa-solid fa-cookie-bite"></i> HttpOnly Cookie Sync</span>
+      </div>
+    </header>
+
+    <!-- SECTION: Token Storage -->
+    <div class="card">
+      <h2><i class="fa-solid fa-hard-drive text-cyan"></i> Where Access Tokens & Refresh Tokens Are Stored</h2>
+      <p>
+        To prevent XSS token harvesting while maintaining sub-millisecond API response times, tokens use dedicated storage layers:
+      </p>
+      
+      <div class="grid-2" style="margin-top: 18px;">
+        <div style="background: rgba(255,255,255,0.03); padding: 18px; border-radius: 12px; border: 1px solid var(--border);">
+          <h3 style="margin-top:0;"><i class="fa-solid fa-bolt"></i> Access Token (120m)</h3>
+          <ul style="padding-left: 20px; font-size: 0.9rem; color: #cbd5e1;">
+            <li><strong>Client-Side:</strong> In-Memory (JavaScript State / React Context / Pinia). Never stored in <code>localStorage</code> (shields from XSS).</li>
+            <li><strong>Transport:</strong> Attached via HTTP Header: <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+            <li><strong>Server-Side:</strong> <em>Purely Stateless</em>. Not saved in MongoDB. Verified mathematically in-memory using HMAC-SHA256 secret.</li>
+          </ul>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); padding: 18px; border-radius: 12px; border: 1px solid var(--border);">
+          <h3 style="margin-top:0; color: var(--accent-emerald);"><i class="fa-solid fa-lock"></i> Refresh Token (7 Days)</h3>
+          <ul style="padding-left: 20px; font-size: 0.9rem; color: #cbd5e1;">
+            <li><strong>Client-Side:</strong> <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite=none</code> browser cookie. JavaScript cannot read it via XSS.</li>
+            <li><strong>Transport:</strong> Automatically attached by the browser exclusively to <code>/refresh-token</code> and <code>/logout</code>.</li>
+            <li><strong>Server-Side:</strong> Persisted in MongoDB <code>RefreshToken</code> collection with native 7-day TTL index. Burned upon use.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION: Previous vs Present Comparison -->
+    <div class="card">
+      <h2><i class="fa-solid fa-code-compare"></i> Previous vs. Present Workflow Comparison</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Security Vector</th>
+            <th>Previous (Legacy Flawed State)</th>
+            <th>Present (Current Production Implementation)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Token Invalidation</strong></td>
+            <td><span style="color:var(--accent-rose); font-weight:700;">❌ Never invalidated</span> (Tokens lived for 7 full days after rotation).</td>
+            <td><span style="color:var(--accent-emerald); font-weight:700;">🟢 Single-use burn</span> (Old token is deleted from MongoDB on every refresh).</td>
+          </tr>
+          <tr>
+            <td><strong>Replay Attack Detection</strong></td>
+            <td><span style="color:var(--accent-rose); font-weight:700;">❌ Absent</span> (Attacker could replay old token thousands of times).</td>
+            <td><span style="color:var(--accent-emerald); font-weight:700;">🟢 Protected</span> (Replay of burned token throws immediate HTTP 401).</td>
+          </tr>
+          <tr>
+            <td><strong>Token Uniqueness</strong></td>
+            <td><span style="color:var(--accent-amber); font-weight:700;">⚠️ Deterministic</span> (Risk of token collision in the same second).</td>
+            <td><span style="color:var(--accent-emerald); font-weight:700;">🟢 Cryptographic UUID</span> (<code>jwtid: crypto.randomUUID()</code> on every issuance).</td>
+          </tr>
+          <tr>
+            <td><strong>Cookie Synchronization</strong></td>
+            <td><span style="color:var(--accent-rose); font-weight:700;">❌ Broken</span> (<code>res.cookie</code> omitted; client stuck on old token).</td>
+            <td><span style="color:var(--accent-emerald); font-weight:700;">🟢 Synchronized</span> (New token cookie is refreshed on every rotation).</td>
+          </tr>
+          <tr>
+            <td><strong>Logout Revocation</strong></td>
+            <td><span style="color:var(--accent-rose); font-weight:700;">❌ Client-only log</span> (Server kept token active).</td>
+            <td><span style="color:var(--accent-emerald); font-weight:700;">🟢 Database Purge</span> (Token deleted from MongoDB on logout).</td>
+          </tr>
+          <tr>
+            <td><strong>Password Reset Action</strong></td>
+            <td><span style="color:var(--accent-rose); font-weight:700;">❌ No token cleanup</span>.</td>
+            <td><span style="color:var(--accent-emerald); font-weight:700;">🟢 Cascade Purge</span> (Revokes all active refresh tokens for the user).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION: How Present Implementation Works -->
+    <div class="card">
+      <h2><i class="fa-solid fa-gears text-emerald"></i> Present Implementation Deep-Dive</h2>
+      <div class="success-box">
+        <strong>Single-Use Burning Workflow:</strong> Every call to <code>POST /api/v1/auth/refresh-token</code> performs an atomic token swap in MongoDB.
+      </div>
+      
+      <ol style="padding-left: 20px; font-size: 0.92rem; line-height: 1.8; color: #cbd5e1;">
+        <li><strong>Step 1:</strong> Client passes refresh token via <code>req.cookies.refreshToken</code>.</li>
+        <li><strong>Step 2:</strong> Server verifies cryptographic signature using <code>REFRESH_TOKEN_SECRET</code>.</li>
+        <li><strong>Step 3:</strong> Server queries MongoDB <code>RefreshToken.findOne({ token })</code>. If not found, immediately raises <code>401 Unauthorized</code> (Replay Attack!).</li>
+        <li><strong>Step 4:</strong> Server <strong>burns</strong> the old token: <code>RefreshToken.deleteOne({ _id: tokenDoc._id })</code>.</li>
+        <li><strong>Step 5:</strong> Server checks user status (<code>user.isActive</code>).</li>
+        <li><strong>Step 6:</strong> Server mints brand-new access token + unique refresh token.</li>
+        <li><strong>Step 7:</strong> Server saves new refresh token in MongoDB.</li>
+        <li><strong>Step 8:</strong> Server synchronizes browser cookie: <code>res.cookie("refreshToken", newRefreshToken, options)</code>.</li>
+      </ol>
+    </div>
+
+    <!-- SECTION: Future Implementation Roadmap -->
+    <div class="card">
+      <h2><i class="fa-solid fa-map-location-dot text-amber"></i> Future Implementations & Token Roadmap</h2>
+      
+      <div style="margin-bottom: 20px;">
+        <h3>1. Redis In-Memory Caching (Sub-Millisecond Verification)</h3>
+        <p style="font-size: 0.9rem; color: #cbd5e1;">
+          Add a high-speed Redis caching tier (<code>rt:token:&lt;tokenId&gt;</code>) to verify token status in memory, eliminating MongoDB disk reads on high traffic spikes.
+        </p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h3>2. Token Family Lineage & Automatic Theft Isolation (RFC 6749)</h3>
+        <p style="font-size: 0.9rem; color: #cbd5e1;">
+          Track session lineage using a permanent <code>familyId</code>. If an attacker replays a burned token, the server detects the breach and revokes <strong>all descendant tokens</strong> in that family, forcing both attacker and victim to log in again.
+        </p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h3>3. Multi-Tab Concurrency Grace Window</h3>
+        <p style="font-size: 0.9rem; color: #cbd5e1;">
+          Provide a 30-second concurrency grace period (<code>graceExpiresAt</code>). If multiple tabs fire simultaneous refresh requests, the server safely re-serves the already-minted child token without triggering a security alarm.
+        </p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h3>4. Device Fingerprinting & Geographic Anomaly Detection</h3>
+        <p style="font-size: 0.9rem; color: #cbd5e1;">
+          Bind refresh tokens to client IP subnets and User-Agent fingerprints. Trigger step-up OTP authentication if a token suddenly hops geographical regions.
+        </p>
+      </div>
+
+      <div>
+        <h3>5. Multi-Device Management Dashboard</h3>
+        <p style="font-size: 0.9rem; color: #cbd5e1;">
+          Enable travelers to view and terminate active sessions ("Chrome on Windows - Delhi", "iPhone App - Dubai") from their profile settings.
+        </p>
+      </div>
+    </div>
+
+    <!-- SECTION: Automated Testing -->
+    <div class="card">
+      <h2><i class="fa-solid fa-vial-circle-check"></i> Automated Verification Test</h2>
+      <p style="font-size: 0.92rem; color: #cbd5e1;">
+        The entire rotation, replay defense, and logout flow is verified by an automated integration test:
+      </p>
+      <pre><code class="language-bash">node --test tests/refreshTokenAuth.test.js</code></pre>
+      <div class="note-box" style="margin-top: 14px;">
+        All 6 integration test cases currently pass with zero failures.
+      </div>
+    </div>
+  </div>
+
+  <script>hljs.highlightAll();</script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM Customer Intelligence & Travellers API — Maqam Travels</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #080b12;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-purple: #a855f7;
+      --code-bg: #030712;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-primary);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8, #a855f7, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+    }
+    .badge-cyan { color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.3); }
+    .badge-purple { color: var(--accent-purple); border-color: rgba(168, 85, 247, 0.3); }
+    .badge-emerald { color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 32px;
+      backdrop-filter: blur(16px);
+    }
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h3 {
+      font-size: 1.15rem;
+      color: var(--accent-cyan);
+      margin: 22px 0 10px 0;
+    }
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .method-tag {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .method-get { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .route-url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.15rem;
+      color: #f1f5f9;
+      font-weight: 600;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    td code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent-cyan);
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      margin: 14px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>👥 CRM Customer Intelligence & Travellers API</h1>
+      <p style="color: var(--text-muted); font-size: 1.05rem;">
+        Comprehensive guide for customer directory, aggregated lifetime metrics (travellers count, booked offers, money spent), individual profiles, and saved travellers.
+      </p>
+      <div class="meta-bar">
+        <span class="badge badge-purple"><i class="fa-solid fa-users"></i> CRM Customers</span>
+        <span class="badge badge-cyan"><i class="fa-solid fa-chart-pie"></i> Lifetime Metrics</span>
+        <span class="badge badge-emerald"><i class="fa-solid fa-passport"></i> Travellers Directory</span>
+      </div>
+    </header>
+
+    <!-- Endpoint 1: List Customers -->
+    <div class="card">
+      <div class="endpoint-header">
+        <span class="method-tag method-get">GET</span>
+        <span class="route-url">/api/v1/crm/customers</span>
+      </div>
+      <p>Retrieve all customers with aggregated business metrics: <strong>name, phone, email, totalTravellers, bookedOffersCount, isActive, and totalMoneySpent</strong>.</p>
+      
+      <h3>Query Filters</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>page</code></td><td>Integer</td><td><code>1</code></td><td>Page number</td></tr>
+          <tr><td><code>limit</code></td><td>Integer</td><td><code>20</code></td><td>Items per page (max 100)</td></tr>
+          <tr><td><code>search</code></td><td>String</td><td>-</td><td>Search by firstName, lastName, phone, or email</td></tr>
+          <tr><td><code>isActive</code></td><td>Boolean</td><td>-</td><td>Filter by true/false</td></tr>
+          <tr><td><code>sortBy</code></td><td>String</td><td><code>createdAt</code></td><td>createdAt, firstName, lastName, updatedAt</td></tr>
+          <tr><td><code>sortOrder</code></td><td>String</td><td><code>desc</code></td><td>asc, desc</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Sample Response Payload (200 OK)</h3>
+      <pre><code class="language-json">{
+  "success": true,
+  "message": "Customers retrieved successfully",
+  "data": [
+    {
+      "_id": "6aacc0352df766456873afa1",
+      "name": "Ahmed Khan",
+      "firstName": "Ahmed",
+      "lastName": "Khan",
+      "phone": "9876543210",
+      "email": "ahmed.khan@example.com",
+      "totalTravellers": 3,
+      "bookedOffersCount": 2,
+      "isActive": true,
+      "totalMoneySpent": 85000.50,
+      "createdAt": "2026-02-10T08:30:00.000Z"
+    }
+  ],
+  "meta": {
+    "total": 48,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 3
+  }
+}</code></pre>
+    </div>
+
+    <!-- Endpoint 2: Get Customer Details -->
+    <div class="card">
+      <div class="endpoint-header">
+        <span class="method-tag method-get">GET</span>
+        <span class="route-url">/api/v1/crm/customers/:id</span>
+      </div>
+      <p>Retrieve comprehensive customer profile, lifetime financial summary, booked offers count, and recent reservations.</p>
+
+      <h3>Sample Response Payload (200 OK)</h3>
+      <pre><code class="language-json">{
+  "success": true,
+  "message": "Customer details retrieved successfully",
+  "data": {
+    "_id": "6aacc0352df766456873afa1",
+    "name": "Ahmed Khan",
+    "firstName": "Ahmed",
+    "lastName": "Khan",
+    "phone": "9876543210",
+    "email": "ahmed.khan@example.com",
+    "avatar": "https://res.cloudinary.com/.../avatar1.png",
+    "role": "customer",
+    "isActive": true,
+    "isVerified": true,
+    "isPhoneVerified": true,
+    "totalTravellers": 3,
+    "bookedOffersCount": 2,
+    "totalBookingsCount": 5,
+    "totalMoneySpent": 85000.50,
+    "currencyBreakdown": [
+      { "currency": "INR", "spent": 85000.50, "transactions": 4 }
+    ],
+    "recentBookings": [
+      {
+        "_id": "6b1e2f3a4b5c6d7e8f9a0b1c",
+        "bookingType": "hotel",
+        "status": "confirmed",
+        "createdAt": "2026-03-15T10:30:15.120Z"
+      }
+    ],
+    "createdAt": "2026-02-10T08:30:00.000Z",
+    "updatedAt": "2026-03-15T10:32:05.000Z"
+  }
+}</code></pre>
+    </div>
+
+    <!-- Endpoint 3: Customer Travellers -->
+    <div class="card">
+      <div class="endpoint-header">
+        <span class="method-tag method-get">GET</span>
+        <span class="route-url">/api/v1/crm/customers/:id/travellers</span>
+      </div>
+      <p>Retrieve all saved travellers, passport details, passenger types (Adult/Child/Infant), and default preferences belonging to a specific customer.</p>
+
+      <h3>Sample Response Payload (200 OK)</h3>
+      <pre><code class="language-json">{
+  "success": true,
+  "message": "Customer travellers retrieved successfully",
+  "data": {
+    "customer": {
+      "_id": "6aacc0352df766456873afa1",
+      "name": "Ahmed Khan",
+      "phone": "9876543210",
+      "email": "ahmed.khan@example.com"
+    },
+    "totalTravellers": 1,
+    "travellers": [
+      {
+        "_id": "6c4e5f6a7b8c9d0e1f2a3b4c",
+        "title": "Mr",
+        "firstName": "Ahmed",
+        "lastName": "Khan",
+        "fullName": "Mr Ahmed Khan",
+        "passengerType": "Adult",
+        "gender": "Male",
+        "dateOfBirth": "1990-05-14T00:00:00.000Z",
+        "nationality": "Indian",
+        "email": "ahmed.khan@example.com",
+        "phone": "9876543210",
+        "passportNo": "Z1234567",
+        "passportExpiry": "2032-05-14T00:00:00.000Z",
+        "isDefault": true
+      }
+    ]
+  }
+}</code></pre>
+    </div>
+  </div>
+
+  <script>hljs.highlightAll();</script>
+</body>
+</html>

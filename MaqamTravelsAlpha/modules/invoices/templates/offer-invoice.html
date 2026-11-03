@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice - {{invoiceNumber}} | Maqam Travels</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --navy-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --emerald-600: #059669;
+      --emerald-50: #ecfdf5;
+      --amber-600: #d97706;
+      --amber-50: #fffbeb;
+      --purple-600: #7c3aed;
+      --purple-50: #f5f3ff;
+      --border-color: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f1f5f9;
+      color: var(--slate-800);
+      line-height: 1.5;
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Action Bar (Screen Only) */
+    .action-bar {
+      max-width: 860px;
+      margin: 20px auto 10px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: var(--slate-100);
+      color: var(--slate-700);
+      border: 1px solid var(--slate-200);
+    }
+
+    .btn-secondary:hover {
+      background: var(--slate-200);
+    }
+
+    /* Main Invoice Sheet (A4 Dimensions) */
+    .invoice-wrapper {
+      max-width: 860px;
+      margin: 10px auto 40px auto;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    /* Header Section */
+    .header-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--slate-100);
+      padding-bottom: 20px;
+    }
+
+    .header-table td {
+      vertical-align: top;
+    }
+
+    .agency-logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--navy-900);
+      letter-spacing: -0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .agency-logo-text span {
+      color: var(--primary);
+    }
+
+    .agency-details {
+      margin-top: 8px;
+      color: var(--slate-600);
+      font-size: 11.5px;
+      line-height: 1.6;
+    }
+
+    .invoice-title-block {
+      text-align: right;
+    }
+
+    .invoice-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--slate-800);
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+
+    .invoice-subtitle {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-top: 2px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .invoice-meta-grid {
+      margin-top: 12px;
+      display: inline-block;
+      text-align: left;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .meta-label {
+      color: var(--slate-500);
+      font-weight: 500;
+    }
+
+    .meta-val {
+      font-weight: 700;
+      color: var(--slate-800);
+      min-width: 130px;
+      text-align: right;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-status-confirmed {
+      background: var(--emerald-50);
+      color: var(--emerald-600);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    .badge-status-pending {
+      background: var(--amber-50);
+      color: var(--amber-600);
+      border: 1px solid rgba(217, 119, 6, 0.2);
+    }
+
+    .badge-offer {
+      background: var(--purple-50);
+      color: var(--purple-600);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    /* Billing Cards Layout */
+    .billing-section {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .info-card {
+      flex: 1;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      padding: 14px 18px;
+    }
+
+    .card-heading {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--slate-500);
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--slate-200);
+      padding-bottom: 6px;
+    }
+
+    .info-detail {
+      font-size: 12px;
+      color: var(--slate-700);
+      margin-bottom: 4px;
+    }
+
+    .info-detail strong {
+      color: var(--slate-900);
+    }
+
+    /* Service / Offer Summary Banner */
+    .service-banner {
+      background: #f8fafc;
+      border: 1px solid var(--slate-200);
+      border-left: 4px solid var(--primary);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .service-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--slate-800);
+    }
+
+    .service-subtitle {
+      font-size: 12px;
+      color: var(--slate-500);
+      margin-top: 3px;
+    }
+
+    .highlight-mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    /* Tables */
+    .table-section {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--slate-800);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .data-table th {
+      background: var(--slate-100);
+      color: var(--slate-700);
+      font-weight: 700;
+      text-align: left;
+      padding: 8px 12px;
+      border: 1px solid var(--slate-200);
+    }
+
+    .data-table td {
+      padding: 10px 12px;
+      border: 1px solid var(--slate-200);
+      color: var(--slate-700);
+    }
+
+    .data-table tr:nth-child(even) td {
+      background: #fafbfc;
+    }
+
+    /* Financial Summary Ledger */
+    .totals-wrapper {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    .totals-table {
+      width: 360px;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    .totals-table td {
+      padding: 6px 12px;
+    }
+
+    .totals-table .label {
+      color: var(--slate-600);
+      text-align: right;
+    }
+
+    .totals-table .amount {
+      text-align: right;
+      font-weight: 600;
+      color: var(--slate-800);
+    }
+
+    .totals-table tr.total-row {
+      border-top: 2px solid var(--slate-300);
+      border-bottom: 2px solid var(--slate-800);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .totals-table tr.total-row td {
+      padding: 10px 12px;
+      color: var(--slate-900);
+    }
+
+    .total-amount-highlight {
+      color: var(--primary);
+    }
+
+    /* Inclusions & Highlights */
+    .inclusions-wrapper {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .inclusion-tag {
+      background: var(--emerald-50);
+      color: var(--emerald-600);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* Payment Ledger Box */
+    .payment-box {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      padding: 12px 18px;
+      margin-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    /* Legal / Compliance Footer */
+    .footer {
+      margin-top: 36px;
+      padding-top: 18px;
+      border-top: 1px solid var(--slate-200);
+      text-align: center;
+      color: var(--slate-500);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    /* Print Stylesheet */
+    @media print {
+      body {
+        background: #ffffff;
+      }
+      .action-bar {
+        display: none !important;
+      }
+      .invoice-wrapper {
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
+      }
+      @page {
+        size: A4;
+        margin: 12mm 15mm;
+      }
+      table {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Action Bar (Screen Only) -->
+  <div class="action-bar">
+    <div style="font-weight: 600; color: var(--slate-700);">
+      Tax Invoice Document &bull; <span class="highlight-mono">{{invoiceNumber}}</span>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-primary" onclick="window.print()">
+        🖨️ Print / Save as PDF
+      </button>
+      <a class="btn btn-secondary" href="?token={{rawToken}}&download=true" download>
+        ⬇️ Download HTML
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Invoice Sheet -->
+  <div class="invoice-wrapper">
+
+    <!-- Header Table -->
+    <table class="header-table">
+      <tr>
+        <td style="width: 55%;">
+          <div class="agency-logo-text">
+            MAQAM <span>TRAVELS</span>
+          </div>
+          <div class="agency-details">
+            <strong>{{agencyName}}</strong><br>
+            {{agencyAddress}}<br>
+            GSTIN: <strong>{{agencyGst}}</strong> &bull; PAN: <strong>{{agencyPan}}</strong><br>
+            SAC Code: <strong>{{sacCode}}</strong> &bull; Email: {{agencyEmail}} &bull; Tel: {{agencyPhone}}
+          </div>
+        </td>
+        <td style="width: 45%;">
+          <div class="invoice-title-block">
+            <div class="invoice-title">Tax Invoice</div>
+            <div class="invoice-subtitle">{{serviceTypeBadge}}</div>
+            <div class="invoice-meta-grid">
+              <div class="meta-row">
+                <span class="meta-label">Invoice No:</span>
+                <span class="meta-val highlight-mono">{{invoiceNumber}}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Booking Ref:</span>
+                <span class="meta-val highlight-mono">{{bookingReference}}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Invoice Date:</span>
+                <span class="meta-val">{{invoiceDate}}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Status:</span>
+                <span class="meta-val"><span class="badge {{statusBadgeClass}}">{{bookingStatus}}</span></span>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Billing Profile Cards -->
+    <div class="billing-section">
+      <div class="info-card">
+        <div class="card-heading">Billed Customer</div>
+        <div class="info-detail"><strong>{{customerName}}</strong></div>
+        <div class="info-detail">Email: {{customerEmail}}</div>
+        <div class="info-detail">Phone: {{customerPhone}}</div>
+        <div class="info-detail">Place of Supply: <strong>{{placeOfSupply}}</strong></div>
+      </div>
+      <div class="info-card">
+        <div class="card-heading">Service Classification</div>
+        <div class="info-detail">Category: <strong>Wholesale Retail Inventory</strong></div>
+        <div class="info-detail">Offer Type: <strong>{{offerItemType}}</strong></div>
+        <div class="info-detail">Quantity Booked: <strong>{{quantity}} Unit(s)</strong></div>
+        <div class="info-detail">Inventory Source: <strong>Direct Series Allotment</strong></div>
+      </div>
+    </div>
+
+    <!-- Service Summary Banner -->
+    <div class="service-banner">
+      <div>
+        <div class="service-title">{{offerTitle}}</div>
+        <div class="service-subtitle">Destination Sector: <strong>{{destination}}</strong></div>
+      </div>
+      <div style="text-align: right;">
+        <span class="badge badge-offer">Retail Series Deal</span>
+      </div>
+    </div>
+
+    <!-- Dynamic Variant Component Details (Flight or Hotel) -->
+    {{variantDetailsBlock}}
+
+    <!-- Passenger / Guest Manifest Table -->
+    <div class="table-section">
+      <div class="section-title">{{manifestHeading}}</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 6%;">#</th>
+            <th>Name</th>
+            <th style="width: 15%;">Type</th>
+            <th style="width: 25%;">Allotted Unit / Ticket</th>
+            <th style="width: 20%;">Passport / ID</th>
+            <th style="width: 15%;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{manifestRows}}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Package Inclusions (if present) -->
+    {{inclusionsBlock}}
+
+    <!-- Financial Breakdown & Taxation Table -->
+    <div class="totals-wrapper">
+      <table class="totals-table">
+        <tr>
+          <td class="label">Wholesale Consideration:</td>
+          <td class="amount">{{currency}} {{baseFareAmount}}</td>
+        </tr>
+        <tr>
+          <td class="label">Agency Booking Margin:</td>
+          <td class="amount">{{currency}} {{serviceFee}}</td>
+        </tr>
+        {{taxRows}}
+        <tr class="total-row">
+          <td class="label">Total Amount Paid:</td>
+          <td class="amount total-amount-highlight">{{currency}} {{totalAmount}}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Payment & Settlement Record -->
+    <div class="payment-box">
+      <div>
+        Payment Gateway: <strong>{{paymentGateway}}</strong> &bull;
+        Txn Reference: <span class="highlight-mono">{{paymentTransactionId}}</span>
+      </div>
+      <div>
+        Payment Status: <span class="badge badge-status-confirmed">{{paymentStatus}}</span>
+      </div>
+    </div>
+
+    <!-- Footer Notes & Endorsement -->
+    <div class="footer">
+      This is a computer-generated tax invoice and booking document. No physical signature is required.<br>
+      Issued under statutory authority of Maqam Travels Private Limited &bull; All applicable taxes calculated per Government of India GST guidelines.<br>
+      Thank you for choosing Maqam Travels! For inquiries, contact {{agencyEmail}} or call {{agencyPhone}}.
+    </div>
+
+  </div>
+
+</body>
+</html>

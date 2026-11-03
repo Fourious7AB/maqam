@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice - MT-INV-PKG-202610-CONFUMRAH786 | Maqam Travels</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --navy-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --emerald-600: #059669;
+      --emerald-50: #ecfdf5;
+      --amber-600: #d97706;
+      --amber-50: #fffbeb;
+      --purple-600: #7c3aed;
+      --purple-50: #f5f3ff;
+      --border-color: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f1f5f9;
+      color: var(--slate-800);
+      line-height: 1.5;
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Action Bar (Screen Only) */
+    .action-bar {
+      max-width: 860px;
+      margin: 20px auto 10px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease-in-out;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--slate-200);
+      color: var(--slate-700);
+    }
+
+    .btn-outline:hover {
+      background: var(--slate-50);
+    }
+
+    /* Invoice Page Sheet */
+    .invoice-container {
+      max-width: 860px;
+      margin: 0 auto 30px auto;
+      background: #ffffff;
+      padding: 36px 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Header Section */
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--slate-100);
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--slate-500);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    .agency-address {
+      font-size: 11px;
+      color: var(--slate-600);
+      line-height: 1.4;
+      margin-top: 8px;
+      max-width: 330px;
+    }
+
+    .invoice-title-block {
+      text-align: right;
+    }
+
+    .invoice-heading {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--navy-900);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-group {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .badge-status-confirmed {
+      background: var(--emerald-50);
+      color: var(--emerald-600);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    .badge-status-pending {
+      background: var(--amber-50);
+      color: var(--amber-600);
+      border: 1px solid rgba(217, 119, 6, 0.2);
+    }
+
+    .badge-service {
+      background: var(--purple-50);
+      color: var(--purple-600);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    /* Details Grid */
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+      background: var(--slate-50);
+      padding: 16px 20px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .detail-col h4 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--slate-500);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .detail-row {
+      display: flex;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .detail-label {
+      width: 140px;
+      color: var(--slate-600);
+      font-weight: 500;
+    }
+
+    .detail-val {
+      flex: 1;
+      font-weight: 600;
+      color: var(--slate-800);
+    }
+
+    .highlight-mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    /* Package Summary Card */
+    .package-summary-card {
+      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .package-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--navy-900);
+      margin-bottom: 4px;
+    }
+
+    .package-sub {
+      font-size: 12px;
+      color: var(--slate-600);
+    }
+
+    .package-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      background: var(--slate-50);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+    }
+
+    .meta-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--slate-500);
+      margin-bottom: 3px;
+      font-weight: 700;
+    }
+
+    .meta-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--slate-800);
+    }
+
+    /* Inclusions & Highlights */
+    .inclusions-container {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy-900);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .inclusion-tag {
+      background: #f8fafc;
+      border: 1px solid var(--slate-200);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--slate-700);
+    }
+
+    /* Tables */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 12px;
+    }
+
+    .data-table th {
+      background: var(--slate-100);
+      color: var(--slate-700);
+      font-weight: 700;
+      text-align: left;
+      padding: 9px 12px;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--slate-100);
+      color: var(--slate-700);
+    }
+
+    .data-table tr:hover {
+      background: #fdfdfd;
+    }
+
+    /* Financial Breakdown Box */
+    .fare-box {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-left: auto;
+      max-width: 380px;
+      margin-bottom: 24px;
+    }
+
+    .fare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .fare-table td {
+      padding: 5px 0;
+    }
+
+    .fare-table td:last-child {
+      text-align: right;
+      font-weight: 600;
+      color: var(--slate-800);
+    }
+
+    .fare-divider {
+      border-bottom: 1px solid var(--slate-200);
+      margin: 8px 0;
+    }
+
+    .fare-total-row td {
+      font-size: 15px;
+      font-weight: 800 !important;
+      color: var(--navy-900) !important;
+      padding-top: 6px;
+    }
+
+    /* Payment & Info Box */
+    .payment-box {
+      background: var(--slate-50);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .compliance-card {
+      background: #fafaf9;
+      border: 1px solid #e7e5e4;
+      border-radius: 6px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      font-size: 11px;
+      color: var(--slate-600);
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .invoice-footer {
+      border-top: 1px solid var(--slate-200);
+      padding-top: 16px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--slate-500);
+      line-height: 1.6;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: #ffffff !important;
+        font-size: 12px;
+      }
+
+      .action-bar {
+        display: none !important;
+      }
+
+      .invoice-container {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+      }
+
+      .fare-box, .details-grid, .package-meta-grid {
+        break-inside: avoid;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 12mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Only Quick Action Bar -->
+  <div class="action-bar">
+    <div style="font-weight: 600; color: var(--slate-700);">
+      Official Tax Invoice &bull; <strong>MT-INV-PKG-202610-CONFUMRAH786</strong>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="window.print()" class="btn btn-primary">
+        🖨️ Print / Save as PDF
+      </button>
+      <a href="?token=demo_secure_token&download=true" class="btn btn-outline">
+        ⬇️ Download File
+      </a>
+    </div>
+  </div>
+
+  <!-- Printable Invoice Document Sheet -->
+  <div class="invoice-container">
+
+    <!-- Header Block -->
+    <header class="invoice-header">
+      <div>
+        <div class="brand-title">
+          <span>🕌</span> MAQAM TRAVELS
+        </div>
+        <div class="brand-sub">Licensed Travel &amp; Tour Operator</div>
+        <div class="agency-address">
+          Worldmark 1, Aerocity, New Delhi, Delhi 110037, India<br>
+          <strong>GSTIN:</strong> 07AAACM1234F1Z8 &bull; <strong>PAN:</strong> AAACM1234F<br>
+          <strong>Email:</strong> support@maqamtravels.com &bull; <strong>Phone:</strong> +91 11 4000 8899
+        </div>
+      </div>
+      <div class="invoice-title-block">
+        <div class="invoice-heading">Package Tax Invoice</div>
+        <div style="font-size: 12px; color: var(--slate-500); margin-top: 4px;">
+          Invoice No: <span class="highlight-mono">MT-INV-PKG-202610-CONFUMRAH786</span>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-status-confirmed">CONFIRMED</span>
+          <span class="badge badge-service">Tour Package</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Details Grid -->
+    <div class="details-grid">
+      <div class="detail-col">
+        <h4>Customer &amp; Pilgrim Details</h4>
+        <div class="detail-row">
+          <span class="detail-label">Booked By:</span>
+          <span class="detail-val">Tariq Ansari</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Billing Email:</span>
+          <span class="detail-val">tariq.ansari@example.com</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Contact Phone:</span>
+          <span class="detail-val">+91 98765 43210</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Lead Passenger:</span>
+          <span class="detail-val">Mr Tariq Ansari</span>
+        </div>
+      </div>
+      <div class="detail-col">
+        <h4>Booking &amp; Travel Overview</h4>
+        <div class="detail-row">
+          <span class="detail-label">Booking Reference:</span>
+          <span class="detail-val highlight-mono">PKG-UMRAH-14D-786</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Booking Date:</span>
+          <span class="detail-val">15 Oct 2026, 11:30 am</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Invoice Issue Date:</span>
+          <span class="detail-val">15 Oct 2026, 11:35 am</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Assigned Agent:</span>
+          <span class="detail-val">Maqam Executive Concierge Desk</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Package Summary Card -->
+    <div class="package-summary-card">
+      <div>
+        <div class="package-title">Premium 14-Day Executive Umrah Experience</div>
+        <div class="package-sub">
+          <strong>Destination:</strong> Holy Makkah & Madinah Al-Munawwarah, Saudi Arabia &bull; <strong>Package Type:</strong> Custom Umrah &amp; Tour Package
+        </div>
+      </div>
+      <div>
+        <span class="badge badge-status-confirmed" style="font-size: 12px; padding: 6px 14px;">
+          2 Package(s)
+        </span>
+      </div>
+    </div>
+
+    <!-- Stay & Duration Grid -->
+    <div class="package-meta-grid">
+      <div>
+        <div class="meta-title">Start Date</div>
+        <div class="meta-value">10 Nov 2026</div>
+      </div>
+      <div>
+        <div class="meta-title">End Date</div>
+        <div class="meta-value">24 Nov 2026</div>
+      </div>
+      <div>
+        <div class="meta-title">Total Duration</div>
+        <div class="meta-value">14 Night(s) / 15 Day(s)</div>
+      </div>
+      <div>
+        <div class="meta-title">Total Pilgrims</div>
+        <div class="meta-value">2 Guest(s)</div>
+      </div>
+    </div>
+
+    <!-- Inclusions & Guide Addon (if any) -->
+    <div class="inclusions-container">
+      <div class="section-title">Package Inclusions &amp; Addons</div>
+      <div class="tag-cloud">
+        <span class="inclusion-tag">✓ 5-Star Luxury Clock Tower Hotel in Makkah (7 Nights)</span> <span class="inclusion-tag">✓ 5-Star Madinah Hotel near Prophet's Mosque (7 Nights)</span> <span class="inclusion-tag">✓ Round-Trip Flights via Saudi Arabian Airlines</span> <span class="inclusion-tag">✓ VIP Private Airport & Intercity Transfers</span> <span class="inclusion-tag">✓ Comprehensive Historical Ziyarat Tours in Makkah & Madinah</span> <span class="inclusion-tag">✓ Daily Buffet Breakfast & Complimentary Zamzam Water</span> <span class="inclusion-tag">✓ Saudi Umrah Tourist Visa Processing & Insurance</span>
+      </div>
+      
+        <div style="background: var(--purple-50); border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong style="color: var(--purple-600);">🕌 Certified Tour Guide / Instructor Included</strong>
+            <div style="font-size: 11px; color: var(--slate-600); margin-top: 2px;">Assigned for: Holy Makkah & Madinah Al-Munawwarah</div>
+          </div>
+          <span style="font-weight: 700; color: var(--purple-600);">INR 10,000.00</span>
+        </div>
+      
+    </div>
+
+    <!-- Pilgrims Manifest -->
+    <div class="section-title">Pilgrim / Traveller Manifest</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 35px;">#</th>
+          <th>Passenger Name</th>
+          <th>Category</th>
+          <th>Passport No.</th>
+          <th>Nationality</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td>1</td>
+          <td><strong>Mr Tariq Ansari</strong></td>
+          <td>Adult (Male)</td>
+          <td class="highlight-mono">Z5891234</td>
+          <td>Indian</td>
+          <td><span style="color: var(--primary); font-weight: 700;">★ Lead Pilgrim</span></td>
+        </tr>
+      
+        <tr>
+          <td>2</td>
+          <td><strong>Mrs Ayesha Ansari</strong></td>
+          <td>Adult (Female)</td>
+          <td class="highlight-mono">Z9823411</td>
+          <td>Indian</td>
+          <td>Companion</td>
+        </tr>
+      
+      </tbody>
+    </table>
+
+    <!-- Financial Fare Breakdown -->
+    <div class="fare-box">
+      <table class="fare-table">
+        <tr>
+          <td>Base Package Tariff:</td>
+          <td>INR 3,70,000.00</td>
+        </tr>
+        
+        <tr>
+          <td>Tour Guide Add-on Service:</td>
+          <td>INR 10,000.00</td>
+        </tr>
+      
+        
+        
+        <tr>
+          <td>Agency Personal GST (5%):</td>
+          <td>INR 19,000.00</td>
+        </tr>
+      
+        <tr>
+          <td colspan="2"><div class="fare-divider"></div></td>
+        </tr>
+        <tr class="fare-total-row">
+          <td>Total Gross Amount Paid:</td>
+          <td>INR 3,99,000.00</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Payment Information -->
+    <div class="payment-box">
+      <div>
+        <strong>Payment Gateway:</strong> RAZORPAY &nbsp;|&nbsp;
+        <strong>Transaction Ref:</strong> <span class="highlight-mono">pay_RZP_PKG_99887766</span>
+      </div>
+      <div>
+        <strong>Status:</strong>
+        <span style="color: var(--emerald-600); font-weight: 700;">PAID</span>
+      </div>
+    </div>
+
+    <!-- Compliance Card -->
+    <div class="compliance-card">
+      <strong>Service Classification:</strong> Tour Operator / Travel Agency Package Reservation Services &bull; 
+      <strong>SAC Code:</strong> 998555<br>
+      <strong>Statutory Tax Declaration:</strong> Computer-generated tax invoice issued in accordance with Section 31 of the CGST Act, 2017. All package services are subject to standard travel terms and supplier conditions.
+    </div>
+
+    <!-- Footer -->
+    <footer class="invoice-footer">
+      <div><strong>Maqam Travels Private Limited</strong> &bull; Licensed Umrah &amp; Global Tour Operator</div>
+      <div>This is an official computer-generated tax invoice and requires no physical signature. For support, cancellations, or itinerary amendments, please contact support@maqamtravels.com or call +91 11 4000 8899.</div>
+    </footer>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,453 @@
+# swagger/components/schemas/packages.yaml
+components:
+  schemas:
+    PackageOfferRef:
+      type: object
+      required:
+        - offer
+      properties:
+        _id:
+          type: string
+          example: "66d4a8e2e944f7b6b199e811"
+        offer:
+          type: string
+          description: "ObjectId reference to Offer"
+          example: "66d4a8e2e944f7b6b199e810"
+        unitsPerBooking:
+          type: integer
+          default: 1
+          example: 1
+        isOptional:
+          type: boolean
+          default: true
+          description: "Whether customer can opt-out in customizer"
+        isDefaultSelected:
+          type: boolean
+          default: true
+        allowSwap:
+          type: boolean
+          default: true
+          description: "Whether customer can swap with matching destination offer"
+        notes:
+          type: string
+          example: "Economy Return Flight DEL-DXB"
+
+    ItineraryDayItem:
+      type: object
+      properties:
+        offer:
+          type: string
+          nullable: true
+          example: "66d4a8e2e944f7b6b199e810"
+        role:
+          type: string
+          enum:
+            [
+              flight_departure,
+              flight_arrival,
+              hotel_stay,
+              hotel_checkout,
+              guide_tour,
+              activity,
+            ]
+          example: "flight_departure"
+        notes:
+          type: string
+          example: "Depart Delhi Airport Terminal 3 at 08:30 AM"
+
+    ItineraryDay:
+      type: object
+      required:
+        - day
+        - title
+        - description
+      properties:
+        day:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Arrival in Dubai & Dhow Dinner Cruise"
+        description:
+          type: string
+          example: "Land at DXB International Airport, private transfer to hotel, evening Marina Dhow Cruise."
+        assignedOffers:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItineraryDayItem"
+
+    Package:
+      type: object
+      required:
+        - title
+        - destination
+        - sellPrice
+      properties:
+        _id:
+          type: string
+          example: "66d4a8e2e944f7b6b199e815"
+        title:
+          type: string
+          example: "Dubai Golden Sands 5D4N Getaway"
+        description:
+          type: string
+          example: "All-inclusive Dubai holiday package including return flights, 4-star hotel stay, and desert safari."
+        destination:
+          type: string
+          example: "Dubai"
+        images:
+          type: array
+          items:
+            type: string
+          example:
+            [
+              "https://res.cloudinary.com/travelagency/image/upload/dubai_package.jpg",
+            ]
+        offerRefs:
+          type: array
+          description: "Array of bundled Offer components (minimum 2 offers required)"
+          items:
+            $ref: "#/components/schemas/PackageOfferRef"
+        bundleDiscountPercentage:
+          type: number
+          example: 10
+          description: "Percentage discount applied to unbundled sum to form sellPrice"
+        sellPrice:
+          type: number
+          example: 36000
+          description: "Base package retail selling price (INR)"
+        inclusions:
+          type: array
+          items:
+            type: string
+          example:
+            [
+              "Return Flights (DEL-DXB)",
+              "4-Star Hotel Stay 4 Nights",
+              "Airport Transfers",
+            ]
+        itinerary:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItineraryDay"
+        validity:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+        isActive:
+          type: boolean
+          default: true
+        isPublic:
+          type: boolean
+          default: true
+        availableSlots:
+          type: integer
+          example: 14
+          description: "Dynamic availability calculated from lowest stock among bundled offers"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PackageBookingTraveller:
+      type: object
+      required:
+        - travellerId
+      properties:
+        travellerId:
+          type: string
+          example: "66c1b011e944f7b6b199e801"
+        isLead:
+          type: boolean
+          default: false
+
+    PackageBooking:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "66d4b555e944f7b6b199e825"
+        userId:
+          type: string
+          example: "66c1b011e944f7b6b199e801"
+        packageId:
+          type: string
+          example: "66d4a8e2e944f7b6b199e815"
+        packageSnapshot:
+          type: object
+          description: "Frozen snapshot of package configuration and selections at checkout"
+        customizedSelections:
+          type: object
+          properties:
+            includedOfferIds:
+              type: array
+              items:
+                type: string
+            excludedOfferIds:
+              type: array
+              items:
+                type: string
+            swappedOffers:
+              type: array
+              items:
+                type: object
+                properties:
+                  originalOfferId:
+                    type: string
+                  replacementOfferId:
+                    type: string
+        travellers:
+          type: array
+          items:
+            type: object
+            properties:
+              travellerId:
+                type: string
+              isLead:
+                type: boolean
+        quantity:
+          type: integer
+          example: 1
+        totalAmount:
+          type: number
+          example: 36000
+        status:
+          type: string
+          enum: [initiated, pending, confirmed, cancelled]
+          example: "confirmed"
+        claimedUnits:
+          type: array
+          items:
+            type: object
+            properties:
+              stockModel:
+                type: string
+                example: "TicketStock"
+              stock:
+                type: string
+                example: "66d4a8e2e944f7b6b199e810"
+              unitId:
+                type: string
+                example: "66d4a8e2e944f7b6b199e811"
+        assignedTo:
+          type: string
+          nullable: true
+          description: "CRM Operations Agent / Case Officer ID"
+          example: "66ce08f0e944f7b6b199e810"
+        createdAt:
+          type: string
+          format: date-time
+
+    # Request Payloads
+    PackageQuoteRequest:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          default: 1
+          example: 1
+        excludedOfferIds:
+          type: array
+          items:
+            type: string
+          example: []
+        swappedOffers:
+          type: array
+          items:
+            type: object
+            required:
+              - originalOfferId
+              - replacementOfferId
+            properties:
+              originalOfferId:
+                type: string
+                example: "66d4a8e2e944f7b6b199e810"
+              replacementOfferId:
+                type: string
+                example: "66d4a8e2e944f7b6b199e899"
+
+    CreatePackageBookingRequest:
+      type: object
+      required:
+        - packageId
+        - travellers
+      properties:
+        packageId:
+          type: string
+          example: "66d4a8e2e944f7b6b199e815"
+        quantity:
+          type: integer
+          default: 1
+          example: 1
+        travellers:
+          type: array
+          items:
+            $ref: "#/components/schemas/PackageBookingTraveller"
+        excludedOfferIds:
+          type: array
+          items:
+            type: string
+          example: []
+        swappedOffers:
+          type: array
+          items:
+            type: object
+            properties:
+              originalOfferId:
+                type: string
+              replacementOfferId:
+                type: string
+
+    AdminBookPackageForCustomerRequest:
+      type: object
+      required:
+        - customerId
+        - packageId
+        - travellers
+      properties:
+        customerId:
+          type: string
+          example: "66c1b011e944f7b6b199e801"
+        packageId:
+          type: string
+          example: "66d4a8e2e944f7b6b199e815"
+        quantity:
+          type: integer
+          default: 1
+          example: 1
+        travellers:
+          type: array
+          items:
+            $ref: "#/components/schemas/PackageBookingTraveller"
+        travelDates:
+          type: object
+          properties:
+            startDate:
+              type: string
+              format: date-time
+              example: "2026-11-10T00:00:00.000Z"
+            endDate:
+              type: string
+              format: date-time
+              example: "2026-11-15T00:00:00.000Z"
+        contactDetails:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "customer@example.com"
+            phone:
+              type: string
+              example: "+919876543210"
+            emergencyContact:
+              type: string
+              example: "+919876543211"
+        payment:
+          type: object
+          properties:
+            method:
+              type: string
+              default: bank_transfer
+              example: "bank_transfer"
+            referenceNumber:
+              type: string
+              example: "NEFT-HDFC-994821034"
+            notes:
+              type: string
+              example: "Offline bank transfer received"
+
+    AdminCreatePackageRequest:
+      type: object
+      required:
+        - title
+        - destination
+        - offerRefs
+      properties:
+        title:
+          type: string
+          example: "Dubai Explorer 5D4N"
+        description:
+          type: string
+          example: "Complete Dubai package with flights and 4-star luxury stay"
+        destination:
+          type: string
+          example: "Dubai"
+        includeGuide:
+          type: boolean
+          description: "Whether the package includes a tour guide addon option"
+          default: false
+          example: true
+        guideActive:
+          type: boolean
+          description: "Alternative flag for guide availability (synonym for includeGuide)"
+          default: false
+          example: true
+        guideLocation:
+          type: string
+          description: "Location where the tour guide assists (e.g. Makkah, Madinah)"
+          example: "Makkah"
+        guidePrice:
+          type: number
+          description: "Baseline retail price of the guide addon"
+          default: 0
+          example: 1500
+        images:
+          type: array
+          items:
+            type: string
+          example:
+            ["https://res.cloudinary.com/travelagency/image/upload/dubai.jpg"]
+        offerRefs:
+          type: array
+          description: "Array of bundled offers (must contain at least 2 components)"
+          items:
+            type: object
+            required:
+              - offer
+            properties:
+              offer:
+                type: string
+                example: "66d4a8e2e944f7b6b199e810"
+              unitsPerBooking:
+                type: integer
+                default: 1
+              isOptional:
+                type: boolean
+                default: true
+              allowSwap:
+                type: boolean
+                default: true
+        bundleDiscountPercentage:
+          type: number
+          default: 10
+          example: 10
+        sellPrice:
+          type: number
+          description: "Optional manual override. If omitted, calculated automatically via Option A pricing."
+          example: 36000
+        inclusions:
+          type: array
+          items:
+            type: string
+          example: ["Flights", "Hotel", "Airport Transfers"]
+        itinerary:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItineraryDay"
+
+    AdminAssignPackageBookingRequest:
+      type: object
+      required:
+        - assignedTo
+      properties:
+        assignedTo:
+          type: string
+          description: "User ID of the Operations staff / Case Officer"
+          example: "66ce08f0e944f7b6b199e810"

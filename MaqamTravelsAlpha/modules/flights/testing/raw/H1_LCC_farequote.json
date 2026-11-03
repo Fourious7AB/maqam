@@ -1,0 +1,119 @@
+{
+  "Error": {
+    "ErrorCode": "0",
+    "ErrorMessage": ""
+  },
+  "TraceId": "273937",
+  "SrdvType": "MixAPI",
+  "IsPriceChanged": false,
+  "Results": {
+    "SrdvIndex": "2",
+    "ResultIndex": "32-15-2-10-9582113405_111DELBOMH12039~5681912536881742",
+    "Source": "Publish",
+    "ButtonColor": "#0000ff",
+    "TextColor": "#ffffff",
+    "SingleSlotBooking": "Yes",
+    "IsLCC": true,
+    "IsRefundable": true,
+    "IsPriceChanged": false,
+    "AirlineRemark": [],
+    "IsPassportFullDetailRequiredAtBook": false,
+    "IsPassportRequiredAtBook": false,
+    "DocumentRequired": false,
+    "GSTAllowed": true,
+    "IsGSTMandatory": false,
+    "AdultDobRequired": false,
+    "ChildDobRequired": true,
+    "InfantDobRequired": true,
+    "SeatSelectAllowed": true,
+    "HoldAllowed": true,
+    "Fare": {
+      "Currency": "INR",
+      "BaseFare": 12374,
+      "Tax": 9326.5,
+      "YQTax": 3254,
+      "OtherCharges": 0,
+      "TransactionFee": 0,
+      "AdditionalTxnFeeOfrd": 0,
+      "AdditionalTxnFeePub": 0,
+      "AirTransFee": 0,
+      "Discount": 0,
+      "PublishedFare": 21700.5,
+      "OfferedFare": 21701,
+      "CommissionEarned": 0,
+      "TdsOnCommission": 0
+    },
+    "FareBreakdown": [
+      {
+        "PassengerType": 1,
+        "PassengerCount": 1,
+        "BaseFare": 12374,
+        "Tax": 9326.5,
+        "YQTax": 3254,
+        "AdditionalTxnFeeOfrd": "",
+        "AdditionalTxnFeePub": ""
+      }
+    ],
+    "Segments": [
+      [
+        {
+          "IsRefundable": true,
+          "Baggage": "1Piece",
+          "CabinBaggage": "",
+          "CabinClassName": "Economy",
+          "CabinClassCode": 2,
+          "TripIndicator": 1,
+          "SegmentIndicator": 1,
+          "Airline": {
+            "AirlineCode": "H1",
+            "AirlineName": "Hahn Air",
+            "FlightNumber": "2039",
+            "FareClass": "K",
+            "OperatingCarrier": ""
+          },
+          "NoOfSeatAvailable": "",
+          "Origin": {
+            "AirportCode": "DEL",
+            "AirportName": "Delhi Indira Gandhi Intl",
+            "Terminal": "Terminal 1D",
+            "CityCode": "DEL",
+            "CityName": "Delhi",
+            "CountryCode": "IN",
+            "CountryName": "India"
+          },
+          "DepTime": "2026-08-15T18:35",
+          "Destination": {
+            "AirportCode": "BOM",
+            "AirportName": "Chhatrapati Shivaji",
+            "Terminal": "Terminal 1",
+            "CityCode": "BOM",
+            "CityName": "Mumbai",
+            "CountryCode": "IN",
+            "CountryName": "India"
+          },
+          "ArrTime": "2026-08-15T20:45",
+          "Duration": 130,
+          "GroundTime": "",
+          "AccumulatedDuration": 130,
+          "Mile": "",
+          "StopOver": "",
+          "StopPoint": "",
+          "StopPointArrivalTime": "",
+          "StopPointDepartureTime": "",
+          "Craft": "",
+          "Remark": "",
+          "IsETicketEligible": "",
+          "FlightStatus": "",
+          "Status": ""
+        }
+      ]
+    ],
+    "AirlineCode": "",
+    "ValidatingAirline": "",
+    "AirlineRules": {
+      "FirstNameMinChar": 2,
+      "LastNameMinChar": 2
+    }
+  },
+  "LogPath": "2026/07/27"
+}

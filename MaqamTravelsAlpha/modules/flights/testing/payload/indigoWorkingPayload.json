@@ -1,0 +1,49 @@
+{
+  "EndUserIp": "115.187.42.189",
+  "ClientId": "180174",
+  "UserName": "MaqamHds",
+  "Password": "MaqamHds@9",
+  "SrdvType": "MixAPI",
+  "SrdvIndex": "1",
+  
+  "TraceId": "274513",
+  "ResultIndex": "OB6_0_2",
+  "Passengers": [
+    {
+      "Title": "Mr",
+      "FirstName": "Test",
+      "LastName": "Sharma",
+      "PaxType": 1,
+      "DateOfBirth": "1992-08-15T00:00:00",
+      "Gender": "1",
+      "PassportNo": "",
+      "PassportExpiry": "",
+      "AddressLine1": "Flat 402 Sunshine Apartments",
+      "City": "Mumbai",
+      "CountryCode": "IN",
+      "CountryName": "INDIA",
+      "ContactNo": "9876543210",
+      "Email": "rahul.sharma@example.com",
+      "IsLeadPax": 1,
+      "GSTCompanyAddress": "",
+      "GSTCompanyContactNumber": "",
+      "GSTCompanyName": "",
+      "GSTNumber": "",
+      "GSTCompanyEmail": "",
+      "Fare": {
+        "BaseFare": 4169,
+        "Tax": 2103,
+        "TransactionFee": "0",
+        "YQTax": 1200,
+        "AdditionalTxnFeeOfrd": 0,
+        "AdditionalTxnFeePub": 0,
+        "AirTransFee": "0"
+      },
+      "CellCountryCode": "+91",
+      "PassportIssueDate": "",
+      "Baggage": [],
+      "MealDynamic": [],
+      "Seat": []
+    }
+  ]
+}

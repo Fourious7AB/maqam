@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maqam Travels — Tour Guide System API Documentation & Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0f1d;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.85);
+      --bg-card-hover: rgba(30, 41, 59, 0.7);
+      --bg-code: #070b14;
+      --border-color: #1e293b;
+      --border-glow: rgba(56, 189, 248, 0.2);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --primary: #0284c7;
+      --primary-light: #38bdf8;
+      --accent-gold: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-rose: #f43f5e;
+      --get-color: #0ea5e9;
+      --post-color: #10b981;
+      --put-color: #f59e0b;
+      --patch-color: #8b5cf6;
+      --delete-color: #ef4444;
+      --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+      --glass-blur: blur(12px);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-bottom: 80px;
+    }
+
+    /* Top Navigation Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 15, 29, 0.85);
+      backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--primary-light), var(--accent-gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: #fff;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+    }
+
+    .brand-title h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .nav-tab {
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      border: none;
+      background: transparent;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-tab.active {
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 2px 10px rgba(2, 132, 199, 0.4);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Hero Banner */
+    .hero {
+      background: radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.12) 0%, transparent 45%),
+                  radial-gradient(circle at 85% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 45%),
+                  var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--primary-light);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .hero h2 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 850px;
+      line-height: 1.6;
+    }
+
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .metric-card {
+      background: rgba(10, 15, 29, 0.6);
+      padding: 1.25rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-label {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Section Styling */
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title h3 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-count {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary-light);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    /* Diagram Styles */
+    .diagram-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+      overflow-x: auto;
+    }
+
+    .diagram-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .diagram-header h4 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .diagram-header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    svg.flow-svg {
+      width: 100%;
+      min-width: 900px;
+      height: auto;
+      filter: drop-shadow(0 15px 25px rgba(0,0,0,0.5));
+    }
+
+    /* Endpoints Grid */
+    .endpoints-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+
+    .endpoint-card {
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .endpoint-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .endpoint-header {
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      background: rgba(15, 23, 42, 0.4);
+      transition: background 0.2s;
+    }
+
+    .endpoint-header:hover {
+      background: rgba(30, 41, 59, 0.4);
+    }
+
+    .endpoint-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .method-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 5px 12px;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+      min-width: 72px;
+      text-align: center;
+    }
+
+    .method-get { background: rgba(14, 165, 233, 0.15); color: var(--get-color); border: 1px solid rgba(14, 165, 233, 0.3); }
+    .method-post { background: rgba(16, 185, 129, 0.15); color: var(--post-color); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .method-put { background: rgba(245, 158, 11, 0.15); color: var(--put-color); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .method-patch { background: rgba(139, 92, 246, 0.15); color: var(--patch-color); border: 1px solid rgba(139, 92, 246, 0.3); }
+    .method-delete { background: rgba(239, 68, 68, 0.15); color: var(--delete-color); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .endpoint-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .endpoint-title {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-left: 0.5rem;
+    }
+
+    .endpoint-tags {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .auth-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .auth-public {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .auth-user {
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--primary-light);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    .auth-admin {
+      background: rgba(244, 63, 94, 0.1);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+    }
+
+    .toggle-icon {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      transition: transform 0.25s ease;
+    }
+
+    .endpoint-card.open .toggle-icon {
+      transform: rotate(180deg);
+      color: var(--primary-light);
+    }
+
+    .endpoint-body {
+      display: none;
+      padding: 1.5rem;
+      border-top: 1px solid var(--border-color);
+      background: rgba(10, 15, 29, 0.5);
+    }
+
+    .endpoint-card.open .endpoint-body {
+      display: block;
+    }
+
+    .desc-text {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Two column grid for parameters and responses */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.25rem;
+    }
+
+    @media (max-width: 1024px) {
+      .specs-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .spec-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .spec-header {
+      padding: 0.6rem 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s;
+    }
+
+    .copy-btn:hover {
+      color: var(--primary-light);
+    }
+
+    pre code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: #e2e8f0;
+      display: block;
+      padding: 1rem;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+
+    /* Params Table */
+    .params-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .params-table th {
+      text-align: left;
+      padding: 8px 12px;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .params-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: top;
+    }
+
+    .param-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--primary-light);
+    }
+
+    .param-type {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-gold);
+      font-size: 0.75rem;
+    }
+
+    .param-req {
+      color: var(--accent-rose);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .param-opt {
+      color: var(--text-dim);
+      font-size: 0.7rem;
+    }
+
+    /* Schema tab view */
+    .schema-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .schema-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Search & Filter Bar */
+    .search-filter-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 260px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      color: #fff;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+    }
+
+    .filter-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--primary-light);
+      color: var(--primary-light);
+    }
+
+    /* Status Pill for State Machine */
+    .state-pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-right: 6px;
+    }
+
+    .state-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+    .state-approved { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+    .state-active { background: rgba(14, 165, 233, 0.2); color: #0ea5e9; border: 1px solid #0ea5e9; }
+    .state-suspended { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">M</div>
+      <div class="brand-title">
+        <h1>Maqam Travels</h1>
+        <span>Tour Guide Service & API Architecture</span>
+      </div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchView('all')">All APIs</button>
+      <button class="nav-tab" onclick="switchView('user')">User Endpoints (6)</button>
+      <button class="nav-tab" onclick="switchView('admin')">Admin Endpoints (6)</button>
+      <button class="nav-tab" onclick="switchView('diagrams')">Data Flow Diagrams</button>
+      <button class="nav-tab" onclick="switchView('schemas')">Database Schemas</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Hero Section -->
+    <div class="hero">
+      <div class="hero-tag">Architecture & API Documentation Specification</div>
+      <h2>Tour Guide Service Subsystem</h2>
+      <p>
+        Complete specifications for the Maqam Travels Tour Guide platform. Covers full end-to-end customer discovery, slot availability calendar, verified pilgrim reviews, and comprehensive Admin backoffice controls for onboarding, slot scheduling, and guide lifecycle status management.
+      </p>
+
+      <div class="metrics-bar">
+        <div class="metric-card">
+          <div class="metric-value">12</div>
+          <div class="metric-label">Total Endpoints</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">6 / 6</div>
+          <div class="metric-label">User / Admin Split</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">REST + JSON</div>
+          <div class="metric-label">Envelope Protocol</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">JWT Bearer</div>
+          <div class="metric-label">Role-Based Access Control</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Data Flow Diagrams -->
+    <div id="diagrams-view" class="view-section">
+      <div class="section-title">
+        <h3>📊 System Architecture & Data Flow Diagrams <span class="badge-count">3 Visual Flows</span></h3>
+      </div>
+
+      <!-- Diagram 1: System Overview Flow -->
+      <div class="diagram-container">
+        <div class="diagram-header">
+          <h4>1. Complete Request-Response Data Flow & Security Gateway</h4>
+          <p>Shows how User and Admin client requests navigate authentication middleware, RBAC checks, business logic services, and database persistence.</p>
+        </div>
+
+        <svg class="flow-svg" viewBox="0 0 1000 360" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="gradClient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0284c7"/>
+              <stop offset="100%" stop-color="#0369a1"/>
+            </linearGradient>
+            <linearGradient id="gradGateway" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#334155"/>
+              <stop offset="100%" stop-color="#1e293b"/>
+            </linearGradient>
+            <linearGradient id="gradService" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0f766e"/>
+              <stop offset="100%" stop-color="#115e59"/>
+            </linearGradient>
+            <linearGradient id="gradDb" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#854d0e"/>
+              <stop offset="100%" stop-color="#713f12"/>
+            </linearGradient>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+
+          <!-- Layer 1: Clients -->
+          <rect x="20" y="50" width="160" height="90" rx="10" fill="url(#gradClient)" stroke="#38bdf8" stroke-width="2"/>
+          <text x="100" y="90" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">Customer Web/App</text>
+          <text x="100" y="112" fill="#bae6fd" font-size="11" text-anchor="middle">Public & Authenticated</text>
+
+          <rect x="20" y="190" width="160" height="90" rx="10" fill="url(#gradClient)" stroke="#f43f5e" stroke-width="2"/>
+          <text x="100" y="230" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">Admin CRM Panel</text>
+          <text x="100" y="252" fill="#fecdd3" font-size="11" text-anchor="middle">Bearer Auth (Admin Role)</text>
+
+          <!-- Connectors to Gateway -->
+          <path d="M 180 95 L 260 160" stroke="#38bdf8" stroke-width="2" stroke-dasharray="5,5" fill="none"/>
+          <path d="M 180 235 L 260 180" stroke="#f43f5e" stroke-width="2" stroke-dasharray="5,5" fill="none"/>
+
+          <!-- Layer 2: API Gateway & Middleware -->
+          <rect x="260" y="60" width="220" height="210" rx="12" fill="url(#gradGateway)" stroke="#475569" stroke-width="2"/>
+          <text x="370" y="95" fill="#f8fafc" font-size="15" font-weight="800" text-anchor="middle">Express Middleware</text>
+          
+          <rect x="280" y="115" width="180" height="32" rx="6" fill="#0f172a" stroke="#334155"/>
+          <text x="370" y="136" fill="#94a3b8" font-size="12" text-anchor="middle">CORS & CorrelationId</text>
+
+          <rect x="280" y="155" width="180" height="32" rx="6" fill="#0f172a" stroke="#38bdf8"/>
+          <text x="370" y="176" fill="#38bdf8" font-size="12" text-anchor="middle">authenticate (JWT Verify)</text>
+
+          <rect x="280" y="195" width="180" height="32" rx="6" fill="#0f172a" stroke="#f43f5e"/>
+          <text x="370" y="216" fill="#f43f5e" font-size="12" text-anchor="middle">authorize('admin')</text>
+
+          <!-- Connectors to Service -->
+          <path d="M 480 165 L 540 165" stroke="#10b981" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+          <!-- Layer 3: Controller & Service -->
+          <rect x="540" y="60" width="200" height="210" rx="12" fill="url(#gradService)" stroke="#2dd4bf" stroke-width="2"/>
+          <text x="640" y="95" fill="#fff" font-size="15" font-weight="800" text-anchor="middle">Guide Module</text>
+
+          <rect x="560" y="115" width="160" height="32" rx="6" fill="#134e4a"/>
+          <text x="640" y="136" fill="#ccfbf1" font-size="12" text-anchor="middle">guide.controller.js</text>
+
+          <rect x="560" y="155" width="160" height="32" rx="6" fill="#134e4a"/>
+          <text x="640" y="176" fill="#ccfbf1" font-size="12" text-anchor="middle">guide.service.js</text>
+
+          <rect x="560" y="195" width="160" height="32" rx="6" fill="#134e4a"/>
+          <text x="640" y="216" fill="#ccfbf1" font-size="12" text-anchor="middle">slot.service.js</text>
+
+          <!-- Connectors to DB -->
+          <path d="M 740 165 L 800 165" stroke="#f59e0b" stroke-width="3" fill="none"/>
+
+          <!-- Layer 4: Storage & Cache -->
+          <rect x="800" y="60" width="180" height="210" rx="12" fill="url(#gradDb)" stroke="#fbbf24" stroke-width="2"/>
+          <text x="890" y="95" fill="#fef08a" font-size="15" font-weight="800" text-anchor="middle">Data Layer</text>
+
+          <rect x="820" y="115" width="140" height="32" rx="6" fill="#451a03"/>
+          <text x="890" y="136" fill="#fde68a" font-size="12" text-anchor="middle">MongoDB (Guides)</text>
+
+          <rect x="820" y="155" width="140" height="32" rx="6" fill="#451a03"/>
+          <text x="890" y="176" fill="#fde68a" font-size="12" text-anchor="middle">MongoDB (Slots)</text>
+
+          <rect x="820" y="195" width="140" height="32" rx="6" fill="#451a03"/>
+          <text x="890" y="216" fill="#fde68a" font-size="12" text-anchor="middle">Redis (Cache/Locks)</text>
+
+          <!-- Return pipeline -->
+          <path d="M 800 290 L 100 290" stroke="#64748b" stroke-width="2" stroke-dasharray="6,6" fill="none"/>
+          <text x="500" y="315" fill="#94a3b8" font-size="12" text-anchor="middle">Standardized JSON Response: { success: true, message: "...", data: { ... } }</text>
+        </svg>
+      </div>
+
+      <!-- Diagram 2: Guide Status State Machine -->
+      <div class="diagram-container">
+        <div class="diagram-header">
+          <h4>2. Guide Account Lifecycle & State Transition Engine</h4>
+          <p>Illustrates how admin controls govern the visibility of guides on public listing pages.</p>
+        </div>
+
+        <svg class="flow-svg" viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Pending state -->
+          <rect x="40" y="60" width="160" height="70" rx="10" fill="#451a03" stroke="#f59e0b" stroke-width="2"/>
+          <text x="120" y="95" fill="#fef08a" font-size="14" font-weight="700" text-anchor="middle">PENDING</text>
+          <text x="120" y="115" fill="#fcd34d" font-size="11" text-anchor="middle">Created, KYC Review</text>
+
+          <!-- Arrow to Approved -->
+          <path d="M 200 95 L 270 95" stroke="#10b981" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="235" y="85" fill="#10b981" font-size="10" text-anchor="middle">Admin Approves</text>
+
+          <!-- Approved state -->
+          <rect x="270" y="60" width="160" height="70" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+          <text x="350" y="95" fill="#a7f3d0" font-size="14" font-weight="700" text-anchor="middle">APPROVED</text>
+          <text x="350" y="115" fill="#6ee7b7" font-size="11" text-anchor="middle">Verified & Ready</text>
+
+          <!-- Arrow to Active -->
+          <path d="M 430 95 L 500 95" stroke="#38bdf8" stroke-width="2"/>
+          <text x="465" y="85" fill="#38bdf8" font-size="10" text-anchor="middle">Slots Configured</text>
+
+          <!-- Active state -->
+          <rect x="500" y="45" width="170" height="95" rx="10" fill="#0c4a6e" stroke="#38bdf8" stroke-width="2" filter="url(#glow)"/>
+          <text x="585" y="80" fill="#fff" font-size="15" font-weight="800" text-anchor="middle">ACTIVE (PUBLIC)</text>
+          <text x="585" y="100" fill="#7dd3fc" font-size="11" text-anchor="middle">Visible in Search</text>
+          <text x="585" y="118" fill="#38bdf8" font-size="11" text-anchor="middle">Bookable by Pilgrims</text>
+
+          <!-- Bi-directional to Suspended -->
+          <path d="M 670 80 L 740 80" stroke="#f43f5e" stroke-width="2"/>
+          <text x="705" y="72" fill="#f43f5e" font-size="10" text-anchor="middle">Suspend</text>
+
+          <path d="M 740 110 L 670 110" stroke="#10b981" stroke-width="2"/>
+          <text x="705" y="125" fill="#10b981" font-size="10" text-anchor="middle">Reactivate</text>
+
+          <!-- Suspended state -->
+          <rect x="740" y="60" width="140" height="70" rx="10" fill="#4c0519" stroke="#f43f5e" stroke-width="2"/>
+          <text x="810" y="95" fill="#fecdd3" font-size="14" font-weight="700" text-anchor="middle">SUSPENDED</text>
+          <text x="810" y="115" fill="#fda4af" font-size="11" text-anchor="middle">Hidden from Search</text>
+
+          <!-- Legend -->
+          <text x="450" y="195" fill="#64748b" font-size="12" text-anchor="middle">Admin can toggle between PENDING, APPROVED, ACTIVE, and SUSPENDED via PATCH /api/v1/guides/admin/:id</text>
+        </svg>
+      </div>
+
+      <!-- Diagram 3: Slot Reservation Flow -->
+      <div class="diagram-container">
+        <div class="diagram-header">
+          <h4>3. Slot Calendar & Real-time Booking Flow</h4>
+          <p>How users query available dates/slots and how admin calendar management updates availability.</p>
+        </div>
+
+        <svg class="flow-svg" viewBox="0 0 950 200" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(20, 20)">
+            <circle cx="50" cy="80" r="35" fill="#0284c7" />
+            <text x="50" y="85" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">User</text>
+
+            <path d="M 95 60 L 220 60" stroke="#38bdf8" stroke-width="2"/>
+            <text x="155" y="50" fill="#38bdf8" font-size="11" text-anchor="middle">1. GET /:id/slots?date=2026-09-15</text>
+
+            <rect x="230" y="30" width="180" height="100" rx="8" fill="#1e293b" stroke="#475569"/>
+            <text x="320" y="65" fill="#f8fafc" font-size="13" font-weight="700" text-anchor="middle">Slot Service</text>
+            <text x="320" y="85" fill="#94a3b8" font-size="11" text-anchor="middle">Filter status='available'</text>
+            <text x="320" y="105" fill="#94a3b8" font-size="11" text-anchor="middle">Exclude booked slots</text>
+
+            <path d="M 220 100 L 95 100" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4"/>
+            <text x="155" y="118" fill="#10b981" font-size="11" text-anchor="middle">2. Returns Available Slots</text>
+
+            <rect x="480" y="30" width="200" height="100" rx="8" fill="#14532d" stroke="#22c55e"/>
+            <text x="580" y="65" fill="#dcfce7" font-size="13" font-weight="700" text-anchor="middle">Admin Slot Manager</text>
+            <text x="580" y="85" fill="#bbf7d0" font-size="11" text-anchor="middle">PUT /admin/:id/slots</text>
+            <text x="580" y="105" fill="#bbf7d0" font-size="11" text-anchor="middle">Bulk Slot Generator</text>
+
+            <path d="M 690 80 L 780 80" stroke="#f59e0b" stroke-width="2"/>
+            <rect x="790" y="40" width="120" height="80" rx="8" fill="#451a03" stroke="#f59e0b"/>
+            <text x="850" y="75" fill="#fef08a" font-size="12" font-weight="700" text-anchor="middle">GuideSlots</text>
+            <text x="850" y="95" fill="#fde68a" font-size="11" text-anchor="middle">Collection</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="search-filter-bar">
+      <input type="text" id="apiSearch" class="search-input" placeholder="Search endpoint path, method, or description..." onkeyup="filterEndpoints()">
+      <div class="filter-btn-group">
+        <button class="filter-btn active" onclick="filterByRole('all')">All APIs (12)</button>
+        <button class="filter-btn" onclick="filterByRole('user')">User (6)</button>
+        <button class="filter-btn" onclick="filterByRole('admin')">Admin (6)</button>
+      </div>
+    </div>
+
+    <!-- Section: User-Facing APIs -->
+    <div id="user-section" class="view-section">
+      <div class="section-title">
+        <h3>👤 User-Side Endpoints <span class="badge-count">6 Endpoints</span></h3>
+      </div>
+
+      <div class="endpoints-list">
+
+        <!-- User 1: Get Guides -->
+        <div class="endpoint-card role-user" id="ep-user-1">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-user-1')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-get">GET</span>
+              <span class="endpoint-path">/api/v1/guides</span>
+              <span class="endpoint-title">List & Search Published Guides</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-public">Public</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Retrieves a paginated list of active, approved tour guides. Supports filtering by destination/city (e.g. Makkah, Madinah, Jeddah), spoken languages, specialization category, date availability, and sorting by rating or price.
+            </p>
+
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>Query Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">destination</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Filter by city (e.g., <code>Makkah</code>, <code>Madinah</code>, <code>Taif</code>, <code>Jeddah</code>)</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">category</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Slug of category (e.g., <code>umrah-mutawwif</code>, <code>ziyarat-history</code>)</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">language</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Guide language (e.g., <code>Arabic</code>, <code>English</code>, <code>Urdu</code>, <code>Bengali</code>)</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">date</span></td>
+                  <td><span class="param-type">ISO8601</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Only return guides who have available slots on this specific date</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">page / limit</span></td>
+                  <td><span class="param-type">number</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Pagination controls (Default: <code>page=1</code>, <code>limit=10</code>)</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X GET "https://api.maqamtravels.com/api/v1/guides?destination=Makkah&category=umrah-mutawwif&page=1&limit=10" \
+  -H "Accept: application/json"</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (200 OK)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "Guides retrieved successfully",
+  "data": [
+    {
+      "id": "66d6a8f1e29c123456789abc",
+      "fullName": "Sheikh Ahmad Al-Makki",
+      "avatar": "https://cdn.maqam.com/avatars/guide-1.jpg",
+      "specialization": "Umrah Rituals & Haramain History",
+      "city": "Makkah",
+      "languages": ["Arabic", "English", "Urdu"],
+      "yearsOfExperience": 12,
+      "hourlyRate": 150,
+      "currency": "SAR",
+      "rating": 4.9,
+      "totalReviews": 142,
+      "badge": "Certified Mutawwif"
+    }
+  ],
+  "meta": {
+    "total": 38,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 4
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User 2: Get Specific Guide -->
+        <div class="endpoint-card role-user" id="ep-user-2">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-user-2')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-get">GET</span>
+              <span class="endpoint-path">/api/v1/guides/:id</span>
+              <span class="endpoint-title">Get Complete Guide Profile Details</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-public">Public</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Fetches comprehensive public profile details for a specific guide by ID, including biography, verified credentials, licenses, available packages, spoken languages, and rating summary.
+            </p>
+
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>URL Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">id</span></td>
+                  <td><span class="param-type">ObjectId</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>MongoDB ObjectId of the Guide record</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X GET "https://api.maqamtravels.com/api/v1/guides/66d6a8f1e29c123456789abc" \
+  -H "Accept: application/json"</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (200 OK)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "Guide details retrieved successfully",
+  "data": {
+    "guide": {
+      "id": "66d6a8f1e29c123456789abc",
+      "fullName": "Sheikh Ahmad Al-Makki",
+      "bio": "Certified Mutawwif with 12+ years leading private and group Umrah pilgrims through the historical rites and holy sanctuaries of Makkah and Madinah.",
+      "avatar": "https://cdn.maqam.com/avatars/guide-1.jpg",
+      "gallery": [
+        "https://cdn.maqam.com/photos/guide1-makkah.jpg"
+      ],
+      "city": "Makkah",
+      "coverageAreas": ["Masjid Al-Haram", "Jabal Al-Noor", "Jabal Thawr", "Mina", "Arafat"],
+      "languages": ["Arabic", "English", "Urdu"],
+      "pricing": {
+        "hourlyRate": 150,
+        "fullDayRate": 900,
+        "currency": "SAR"
+      },
+      "stats": {
+        "rating": 4.9,
+        "totalReviews": 142,
+        "completedTours": 310
+      },
+      "certifications": ["Ministry of Hajj & Umrah Certified Tour Escort #7819"]
+    }
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User 3: Available Dates / Slots -->
+        <div class="endpoint-card role-user" id="ep-user-3">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-user-3')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-get">GET</span>
+              <span class="endpoint-path">/api/v1/guides/:id/slots</span>
+              <span class="endpoint-title">Check Available Dates & Time Slots</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-public">Public</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Returns open scheduling dates and bookable time slots for the chosen guide. Supports querying a whole month or date range for calendar rendering.
+            </p>
+
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>Param / Query</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">:id</span></td>
+                  <td><span class="param-type">ObjectId</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>The guide's unique identifier</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">startDate</span></td>
+                  <td><span class="param-type">YYYY-MM-DD</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Start of query window (defaults to today)</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">endDate</span></td>
+                  <td><span class="param-type">YYYY-MM-DD</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>End of query window (defaults to today + 30 days)</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X GET "https://api.maqamtravels.com/api/v1/guides/66d6a8f1e29c123456789abc/slots?startDate=2026-09-10&endDate=2026-09-17" \
+  -H "Accept: application/json"</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (200 OK)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "Available slots retrieved",
+  "data": {
+    "guideId": "66d6a8f1e29c123456789abc",
+    "calendar": [
+      {
+        "date": "2026-09-10",
+        "slots": [
+          {
+            "slotId": "slot_01HJK",
+            "startTime": "06:00",
+            "endTime": "10:00",
+            "slotType": "Morning Ziyarat Tour",
+            "price": 450,
+            "currency": "SAR",
+            "isAvailable": true
+          },
+          {
+            "slotId": "slot_01HJL",
+            "startTime": "16:00",
+            "endTime": "20:00",
+            "slotType": "Evening Umrah Escort",
+            "price": 500,
+            "currency": "SAR",
+            "isAvailable": true
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User 4: Reviews for Specific Guide -->
+        <div class="endpoint-card role-user" id="ep-user-4">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-user-4')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-get">GET</span>
+              <span class="endpoint-path">/api/v1/guides/:id/reviews</span>
+              <span class="endpoint-title">List Reviews for a Specific Guide</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-public">Public</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Retrieves authentic customer reviews and ratings for a guide, with overall star distribution breakdown (5-star, 4-star, etc.) and verification badges.
+            </p>
+
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>Param / Query</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">:id</span></td>
+                  <td><span class="param-type">ObjectId</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>The guide's unique identifier</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">page / limit</span></td>
+                  <td><span class="param-type">number</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Pagination controls (Default: <code>page=1</code>, <code>limit=5</code>)</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X GET "https://api.maqamtravels.com/api/v1/guides/66d6a8f1e29c123456789abc/reviews?page=1&limit=5" \
+  -H "Accept: application/json"</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (200 OK)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "Reviews retrieved successfully",
+  "data": {
+    "summary": {
+      "averageRating": 4.9,
+      "totalReviews": 142,
+      "starsBreakdown": { "5": 130, "4": 10, "3": 2, "2": 0, "1": 0 }
+    },
+    "reviews": [
+      {
+        "id": "rev_789012",
+        "userName": "Tariq Mansoor",
+        "rating": 5,
+        "comment": "Exceptional experience performing Tawaf and Sai under Sheikh Ahmad's guidance. Deeply knowledgeable on historical sites.",
+        "verifiedBooking": true,
+        "createdAt": "2026-08-28T14:20:00.000Z"
+      }
+    ]
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User 5: Submit Review -->
+        <div class="endpoint-card role-user" id="ep-user-5">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-user-5')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-post">POST</span>
+              <span class="endpoint-path">/api/v1/guides/:id/reviews</span>
+              <span class="endpoint-title">Submit Review for a Guide</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-user">Auth Required</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Allows an authenticated traveler who completed a tour with this guide to post a review and star rating (1 to 5). Automatically updates the guide's cumulative rating and review count.
+            </p>
+
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>Body Field</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">bookingId</span></td>
+                  <td><span class="param-type">ObjectId</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>Reference to the completed guide or package booking</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">rating</span></td>
+                  <td><span class="param-type">number</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>Rating integer between <code>1</code> and <code>5</code></td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">comment</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>Review feedback (min 10 characters, max 1000)</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X POST "https://api.maqamtravels.com/api/v1/guides/66d6a8f1e29c123456789abc/reviews" \
+  -H "Authorization: Bearer <USER_ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bookingId": "66d6b111e29c123456789def",
+    "rating": 5,
+    "comment": "Very polite and punctual. Guided our family through the Ziyarat places in Madinah smoothly."
+  }'</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (201 Created)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "Review submitted successfully. Thank you for your feedback!",
+  "data": {
+    "reviewId": "rev_992384",
+    "guideId": "66d6a8f1e29c123456789abc",
+    "rating": 5,
+    "comment": "Very polite and punctual. Guided our family through the Ziyarat places in Madinah smoothly.",
+    "newGuideAverage": 4.92,
+    "createdAt": "2026-09-03T11:45:00.000Z"
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User 6: List Categories -->
+        <div class="endpoint-card role-user" id="ep-user-6">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-user-6')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-get">GET</span>
+              <span class="endpoint-path">/api/v1/guides/categories</span>
+              <span class="endpoint-title">List Available Guide Categories</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-public">Public</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Returns all active tour guide categories and taxonomy tags (such as Umrah Mutawwif, Historical Ziyarat, Taif Day Tours, Desert Safari) along with the active guide count in each.
+            </p>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X GET "https://api.maqamtravels.com/api/v1/guides/categories" \
+  -H "Accept: application/json"</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (200 OK)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "Categories retrieved successfully",
+  "data": [
+    {
+      "key": "umrah-mutawwif",
+      "name": "Umrah Rituals & Mutawwif",
+      "description": "Licensed escorts guiding pilgrims step-by-step through Tawaf, Sa'i, and Halq",
+      "icon": "https://cdn.maqam.com/icons/kaaba.png",
+      "activeGuidesCount": 24
+    },
+    {
+      "key": "ziyarat-historical",
+      "name": "Historical Ziyarat Tours",
+      "description": "Explorations of historical battlefields, sacred wells, and prophetic mosques",
+      "icon": "https://cdn.maqam.com/icons/mosque.png",
+      "activeGuidesCount": 18
+    },
+    {
+      "key": "city-heritage",
+      "name": "Heritage & City Tours",
+      "description": "Local city tours across Old Jeddah Al-Balad, Taif Rose Valley, and Riyadh",
+      "icon": "https://cdn.maqam.com/icons/compass.png",
+      "activeGuidesCount": 12
+    }
+  ]
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section: Admin-Facing APIs -->
+    <div id="admin-section" class="view-section">
+      <div class="section-title">
+        <h3>🛡️ Admin-Side Endpoints <span class="badge-count">6 Endpoints</span></h3>
+      </div>
+
+      <div class="endpoints-list">
+
+        <!-- Admin 1: Create Guide -->
+        <div class="endpoint-card role-admin" id="ep-admin-1">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-admin-1')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-post">POST</span>
+              <span class="endpoint-path">/api/v1/guides/admin</span>
+              <span class="endpoint-title">Create & Onboard New Guide Profile</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-admin">Admin Only</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Creates a new guide record in the system. Admin uploads identity documents, assigns initial status (defaults to <code>pending</code> or <code>approved</code>), pricing tiers, and contact numbers.
+            </p>
+
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">fullName</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>Full legal name of the guide</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">phone</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>Mobile contact with country code</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">city</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>Primary operating city (e.g. Makkah, Madinah)</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">category</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>Category key (e.g. <code>umrah-mutawwif</code>)</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">languages</span></td>
+                  <td><span class="param-type">array</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>List of languages spoken: <code>["Arabic", "English"]</code></td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">hourlyRate</span></td>
+                  <td><span class="param-type">number</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>Standard rate per hour in SAR</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">status</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td><code>pending</code>, <code>approved</code>, <code>active</code> (Default: <code>approved</code>)</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X POST "https://api.maqamtravels.com/api/v1/guides/admin" \
+  -H "Authorization: Bearer <ADMIN_ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fullName": "Muhammad Ibrahim",
+    "phone": "+966501234567",
+    "email": "m.ibrahim@maqam.com",
+    "city": "Madinah",
+    "category": "ziyarat-historical",
+    "languages": ["Arabic", "English", "Turkish"],
+    "hourlyRate": 160,
+    "fullDayRate": 950,
+    "licenseNumber": "KSA-TOUR-88910",
+    "status": "approved"
+  }'</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (201 Created)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "Guide created successfully",
+  "data": {
+    "guide": {
+      "id": "66d6c900e29c123456789fff",
+      "fullName": "Muhammad Ibrahim",
+      "phone": "+966501234567",
+      "city": "Madinah",
+      "status": "approved",
+      "hourlyRate": 160,
+      "createdAt": "2026-09-03T11:50:00.000Z"
+    }
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin 2: List All Guides -->
+        <div class="endpoint-card role-admin" id="ep-admin-2">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-admin-2')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-get">GET</span>
+              <span class="endpoint-path">/api/v1/guides/admin</span>
+              <span class="endpoint-title">List All Guides (All Statuses)</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-admin">Admin Only</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Provides CRM admins with a complete overview of all guides registered in the database, including pending approvals, suspended accounts, and inactive guides.
+            </p>
+
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>Query Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">status</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Filter by <code>pending</code>, <code>approved</code>, <code>active</code>, <code>suspended</code></td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">search</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Search by guide name, phone, or license number</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">city</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Filter by operating city</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X GET "https://api.maqamtravels.com/api/v1/guides/admin?status=pending&page=1&limit=20" \
+  -H "Authorization: Bearer <ADMIN_ACCESS_TOKEN>" \
+  -H "Accept: application/json"</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (200 OK)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "Admin guides list retrieved",
+  "data": [
+    {
+      "id": "66d6c900e29c123456789fff",
+      "fullName": "Muhammad Ibrahim",
+      "phone": "+966501234567",
+      "city": "Madinah",
+      "status": "pending",
+      "licenseNumber": "KSA-TOUR-88910",
+      "createdAt": "2026-09-03T11:50:00.000Z"
+    }
+  ],
+  "meta": {
+    "total": 5,
+    "page": 1,
+    "limit": 20
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin 3: Access Specific Guide (Admin View) -->
+        <div class="endpoint-card role-admin" id="ep-admin-3">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-admin-3')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-get">GET</span>
+              <span class="endpoint-path">/api/v1/guides/admin/:id</span>
+              <span class="endpoint-title">Access Specific Guide (Internal CRM View)</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-admin">Admin Only</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Returns the full internal dossier of a guide, including private contact numbers, national ID/Iqama records, license documentation, lifetime revenue generated, dispute log, and complete slot roster.
+            </p>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X GET "https://api.maqamtravels.com/api/v1/guides/admin/66d6c900e29c123456789fff" \
+  -H "Authorization: Bearer <ADMIN_ACCESS_TOKEN>" \
+  -H "Accept: application/json"</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (200 OK)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "Admin guide dossier retrieved",
+  "data": {
+    "guide": {
+      "id": "66d6c900e29c123456789fff",
+      "fullName": "Muhammad Ibrahim",
+      "phone": "+966501234567",
+      "email": "m.ibrahim@maqam.com",
+      "nationalId": "1098765432",
+      "licenseNumber": "KSA-TOUR-88910",
+      "status": "pending",
+      "adminNotes": "KYC verified on 03/09/2026. Awaiting certificate upload.",
+      "lifetimeBookings": 0,
+      "lifetimeRevenue": 0,
+      "createdAt": "2026-09-03T11:50:00.000Z"
+    }
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin 4: Update Profile & Status -->
+        <div class="endpoint-card role-admin" id="ep-admin-4">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-admin-4')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-patch">PATCH</span>
+              <span class="endpoint-path">/api/v1/guides/admin/:id</span>
+              <span class="endpoint-title">Update Guide Profile & Lifecycle Status</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-admin">Admin Only</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Modifies profile attributes, pricing tiers, or updates the guide's operational lifecycle status to <span class="state-pill state-approved">approved</span>, <span class="state-pill state-active">active</span>, or <span class="state-pill state-suspended">suspended</span>.
+            </p>
+
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>Body Field</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">status</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>One of: <code>pending</code>, <code>approved</code>, <code>active</code>, <code>suspended</code></td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">hourlyRate</span></td>
+                  <td><span class="param-type">number</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Updated rate in SAR</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">adminNotes</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Internal admin audit notes</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X PATCH "https://api.maqamtravels.com/api/v1/guides/admin/66d6c900e29c123456789fff" \
+  -H "Authorization: Bearer <ADMIN_ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "active",
+    "hourlyRate": 175,
+    "adminNotes": "Account activated after document review."
+  }'</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (200 OK)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "Guide profile updated successfully",
+  "data": {
+    "guide": {
+      "id": "66d6c900e29c123456789fff",
+      "status": "active",
+      "hourlyRate": 175,
+      "updatedAt": "2026-09-03T12:00:00.000Z"
+    }
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin 5: Remove Guide -->
+        <div class="endpoint-card role-admin" id="ep-admin-5">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-admin-5')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-delete">DELETE</span>
+              <span class="endpoint-path">/api/v1/guides/admin/:id</span>
+              <span class="endpoint-title">Remove or Archive a Guide</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-admin">Super Admin Only</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Safely removes a guide from the platform. If the guide has existing active bookings, the system soft-deletes the record (<code>isDeleted: true</code>) to preserve financial and booking audit trails.
+            </p>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X DELETE "https://api.maqamtravels.com/api/v1/guides/admin/66d6c900e29c123456789fff" \
+  -H "Authorization: Bearer <ADMIN_ACCESS_TOKEN>" \
+  -H "Accept: application/json"</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (200 OK)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "Guide successfully archived and removed from active operations"
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin 6: Set / Update Slots -->
+        <div class="endpoint-card role-admin" id="ep-admin-6">
+          <div class="endpoint-header" onclick="toggleEndpoint('ep-admin-6')">
+            <div class="endpoint-meta">
+              <span class="method-pill method-put">PUT</span>
+              <span class="endpoint-path">/api/v1/guides/admin/:id/slots</span>
+              <span class="endpoint-title">Set & Bulk Update Available Slots</span>
+            </div>
+            <div class="endpoint-tags">
+              <span class="auth-tag auth-admin">Admin Only</span>
+              <span class="toggle-icon">▼</span>
+            </div>
+          </div>
+          <div class="endpoint-body">
+            <p class="desc-text">
+              Allows administrators or guide coordinators to populate or modify working shifts, time windows, and available dates for a guide. Unbooked slots can be added, blocked, or rescheduled in bulk.
+            </p>
+
+            <table class="params-table">
+              <thead>
+                <tr>
+                  <th>Body Structure</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">slots</span></td>
+                  <td><span class="param-type">array</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>List of slot objects containing <code>date</code>, <code>startTime</code>, <code>endTime</code>, <code>price</code></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="specs-grid">
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>cURL Request Example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>curl -X PUT "https://api.maqamtravels.com/api/v1/guides/admin/66d6c900e29c123456789fff/slots" \
+  -H "Authorization: Bearer <ADMIN_ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "slots": [
+      {
+        "date": "2026-09-15",
+        "startTime": "07:00",
+        "endTime": "11:00",
+        "slotType": "Morning Ziyarat Tour",
+        "price": 450,
+        "isAvailable": true
+      },
+      {
+        "date": "2026-09-15",
+        "startTime": "17:00",
+        "endTime": "21:00",
+        "slotType": "Evening Umrah Assistance",
+        "price": 500,
+        "isAvailable": true
+      }
+    ]
+  }'</code></pre>
+              </div>
+
+              <div class="spec-block">
+                <div class="spec-header">
+                  <span>Success Response (200 OK)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code>{
+  "success": true,
+  "message": "2 slots configured successfully",
+  "data": {
+    "guideId": "66d6c900e29c123456789fff",
+    "updatedCount": 2,
+    "activeDates": ["2026-09-15"]
+  }
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section: Database Schemas -->
+    <div id="schemas-view" class="view-section">
+      <div class="section-title">
+        <h3>🗄️ Database Schemas & Entity Relationships <span class="badge-count">3 Models</span></h3>
+      </div>
+
+      <div class="schema-card">
+        <div class="schema-title">1. Guide Profile Entity (Mongoose: Guide)</div>
+        <p class="desc-text">Stores the master guide identity, qualifications, verified credentials, pricing, and operational flags.</p>
+        <div class="spec-block">
+          <pre><code>const GuideSchema = new mongoose.Schema({
+  fullName: { type: String, required: true, trim: true },
+  phone: { type: String, required: true, unique: true },
+  email: { type: String, lowercase: true, trim: true },
+  avatar: { type: String, default: null },
+  city: { type: String, enum: ['Makkah', 'Madinah', 'Jeddah', 'Taif', 'Riyadh'], required: true, index: true },
+  category: { type: String, required: true, index: true },
+  languages: [{ type: String }],
+  bio: String,
+  hourlyRate: { type: Number, required: true },
+  fullDayRate: Number,
+  currency: { type: String, default: 'SAR' },
+  licenseNumber: String,
+  status: { 
+    type: String, 
+    enum: ['pending', 'approved', 'active', 'suspended'], 
+    default: 'approved',
+    index: true 
+  },
+  rating: { type: Number, default: 5.0, min: 1, max: 5 },
+  totalReviews: { type: Number, default: 0 },
+  isDeleted: { type: Boolean, default: false }
+}, { timestamps: true });</code></pre>
+        </div>
+      </div>
+
+      <div class="schema-card">
+        <div class="schema-title">2. Guide Slot Entity (Mongoose: GuideSlot)</div>
+        <p class="desc-text">Stores calendar working hours and booking availability for each guide.</p>
+        <div class="spec-block">
+          <pre><code>const GuideSlotSchema = new mongoose.Schema({
+  guide: { type: mongoose.Schema.Types.ObjectId, ref: 'Guide', required: true, index: true },
+  date: { type: String, required: true, index: true }, // Format: YYYY-MM-DD
+  startTime: { type: String, required: true }, // e.g. "08:00"
+  endTime: { type: String, required: true },   // e.g. "12:00"
+  slotType: { type: String, default: 'Standard Tour' },
+  price: { type: Number, required: true },
+  isBooked: { type: Boolean, default: false, index: true },
+  bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking', default: null }
+}, { timestamps: true });
+
+GuideSlotSchema.index({ guide: 1, date: 1, isBooked: 1 });</code></pre>
+        </div>
+      </div>
+
+      <div class="schema-card">
+        <div class="schema-title">3. Guide Review Entity (Mongoose: GuideReview)</div>
+        <p class="desc-text">Records authenticated customer feedback and star ratings tied to verified tour bookings.</p>
+        <div class="spec-block">
+          <pre><code>const GuideReviewSchema = new mongoose.Schema({
+  guide: { type: mongoose.Schema.Types.ObjectId, ref: 'Guide', required: true, index: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  booking: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking', required: true },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  comment: { type: String, required: true, maxlength: 1000 },
+  isVerified: { type: Boolean, default: true }
+}, { timestamps: true });</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      Maqam Travels Travel Booking Platform &bull; Modular Guide Subsystem Architecture Specification &bull; 2026
+    </footer>
+
+  </div>
+
+  <script>
+    // Expand / collapse endpoint cards
+    function toggleEndpoint(cardId) {
+      const card = document.getElementById(cardId);
+      if (card) {
+        card.classList.toggle('open');
+      }
+    }
+
+    // Tab switching
+    function switchView(view) {
+      const tabs = document.querySelectorAll('.nav-tab');
+      tabs.forEach(t => t.classList.remove('active'));
+
+      const userSec = document.getElementById('user-section');
+      const adminSec = document.getElementById('admin-section');
+      const diagramsSec = document.getElementById('diagrams-view');
+      const schemasSec = document.getElementById('schemas-view');
+
+      if (view === 'all') {
+        userSec.style.display = 'block';
+        adminSec.style.display = 'block';
+        diagramsSec.style.display = 'block';
+        schemasSec.style.display = 'block';
+        event.target.classList.add('active');
+      } else if (view === 'user') {
+        userSec.style.display = 'block';
+        adminSec.style.display = 'none';
+        diagramsSec.style.display = 'none';
+        schemasSec.style.display = 'none';
+        event.target.classList.add('active');
+      } else if (view === 'admin') {
+        userSec.style.display = 'none';
+        adminSec.style.display = 'block';
+        diagramsSec.style.display = 'none';
+        schemasSec.style.display = 'none';
+        event.target.classList.add('active');
+      } else if (view === 'diagrams') {
+        userSec.style.display = 'none';
+        adminSec.style.display = 'none';
+        diagramsSec.style.display = 'block';
+        schemasSec.style.display = 'none';
+        event.target.classList.add('active');
+      } else if (view === 'schemas') {
+        userSec.style.display = 'none';
+        adminSec.style.display = 'none';
+        diagramsSec.style.display = 'none';
+        schemasSec.style.display = 'block';
+        event.target.classList.add('active');
+      }
+    }
+
+    // Role-based button filter
+    function filterByRole(role) {
+      const btns = document.querySelectorAll('.filter-btn');
+      btns.forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const userCards = document.querySelectorAll('.role-user');
+      const adminCards = document.querySelectorAll('.role-admin');
+
+      if (role === 'all') {
+        userCards.forEach(c => c.style.display = 'block');
+        adminCards.forEach(c => c.style.display = 'block');
+      } else if (role === 'user') {
+        userCards.forEach(c => c.style.display = 'block');
+        adminCards.forEach(c => c.style.display = 'none');
+      } else if (role === 'admin') {
+        userCards.forEach(c => c.style.display = 'none');
+        adminCards.forEach(c => c.style.display = 'block');
+      }
+    }
+
+    // Live search filter
+    function filterEndpoints() {
+      const query = document.getElementById('apiSearch').value.toLowerCase();
+      const cards = document.querySelectorAll('.endpoint-card');
+
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        if (text.includes(query)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Copy code snippet
+    function copyCode(btn) {
+      const pre = btn.closest('.spec-block').querySelector('pre code');
+      if (pre) {
+        navigator.clipboard.writeText(pre.innerText).then(() => {
+          const originalText = btn.innerText;
+          btn.innerText = 'Copied!';
+          btn.style.color = '#10b981';
+          setTimeout(() => {
+            btn.innerText = originalText;
+            btn.style.color = '';
+          }, 1800);
+        });
+      }
+    }
+  </script>
+</body>
+</html>

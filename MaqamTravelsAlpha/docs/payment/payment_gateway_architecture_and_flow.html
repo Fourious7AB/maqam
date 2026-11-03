@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Gateway Architecture & Resiliency Guide — Maqam Travels</title>
+  
+  <!-- Modern Typography & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Mermaid.js for Dynamic Interactive Architectural Diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#0f172a',
+        primaryColor: '#38bdf8',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#0284c7',
+        lineColor: '#94a3b8',
+        secondaryColor: '#818cf8',
+        tertiaryColor: '#1e293b'
+      },
+      sequence: {
+        showSequenceNumbers: true,
+        actorMargin: 50,
+        boxMargin: 12,
+        boxTextMargin: 6,
+        noteMargin: 12,
+        messageMargin: 38,
+        mirrorActors: false
+      }
+    });
+  </script>
+
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #131c2e;
+      --card-hover: #172338;
+      --border: #22324e;
+      --border-accent: #38bdf8;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.15);
+      --accent: #818cf8;
+      --accent-glow: rgba(129, 140, 248, 0.15);
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --code-bg: #070b13;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      margin: 0;
+      padding: 40px 20px 80px 20px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Header Banner */
+    .header-banner {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(129, 140, 248, 0.08) 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header-banner::before {
+      content: "";
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--primary);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0 0 12px 0;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin: 0;
+      max-width: 780px;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin: 24px 0;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      transition: all 0.2s ease-in-out;
+    }
+    .card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-top: 0;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-title .icon {
+      font-size: 1.3rem;
+    }
+
+    /* Typography */
+    h2 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-top: 50px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+    p, li {
+      color: var(--text-muted);
+      font-size: 0.96rem;
+    }
+    strong {
+      color: #ffffff;
+    }
+
+    /* Diagram Containers */
+    .diagram-card {
+      background: #0d1525;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin: 24px 0;
+      overflow-x: auto;
+    }
+    .diagram-caption {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 14px;
+      font-style: italic;
+    }
+
+    /* Alerts & Callouts */
+    .alert {
+      padding: 18px 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid;
+      background: rgba(19, 28, 46, 0.8);
+    }
+    .alert-info {
+      border-color: var(--primary);
+      background: rgba(56, 189, 248, 0.08);
+    }
+    .alert-success {
+      border-color: var(--success);
+      background: rgba(52, 211, 153, 0.08);
+    }
+    .alert-warning {
+      border-color: var(--warning);
+      background: rgba(251, 191, 36, 0.08);
+    }
+    .alert-title {
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+      font-size: 0.98rem;
+    }
+
+    /* Code Blocks */
+    pre, code {
+      font-family: 'Fira Code', monospace;
+    }
+    code:not(pre code) {
+      background: var(--code-bg);
+      color: #38bdf8;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 0.88em;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      overflow-x: auto;
+      font-size: 0.88rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: var(--card-bg);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92rem;
+    }
+    th {
+      background: #19243a;
+      color: var(--primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover td {
+      background: rgba(56, 189, 248, 0.02);
+    }
+    .method-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+    .method-get { background: rgba(56, 189, 248, 0.2); color: var(--primary); }
+    .method-post { background: rgba(52, 211, 153, 0.2); color: var(--success); }
+    .method-patch { background: rgba(251, 191, 36, 0.2); color: var(--warning); }
+
+    /* Highlights & Flow step tags */
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--primary);
+      color: #0b0f19;
+      font-weight: 800;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header Banner -->
+  <div class="header-banner">
+    <span class="badge">Architecture & Reliability Specification</span>
+    <h1>Payment Gateway & Lifecycle Architecture</h1>
+    <p class="subtitle">
+      A comprehensive guide to multi-gateway payments (Razorpay, PayPal, Bank Transfer), transactional consistency, distributed locking, idempotency safeguards, and dual-confirmation flows across Maqam Travels.
+    </p>
+  </div>
+
+  <!-- Section 1: Executive Overview -->
+  <h2><span>🏛️</span> 1. Core Architecture Overview</h2>
+  <p>
+    The Payment Subsystem is engineered as a <strong>decoupled, multi-tenant payment broker</strong>. It shields specific domain modules (Packages, Offers, Flights, Hotels, Visas) from gateway-specific SDK idiosyncrasies while guaranteeing zero double-charging, at-least-once confirmation, and complete financial auditability.
+  </p>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title"><span class="icon">⚡</span> Unified Broker</div>
+      <p>Single abstraction layer for Razorpay, PayPal, and offline wire/bank transfers with standard state transitions.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">🛡️</span> Idempotency & Locks</div>
+      <p>Anti-tamper SHA-256 payload hashing and MongoDB TTL distributed locks prevent duplicate captures and race conditions.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span> Dual Synchronization</div>
+      <p>Synchronous client-side redirect verification and asynchronous webhooks converge seamlessly in <code>bookingSync.js</code>.</p>
+    </div>
+  </div>
+
+  <!-- Section 2: Entity Relationship Diagram -->
+  <h2><span>📊</span> 2. Database Entity Relationship (ER) Model</h2>
+  <p>
+    The database architecture employs a <strong>two-layer relational design</strong> using Mongoose dynamic references (<code>refPath</code>) to decouple domain inventories from financial transactions.
+  </p>
+
+  <div class="diagram-card">
+    <pre class="mermaid">
+erDiagram
+    Payment ||--|| ParticularBooking : "dynamic ref (bookingId + bookingModel)"
+    Payment ||--o{ AuditLog : "paymentId (immutable audit trail)"
+    Payment ||--o| MasterBooking : "paymentId (unified customer itinerary)"
+    
+    ParticularBooking ||--|| MasterBooking : "itemId (bookingType: 'package'|'offer'|...)"
+    
+    ParticularBooking {
+        ObjectId _id
+        ObjectId userId
+        String status "initiated | confirmed | cancelled"
+        Array claimedUnits "Stock units held / used"
+        Number totalAmount
+        String razorpayPaymentId
+        ObjectId assignedTo "CRM Agent"
+    }
+
+    Payment {
+        ObjectId _id
+        ObjectId userId
+        ObjectId bookingId "Points dynamically to domain model"
+        String bookingModel "PackageBooking | OfferBooking | FlightBooking"
+        String bookingType "package | offer | flight | hotel | visa"
+        Number amount
+        String currency "INR | USD | EUR | AED | SAR"
+        String paymentMethod "razorpay | paypal | bank_transfer"
+        String status "created | pending | captured | paid | refunded"
+        Object gatewayData "orderId, captureId, signature"
+        Array refunds "refundId, amount, status"
+    }
+
+    MasterBooking {
+        ObjectId _id
+        ObjectId userId
+        String bookingType
+        ObjectId itemId "Points to domain booking"
+        ObjectId paymentId "Points to Payment"
+        Object details "destination, dates, pax, price"
+        String status "confirmed | cancelled"
+    }
+
+    AuditLog {
+        ObjectId _id
+        ObjectId paymentId
+        String action "CREATE_ORDER | CAPTURE | REFUND"
+        String previousState
+        String newState
+        Object metadata "Redacted PCI data"
+        String ip
+    }
+
+    Idempotency {
+        String key PK "Idempotency-Key HTTP header"
+        ObjectId userId
+        String requestHash "SHA-256 of request payload"
+        Number statusCode
+        Object responseBody
+        Date expiresAt "TTL Indexed (24h)"
+    }
+
+    WebhookEvent {
+        String eventId PK "Unique Gateway event ID"
+        String gateway "razorpay | paypal"
+        String status "received | processing | processed"
+        Date expiresAt "TTL Indexed (90d)"
+    }
+    </pre>
+    <div class="diagram-caption">Figure 1: Payment Subsystem Database Relationships & Schemas</div>
+  </div>
+
+  <div class="alert alert-info">
+    <div class="alert-title">💡 Why Two Booking Layers? (Particular Booking vs Master Booking)</div>
+    <strong>Particular Booking (e.g. PackageBooking):</strong> Contains domain-heavy state: specific flight seat and hotel room unit allocations, swapped components, traveler passport scans, and linked visa applications.<br>
+    <strong>Master Booking (Booking Model):</strong> An ultra-fast, normalized itinerary ledger powering the Customer Dashboard and global CRM search. It is created automatically upon successful payment.
+  </div>
+
+  <!-- Section 3: End-to-End Sequence Diagram -->
+  <h2><span>🔄</span> 3. End-to-End Payment Lifecycle Sequence</h2>
+  <p>
+    This diagram details the 3 distinct phases of checkout: <strong>1. Order Creation</strong>, <strong>2. Payment Execution & 3DS</strong>, and <strong>3. Dual-Channel Finalization (Webhook vs Frontend Capture)</strong>.
+  </p>
+
+  <div class="diagram-card">
+    <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Customer
+    participant FE as Frontend App
+    participant API as Payment Routes
+    participant Lock as Distributed Lock
+    participant DB as MongoDB (Payment & Booking)
+    participant GW as Gateway (Razorpay / PayPal)
+    participant Sync as bookingSync Engine
+
+    Note over Customer, GW: Phase 1: Order Creation & Pre-Authorization
+    Customer->>FE: Click "Proceed to Pay"
+    FE->>API: POST /api/v1/payments/razorpay/create-order<br/>Headers: { Idempotency-Key: "uuid-123" }<br/>Body: { bookingId, bookingType: "package" }
+    API->>API: Idempotency Check (Key + SHA-256 Payload)
+    API->>GW: Create Order (amount, currency, receipt)
+    GW-->>API: Gateway Order Created (order_xyz987)
+    API->>DB: Save Payment record (status: "created", bookingId)
+    API-->>FE: Return { orderId: "order_xyz987", amount, currency }
+
+    Note over Customer, GW: Phase 2: User Authorization & 3DS
+    FE->>GW: Launch Gateway Modal (UPI / Card / NetBanking / PayPal)
+    Customer->>GW: Enters OTP / Authorizes Payment
+    GW-->>FE: Payment Succeeded { paymentId: "pay_abc123", signature: "sig_789" }
+
+    Note over Customer, Sync: Phase 3: Resilient Dual-Channel Confirmation
+    par Channel A: Instant Browser Verify / Capture
+        FE->>API: POST /api/v1/payments/razorpay/verify<br/>{ orderId, paymentId, signature }
+        API->>Lock: acquireLock("capture:order_xyz987", owner, 15000ms)
+        alt Lock Acquired
+            API->>API: Verify Cryptographic HMAC Signature
+            API->>DB: Update Payment (status: "paid", captureId: "pay_abc123")
+            API->>Sync: ensureBookingConfirmed(payment)
+            Sync->>DB: Mark Stock Units "used" + Booking "confirmed"
+            Sync->>DB: Create Master Booking (booking.model.js)
+            API->>Lock: releaseLock("capture:order_xyz987")
+            API-->>FE: Return { success: true, bookingId }
+        else Lock Busy (Webhook is currently executing)
+            API-->>FE: Wait / Poll for confirmation
+        end
+    and Channel B: Asynchronous Gateway Webhook
+        GW->>API: POST /webhook/razorpay (event: "payment.captured")
+        API->>DB: WebhookEvent.create({ eventId }) [Idempotency Guard]
+        alt First time event received
+            API->>Lock: acquireLock("capture:order_xyz987", owner, 15000ms)
+            API->>Sync: ensureBookingConfirmed(payment)
+            API->>DB: Mark WebhookEvent "processed"
+            API->>Lock: releaseLock("capture:order_xyz987")
+            API-->>GW: HTTP 200 OK
+        else Duplicate Webhook Event
+            API-->>GW: HTTP 200 OK (Acknowledge & Discard)
+        end
+    end
+    </pre>
+    <div class="diagram-caption">Figure 2: Complete 3-Phase Payment, Locking, and Dual-Sync Lifecycle</div>
+  </div>
+
+  <!-- Section 4: Deep Dive into Core Resiliency Pillars -->
+  <h2><span>🛡️</span> 4. Core Resiliency & Security Pillars</h2>
+
+  <!-- 4.1 Idempotency -->
+  <h3>4.1 Request Idempotency Engine (<code>idempotency.middleware.js</code>)</h3>
+  <p>
+    Network drops, duplicate button clicks, or mobile reconnects can trigger duplicate HTTP requests. The idempotency engine ensures an operation is executed <strong>exactly once</strong> regardless of how many times it is submitted.
+  </p>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🔑</span> How the Idempotency Engine Operates:</div>
+    <ul>
+      <li><strong>Client Header:</strong> The client supplies an <code>Idempotency-Key</code> header (e.g. UUID v4) with mutation requests.</li>
+      <li><strong>SHA-256 Anti-Tamper Check:</strong> The middleware computes <code>crypto.createHash('sha256').update(req.body).digest('hex')</code>. If the same key is reused with a modified request body, the server rejects it with <code>409 Conflict</code>.</li>
+      <li><strong>Response Interception & Caching:</strong> When the operation executes, <code>res.json</code> is intercepted. Successful responses (<code>2xx</code>) and client validation errors (<code>4xx</code>) are cached in MongoDB for 24 hours.</li>
+      <li><strong>Transient Error Safety (No 5xx Caching):</strong> If the server encounters a transient database timeout or 500 error, <strong>it is deliberately NOT cached</strong>, allowing the client to safely retry.</li>
+    </ul>
+  </div>
+
+  <!-- 4.2 Distributed Locking -->
+  <h3>4.2 Distributed Locking (<code>distributedLock.js</code>)</h3>
+  <p>
+    When a customer completes payment, two events happen almost simultaneously: the browser submits a <code>/verify</code> request while the gateway fires an asynchronous <code>payment.captured</code> webhook. Without synchronization, both could run concurrently, leading to race conditions or duplicate ticketing calls.
+  </p>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🔒</span> Distributed Lock Mechanics:</div>
+    <ul>
+      <li><strong>Atomic Acquisition:</strong> Employs MongoDB atomic <code>findOneAndUpdate</code> with a unique compound index on <code>resource</code> (e.g. <code>capture:order_xyz987</code>).</li>
+      <li><strong>Re-entrancy & Expiry:</strong> Each lock contains <code>{ resource, owner, expiresAt }</code>. If a node crashes mid-flight, a MongoDB <strong>TTL index</strong> automatically evicts the lock after 15 seconds.</li>
+      <li><strong>Graceful Backoff:</strong> Competing requests wait with exponential jitter backoff before retrying lock acquisition.</li>
+    </ul>
+  </div>
+
+  <!-- 4.3 Webhook Event Engine -->
+  <h3>4.3 Webhook Deduplication & Security (<code>webhookEvent.model.js</code>)</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><span class="icon">🛡️</span> Signature Verification</div>
+      <p>Every inbound webhook is verified before inspection. Razorpay webhooks validate the <code>X-Razorpay-Signature</code> using HMAC-SHA256 with the webhook secret. PayPal webhooks verify CRC32/RSA signatures against PayPal public certificates.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="icon">📦</span> At-Least-Once Deduplication</div>
+      <p>Payment gateways guarantee <em>at-least-once</em> delivery and frequently re-transmit webhooks. Inbound events are atomically logged in <code>WebhookEvent</code> with a unique index on <code>eventId</code>. Duplicates are immediately acknowledged with HTTP 200 and discarded.</p>
+    </div>
+  </div>
+
+  <!-- 4.4 Audit Logging & Security -->
+  <h3>4.4 Immutable Audit Logging (<code>auditLog.service.js</code>)</h3>
+  <p>
+    For PCI-DSS compliance and financial accountability, every payment state transition, gateway call, and admin refund is permanently recorded in <code>AuditLog</code>.
+  </p>
+  <div class="card">
+    <div class="card-title"><span class="icon">🔍</span> Automated PCI Sensitive Data Redaction:</div>
+    <p>Before any request or response payload is written to the audit database, the <code>redactSensitiveData</code> recursive scrubber automatically strips and masks credit card numbers, CVVs, passwords, secret keys, and bearer tokens:</p>
+    <pre><code>// Sanitization Rule Pattern in auditLog.service.js:
+const sensitiveKeys = ['password', 'token', 'secret', 'key', 'cvv', 'cvc', 'cardnumber', 'pan', 'pin', 'authorization'];
+// Any matching field is replaced with: "[REDACTED_SENSITIVE_DATA]"</code></pre>
+    <p><strong>Non-Blocking Guarantee:</strong> Audit logging wraps operations in try/catch blocks that never bubble errors upward, ensuring an audit storage glitch never disrupts customer checkouts.</p>
+  </div>
+
+  <!-- Section 5: State Machine Diagram -->
+  <h2><span>📈</span> 5. Payment State Machine</h2>
+  <p>
+    Every payment record strictly adheres to a finite state machine (<code>payment.stateMachine.js</code>) to prevent invalid transitions (e.g. attempting to refund an uncaptured payment).
+  </p>
+
+  <div class="diagram-card">
+    <pre class="mermaid">
+stateDiagram-v2
+    [*] --> created: POST /create-order
+    created --> pending: Gateway Order Pending
+    created --> cancelled: Abandoned / Timeout
+    created --> failed: Order Generation Failed
+    
+    pending --> authorized: 3DS Authenticated (Hold)
+    pending --> captured: Instant Capture
+    pending --> paid: Direct Settlement / Bank Transfer
+    pending --> failed: Declined by Bank
+    pending --> expired: Order Expiry Window
+    
+    authorized --> captured: Capture API / Webhook
+    authorized --> cancelled: Void Authorization
+    
+    captured --> paid: Inventory Settled & Verified
+    
+    paid --> partially_refunded: Partial Refund Issued
+    paid --> refunded: Full Refund Completed
+    paid --> disputed: Chargeback Filed by Customer
+    
+    partially_refunded --> refunded: Remaining Balance Refunded
+    disputed --> paid: Dispute Won by Merchant
+    disputed --> refunded: Dispute Settled with Customer
+    
+    refunded --> [*]
+    failed --> [*]
+    cancelled --> [*]
+    </pre>
+    <div class="diagram-caption">Figure 3: Finite State Machine for Payment Records</div>
+  </div>
+
+  <!-- Section 6: Important Endpoints Reference -->
+  <h2><span>🌐</span> 6. Essential Payment & Operations Endpoints</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Method & Route</th>
+        <th>Auth Level</th>
+        <th>Description & Key Safeguards</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="method-badge method-post">POST</span> <code>/api/v1/payments/razorpay/create-order</code></td>
+        <td>Customer</td>
+        <td>Creates Razorpay order linked to domain booking. Enforces <code>paymentLimiter</code> & <code>idempotency</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge method-post">POST</span> <code>/api/v1/payments/razorpay/verify</code></td>
+        <td>Customer</td>
+        <td>Verifies HMAC signature, locks order with <code>distributedLock</code>, and confirms booking.</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge method-post">POST</span> <code>/api/v1/payments/paypal/create-order</code></td>
+        <td>Customer</td>
+        <td>Initializes PayPal v2 checkout order. Returns approved PayPal redirect links.</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge method-post">POST</span> <code>/api/v1/payments/paypal/capture</code></td>
+        <td>Customer</td>
+        <td>Captures authorized PayPal funds and executes <code>bookingSync.js</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge method-post">POST</span> <code>/webhook/razorpay</code></td>
+        <td>Public (HMAC)</td>
+        <td>Asynchronous webhook listener. De-duplicates via <code>WebhookEvent</code> and confirms bookings.</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge method-post">POST</span> <code>/api/v1/crm/packages/book-for-customer</code></td>
+        <td>Admin / CRM</td>
+        <td>Direct agent booking with <code>paymentMethod: 'bank_transfer'</code>. Instantly settles stock as <code>used</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge method-post">POST</span> <code>/api/v1/payments/razorpay/:paymentId/refund</code></td>
+        <td>Admin</td>
+        <td>Triggers gateway refund API, updates state machine, and releases claimed stock units.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Section 7: Summary & Best Practices -->
+  <div class="alert alert-success">
+    <div class="alert-title">🎯 Key Takeaways for Developers & Frontend Engineers</div>
+    <ol style="margin-bottom: 0; padding-left: 20px;">
+      <li><strong>Always send <code>Idempotency-Key</code>:</strong> The frontend should generate a unique UUID v4 whenever requesting payment order creation or capture.</li>
+      <li><strong>Trust the Backend Webhook:</strong> Even if the user closes their browser tab right after entering their bank OTP, the background webhook will reliably finalize the booking and send confirmation emails.</li>
+      <li><strong>Inventory Sits with Domain:</strong> Stock reservations (holding/releasing) are handled atomically by <code>stockClaim.service.js</code> under the supervision of <code>bookingSync.js</code>.</li>
+    </ol>
+  </div>
+
+</div>
+
+</body>
+</html>

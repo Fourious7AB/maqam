@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications Module — Function Call Flow Diagrams | MaqamTravels</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <!-- Highlight.js for Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+
+  <!-- Mermaid.js for Interactive Diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #080b12;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.35);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --accent-indigo: #6366f1;
+      --accent-indigo-glow: rgba(99, 102, 241, 0.25);
+      --accent-cyan: #06b6d4;
+      --accent-cyan-glow: rgba(6, 182, 212, 0.2);
+      --accent-blue: #38bdf8;
+      --accent-emerald: #10b981;
+      --accent-emerald-glow: rgba(16, 185, 129, 0.2);
+      --accent-whatsapp: #25d366;
+      --accent-whatsapp-glow: rgba(37, 211, 102, 0.2);
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      
+      --code-bg: #030712;
+      --sidebar-width: 320px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.65;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background glow */
+    .ambient-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 10% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 90% 65%, rgba(37, 211, 102, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
+    }
+
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-indigo), var(--accent-cyan), var(--accent-whatsapp));
+      z-index: 1000;
+      transition: width 0.1s ease-out;
+    }
+
+    /* Mobile Header */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 900;
+    }
+
+    .mobile-brand {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-toggle {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      padding: 24px 20px;
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-cyan);
+      margin-bottom: 6px;
+    }
+
+    .sidebar-header h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .nav-group-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      padding: 12px 10px 4px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateX(2px);
+    }
+
+    .nav-link.active {
+      color: #fff;
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.25), rgba(6, 182, 212, 0.1));
+      border-left: 3px solid var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    .nav-link i {
+      width: 18px;
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--accent-indigo);
+    }
+
+    /* Main Content */
+    .content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 40px 60px 80px;
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+    }
+
+    /* Hero Section */
+    .hero {
+      margin-bottom: 50px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .pill-indigo {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .pill-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .pill-whatsapp {
+      background: rgba(37, 211, 102, 0.15);
+      color: #86efac;
+      border: 1px solid rgba(37, 211, 102, 0.3);
+    }
+
+    .pill-cyan {
+      background: rgba(6, 182, 212, 0.15);
+      color: #67e8f9;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #fff 40%, var(--accent-cyan) 80%, var(--accent-indigo) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 900px;
+      line-height: 1.7;
+    }
+
+    /* Meta Cards Grid */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .meta-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      transition: all 0.2s ease;
+    }
+
+    .meta-card:hover {
+      border-color: var(--border-accent);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .meta-card-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+    }
+
+    .meta-card-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 60px;
+    }
+
+    section h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    section h2 .section-num {
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 1.35rem;
+    }
+
+    section h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 28px 0 14px;
+    }
+
+    p {
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    /* Mermaid Wrapper & Interactive PanZoom Canvas */
+    .mermaid-wrapper {
+      background: rgba(10, 15, 30, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px 18px;
+      margin: 20px 0 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+
+    .mermaid-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .mermaid-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Diagram Interactive Toolbar */
+    .diagram-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .d-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .d-btn:hover {
+      background: var(--accent-indigo);
+      border-color: var(--accent-indigo);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px var(--accent-indigo-glow);
+    }
+
+    .d-btn:active {
+      transform: translateY(0);
+    }
+
+    .d-btn .zoom-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      color: var(--accent-cyan);
+      min-width: 38px;
+      text-align: center;
+    }
+
+    /* PanZoom Viewport Box */
+    .panzoom-viewport {
+      position: relative;
+      overflow: hidden;
+      height: 600px;
+      width: 100%;
+      border-radius: 10px;
+      background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.8), rgba(4, 7, 15, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .panzoom-viewport.is-dragging {
+      cursor: grabbing !important;
+    }
+
+    .panzoom-viewport .mermaid {
+      transform-origin: 0 0;
+      will-change: transform;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: max-content;
+      height: max-content;
+      margin: 0;
+      padding: 0;
+    }
+
+    .panzoom-viewport .mermaid svg {
+      max-width: none !important;
+      display: block;
+      pointer-events: none;
+    }
+
+    .panzoom-hint-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      padding: 0 4px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .panzoom-hint-bar span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Fullscreen Modal */
+    .fs-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: #080b12;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fs-header {
+      height: 64px;
+      padding: 0 24px;
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .fs-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .fs-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+      background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.9), rgba(2, 4, 10, 1));
+      touch-action: none;
+    }
+
+    .fs-viewport.is-dragging {
+      cursor: grabbing !important;
+    }
+
+    .fs-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+      will-change: transform;
+    }
+
+    .fs-canvas svg {
+      max-width: none !important;
+      display: block;
+      pointer-events: none;
+    }
+
+    .fs-hint {
+      position: absolute;
+      bottom: 24px;
+      right: 28px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 18px;
+      pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Table Styles */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    thead {
+      background: rgba(30, 41, 59, 0.7);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      padding: 14px 18px;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    td {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      background: rgba(99, 102, 241, 0.12);
+      color: #c7d2fe;
+      padding: 2px 7px;
+      border-radius: 5px;
+      border: 1px solid rgba(99, 102, 241, 0.25);
+    }
+
+    /* Code Container */
+    .code-container {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+
+    .code-header {
+      background: rgba(15, 23, 42, 0.9);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+
+    .code-title {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent-indigo);
+      color: #fff;
+    }
+
+    pre code {
+      background: transparent !important;
+      border: none !important;
+      padding: 18px !important;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      display: block;
+    }
+
+    /* Back to top button */
+    #back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--accent-indigo);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px var(--accent-indigo-glow);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 99;
+    }
+
+    #back-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #back-to-top:hover {
+      transform: translateY(-3px);
+      background: #4f46e5;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        top: 60px;
+        width: 280px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .mobile-header {
+        display: flex;
+      }
+
+      .content {
+        margin-left: 0;
+        padding: 80px 24px 60px;
+      }
+
+      .hero h1 {
+        font-size: 2.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-glow"></div>
+  <div id="progress-bar"></div>
+
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <div class="mobile-brand">
+      <i class="fa-solid fa-bell" style="color: var(--accent-cyan);"></i>
+      <span>Maqam Notifications</span>
+    </div>
+    <button class="mobile-toggle" id="mobile-toggle">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-tag">
+        <i class="fa-solid fa-paper-plane"></i>
+        <span>Architecture Spec</span>
+      </div>
+      <h2>Function Flows</h2>
+      <p>Notifications Module Engine</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group-title">Navigation</div>
+      
+      <a href="#1-architectural-overview" class="nav-link active">
+        <i class="fa-solid fa-cubes"></i>
+        <span>1. Architecture Overview</span>
+      </a>
+
+      <a href="#2-master-end-to-end-function-call-flowchart" class="nav-link">
+        <i class="fa-solid fa-diagram-project"></i>
+        <span>2. Master Flowchart</span>
+      </a>
+
+      <a href="#3-step-by-step-chronological-sequence-diagram" class="nav-link">
+        <i class="fa-solid fa-arrow-down-1-9"></i>
+        <span>3. Sequence Diagram</span>
+      </a>
+
+      <div class="nav-group-title">Channel Deep Dives</div>
+
+      <a href="#41-email-channel-emailservicejs" class="nav-link">
+        <i class="fa-solid fa-envelope"></i>
+        <span>4.1 Email Channel</span>
+      </a>
+
+      <a href="#42-whatsapp-channel-whatsappservicejs" class="nav-link">
+        <i class="fa-brands fa-whatsapp"></i>
+        <span>4.2 WhatsApp Channel</span>
+      </a>
+
+      <a href="#43-sms-channel-smsservicejs" class="nav-link">
+        <i class="fa-solid fa-message"></i>
+        <span>4.3 SMS Channel</span>
+      </a>
+
+      <div class="nav-group-title">Reference</div>
+
+      <a href="#5-complete-function-calling-reference-matrix" class="nav-link">
+        <i class="fa-solid fa-table"></i>
+        <span>5. Function Matrix</span>
+      </a>
+
+      <a href="#code-sample" class="nav-link">
+        <i class="fa-solid fa-code"></i>
+        <span>6. Single-Call Code API</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="content">
+
+    <!-- Hero -->
+    <header class="hero">
+      <div class="hero-meta">
+        <span class="pill pill-indigo"><i class="fa-solid fa-folder"></i> modules/notifications</span>
+        <span class="pill pill-cyan"><i class="fa-solid fa-microchip"></i> Single-Function Architecture</span>
+        <span class="pill pill-whatsapp"><i class="fa-brands fa-whatsapp"></i> WhatsApp Cloud API</span>
+        <span class="pill pill-emerald"><i class="fa-solid fa-check-double"></i> Fully Implemented</span>
+      </div>
+
+      <h1>Notifications Module<br /><span style="font-size: 0.6em; font-weight: 500; color: #a5b4fc;">Step-by-Step Function Call Flow Diagrams</span></h1>
+
+      <p class="hero-subtitle">
+        Visual architectural blueprint mapping every function call, parameter handoff, decision branch, and provider execution across the <strong>MaqamTravels</strong> notification engine.
+      </p>
+
+      <div class="meta-grid">
+        <div class="meta-card">
+          <div class="meta-card-label">Primary Entry Point</div>
+          <div class="meta-card-value"><code>sendNotification()</code></div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-card-label">Execution Strategy</div>
+          <div class="meta-card-value"><i class="fa-solid fa-bolt" style="color: var(--accent-amber);"></i> Async BullMQ</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-card-label">Channels Coordinated</div>
+          <div class="meta-card-value">Email, WhatsApp, SMS</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-card-label">Idempotency Guard</div>
+          <div class="meta-card-value"><i class="fa-solid fa-shield-halved" style="color: var(--accent-emerald);"></i> Multi-Key Hash</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 1. Architecture Overview -->
+    <section id="1-architectural-overview">
+      <h2><span class="section-num">01</span> Architecture Overview</h2>
+      <p>
+        The Notifications Module implements a <strong>Single-Function Calling Paradigm</strong>. 
+        Any application domain (checkout, auth OTP, flight ticketing, hotel booking, payment webhooks, or CRM admin desk) invokes 
+        <strong>one unified function</strong>: <code>notificationService.sendNotification(options)</code>.
+      </p>
+      <p>
+        The service internally coordinates channel capabilities, resolves valid delivery methods (Email, WhatsApp, SMS), guarantees deduplication via 
+        namespaced idempotency keys (<code>${idempotencyKey}:${channel}</code>), and hands off work asynchronously to BullMQ queue workers.
+      </p>
+    </section>
+
+    <!-- 2. Master Flowchart -->
+    <section id="2-master-end-to-end-function-call-flowchart">
+      <h2><span class="section-num">02</span> Master End-to-End Function Call Flowchart</h2>
+      <p>
+        This flowchart traces the entire code-level call hierarchy from caller invocation to database update:
+      </p>
+
+      <div class="mermaid-wrapper">
+        <div class="mermaid-header">
+          <span class="mermaid-title"><i class="fa-solid fa-diagram-project" style="color: var(--accent-cyan);"></i> Function Invocation & Decision Tree</span>
+        </div>
+        <div class="mermaid">
+flowchart TD
+    classDef caller fill:#1e293b,stroke:#0288d1,stroke-width:1.5px,color:#38bdf8
+    classDef singleFunc fill:#1e293b,stroke:#f57c00,stroke-width:2px,color:#fb923c
+    classDef core fill:#1e293b,stroke:#388e3c,stroke-width:1.5px,color:#4ade80
+    classDef db fill:#1e293b,stroke:#7b1fa2,stroke-width:1.5px,color:#c084fc
+    classDef queue fill:#1e293b,stroke:#512da8,stroke-width:1.5px,color:#a78bfa
+    classDef worker fill:#1e293b,stroke:#d84315,stroke-width:1.5px,color:#fb7185
+    classDef channel fill:#1e293b,stroke:#00695c,stroke-width:1.5px,color:#2dd4bf
+    classDef provider fill:#0f172a,stroke:#38bdf8,stroke-width:1.5px,color:#e2e8f0
+    classDef decision fill:#1e293b,stroke:#fbc02d,stroke-width:1.5px,color:#facc15
+
+    subgraph Step1["1. Application Caller Layer"]
+        C_AUTH["modules/auth/auth.service.js<br/>sendOtp(phone, otp)"]:::caller
+        C_BOOK["modules/payments/bookingSync.js<br/>sendBookingConfirmation(...)"]:::caller
+        C_FLIGHT["workers/flights/flight-ticket-gds.worker.js<br/>sendFlightTicketed(...)"]:::caller
+        C_GENERIC["Payment Webhook / CRM Desk / Visa Admin<br/>Direct invocation"]:::caller
+
+        C_AUTH -->|"Calls"| H_OTP["notificationService.sendOtp(phone, otpCode)"]:::singleFunc
+        C_BOOK -->|"Calls"| H_BOOK["notificationService.sendBookingConfirmation({ booking, user, invoicePdfUrl })"]:::singleFunc
+        C_FLIGHT -->|"Calls"| H_TICK["notificationService.sendFlightTicketed({ booking, pnr, user, eTicketPdfUrl })"]:::singleFunc
+
+        H_OTP -->|"Delegates to"| S_FN["notificationService.sendNotification(options)"]:::singleFunc
+        H_BOOK -->|"Delegates to"| S_FN
+        H_TICK -->|"Delegates to"| S_FN
+        C_GENERIC -->|"Direct call to"| S_FN
+    end
+
+    subgraph Step2["2. Orchestration Layer (notification.service.js)"]
+        S_FN --> RESOLVE["2.1 notificationService._resolveChannels(channels, recipient)"]:::singleFunc
+        RESOLVE --> CHECK_CHANS{"Are any channels reachable?<br/>(Valid email / phone)"}:::decision
+        CHECK_CHANS -- "No" --> RET_WARN["return { success: false, message: 'No valid recipient contact' }"]:::singleFunc
+
+        CHECK_CHANS -- "Yes" --> PROMISE_LOOP["2.2 Promise.allSettled(targetChannels.map(...))"]:::singleFunc
+        PROMISE_LOOP -->|"For each channel"| MAKE_KEY["Construct channel key: `${idempotencyKey}:${channel}`"]:::singleFunc
+        MAKE_KEY --> CALL_ENQ["2.3 notificationService.enqueueNotification(channelParams)"]:::singleFunc
+    end
+
+    subgraph Step3["3. Ingestion & Outbox Pipeline"]
+        CALL_ENQ --> CHK_KEY{"Has idempotencyKey?"}:::decision
+        CHK_KEY -- "Yes" --> DB_FIND["3.1 NotificationLog.findOne({ idempotencyKey })"]:::db
+        CHK_KEY -- "No" --> DB_CREATE["3.3 NotificationLog.create({ status: 'queued', ... })"]:::db
+
+        DB_FIND --> CHK_DUP{"status in [sent, queued, processing]?"}:::decision
+        CHK_DUP -- "Yes (Duplicate)" --> SKIP_DUP["logger.info('Duplicate skipped')<br/>return existing record"]:::singleFunc
+        CHK_DUP -- "No" --> DB_CREATE
+
+        DB_CREATE --> GET_Q["3.4 getNotificationQueue()"]:::queue
+        GET_Q --> IS_Q{"Redis Queue Available?"}:::decision
+
+        IS_Q -- "Yes (Redis BullMQ)" --> BULLMQ_ADD["3.5 queue.add('send-notification', { logId: logDoc._id }, { jobId, attempts: 3, backoff })"]:::queue
+        IS_Q -- "No (Dev Fallback)" --> TIMEOUT_RUN["3.5b setTimeout(() => processNotificationJob(logDoc._id), 50)"]:::worker
+
+        BULLMQ_ADD --> RET_ACK["return logDoc (Fast ACK to Caller in < 50ms)"]:::caller
+        TIMEOUT_RUN --> RET_ACK
+    end
+
+    subgraph Step4["4. Background Worker (notification.worker.js)"]
+        BULLMQ_ADD -.->|"BullMQ Redis Stream"| W_PICK["4.1 Worker picks up job"]:::worker
+        TIMEOUT_RUN -.->|"Event Loop Timer"| W_PICK
+
+        W_PICK --> W_PROC["4.2 processNotificationJob(job.data.logId)"]:::worker
+        W_PROC --> W_FIND["4.3 NotificationLog.findById(logId)"]:::db
+
+        W_FIND --> W_GUARD{"Record exists AND status != 'sent'?"}:::decision
+        W_GUARD -- "No" --> W_ABORT["return early (Idempotent guard)"]:::worker
+        W_GUARD -- "Yes" --> W_MARK["4.4 record.status = 'processing'<br/>record.attempts += 1<br/>await record.save()"]:::db
+
+        W_MARK --> ROUTE_CH{"record.channel"}:::decision
+    end
+
+    subgraph Step5["5. Channel Sub-Service Layer"]
+        ROUTE_CH -- "'email'" --> CALL_EMAIL["<b>5.A.1 emailService.sendEmail(params)</b>"]:::channel
+        CALL_EMAIL --> GET_T["5.A.2 getTransporter() (Nodemailer Pool)"]:::channel
+        GET_T --> CHK_MEDIA["mediaUrl provided?"]:::decision
+        CHK_MEDIA -- "Yes" --> FETCH_PDF["5.A.3 axios.get(mediaUrl, { responseType: 'arraybuffer' })"]:::channel
+        CHK_MEDIA -- "No" --> SEND_MAIL["5.A.4 mailer.sendMail(mailOptions)"]:::provider
+        FETCH_PDF -->|"Attach Buffer to mailOptions"| SEND_MAIL
+        SEND_MAIL --> RES_EMAIL["return { success: true, provider: 'nodemailer', messageId }"]:::channel
+
+        ROUTE_CH -- "'whatsapp'" --> CALL_WA["<b>5.B.1 whatsappService.sendWhatsAppTemplate(params)</b>"]:::channel
+        CALL_WA --> NORM_PHONE["5.B.2 Normalize phone digits (remove '+')"]:::channel
+        NORM_PHONE --> BUILD_HSM["5.B.3 Construct Meta Graph API payload<br/>(Header document link + Body parameters)"]:::channel
+        BUILD_HSM --> POST_WA["5.B.4 axios.post(Graph API v19.0, payload, headers)"]:::provider
+        POST_WA --> RES_WA["return { success: true, provider: 'meta_whatsapp', messageId }"]:::channel
+
+        ROUTE_CH -- "'sms'" --> CALL_SMS["<b>5.C.1 smsService.sendSMS(params)</b>"]:::channel
+        CALL_SMS --> PARSE_P["5.C.2 parsePhoneNumber(phone)"]:::channel
+        PARSE_P --> CHK_INDIA{"isIndian (+91)?"}:::decision
+        CHK_INDIA -- "Yes (India)" --> DLT_SMS["5.C.3 fast2smsService.sendOtpSMS(10Digits, variables)"]:::provider
+        CHK_INDIA -- "No (International)" --> TWILIO_SMS["5.C.4 axios.post(Twilio Messages API, params, auth)"]:::provider
+        DLT_SMS --> RES_SMS["return { success: true, provider: 'fast2sms', data }"]:::channel
+        TWILIO_SMS --> RES_SMS
+    end
+
+    subgraph Step6["6. State Finalization & Retry Handling"]
+        RES_EMAIL --> SAVE_OK["6.1 record.status = 'sent'<br/>record.provider = { name, messageId, response }<br/>await record.save()"]:::db
+        RES_WA --> SAVE_OK
+        RES_SMS --> SAVE_OK
+
+        CALL_EMAIL -.->|"On Error"| W_ERR["6.2 catch (err)"]:::worker
+        CALL_WA -.->|"On Error"| W_ERR
+        CALL_SMS -.->|"On Error"| W_ERR
+
+        W_ERR --> CHK_ATTEMPTS{"record.attempts >= 3?"}:::decision
+        CHK_ATTEMPTS -- "Yes (Max Retries)" --> SET_FAIL["record.status = 'failed'"]:::db
+        CHK_ATTEMPTS -- "No (Retryable)" --> SET_QUEUED["record.status = 'queued'"]:::db
+
+        SET_FAIL --> SAVE_ERR["6.3 record.lastError = err.message<br/>await record.save()<br/>throw err"]:::db
+        SET_QUEUED --> SAVE_ERR
+        SAVE_ERR -.->|"BullMQ Backoff Trigger"| RETRY_Q["6.4 BullMQ Exponential Backoff Retry (4000ms delay)"]:::queue
+    end
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Sequence Diagram -->
+    <section id="3-step-by-step-chronological-sequence-diagram">
+      <h2><span class="section-num">03</span> Step-by-Step Chronological Sequence Diagram</h2>
+      <p>
+        The sequence diagram below displays the exact timing and asynchronous handoffs across all services:
+      </p>
+
+      <div class="mermaid-wrapper">
+        <div class="mermaid-header">
+          <span class="mermaid-title"><i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-emerald);"></i> Chronological Dispatch Sequence</span>
+        </div>
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant App as Application Caller (Checkout/Auth/CRM)
+    participant NS as notificationService.sendNotification()
+    participant Core as notificationService.enqueueNotification()
+    participant Model as NotificationLog (Mongoose)
+    participant Queue as BullMQ (notification-dispatch-queue)
+    participant Worker as notification.worker.js
+    participant EmailSvc as email/emailService.js
+    participant WASvc as whatsapp/whatsapp.service.js
+    participant SMSSvc as sms/smsService.js
+    participant Providers as External APIs (SMTP/Meta/Twilio/Fast2SMS)
+
+    App->>NS: sendNotification({ recipient: { email, phone }, channels: ['email', 'whatsapp', 'sms'], ... })
+    NS->>NS: _resolveChannels(channels, recipient) -> ['email', 'whatsapp', 'sms']
+
+    par Email Dispatch
+        NS->>Core: enqueueNotification({ channel: 'email', ... })
+        Core->>Model: findOne({ idempotencyKey: '...:email' })
+        Core->>Model: create({ channel: 'email', status: 'queued', ... })
+        Core->>Queue: queue.add('send-notification', { logId })
+    and WhatsApp Dispatch
+        NS->>Core: enqueueNotification({ channel: 'whatsapp', ... })
+        Core->>Model: findOne({ idempotencyKey: '...:whatsapp' })
+        Core->>Model: create({ channel: 'whatsapp', status: 'queued', ... })
+        Core->>Queue: queue.add('send-notification', { logId })
+    and SMS Dispatch
+        NS->>Core: enqueueNotification({ channel: 'sms', ... })
+        Core->>Model: findOne({ idempotencyKey: '...:sms' })
+        Core->>Model: create({ channel: 'sms', status: 'queued', ... })
+        Core->>Queue: queue.add('send-notification', { logId })
+    end
+
+    NS-->>App: Fast ACK (< 50ms): { success: true, dispatchedChannels: ['email', 'whatsapp', 'sms'], results }
+
+    par Background Email Worker
+        Queue->>Worker: Consume job (logId)
+        Worker->>Model: findById(logId) -> status = 'processing'
+        Worker->>EmailSvc: sendEmail({ to, subject, htmlBody, mediaUrl })
+        EmailSvc->>Providers: mailer.sendMail()
+        Providers-->>EmailSvc: SMTP MessageID
+        EmailSvc-->>Worker: { success: true, provider: 'nodemailer', messageId }
+        Worker->>Model: status = 'sent', provider info saved
+    and Background WhatsApp Worker
+        Queue->>Worker: Consume job (logId)
+        Worker->>Model: findById(logId) -> status = 'processing'
+        Worker->>WASvc: sendWhatsAppTemplate({ to, templateName, bodyVariables, mediaUrl })
+        WASvc->>Providers: axios.post(Graph API v19.0)
+        Providers-->>WASvc: Meta WAMID
+        WASvc-->>Worker: { success: true, provider: 'meta_whatsapp', messageId }
+        Worker->>Model: status = 'sent', provider info saved
+    and Background SMS Worker
+        Queue->>Worker: Consume job (logId)
+        Worker->>Model: findById(logId) -> status = 'processing'
+        Worker->>SMSSvc: sendSMS({ phone, message, variables })
+        SMSSvc->>Providers: Fast2SMS DLT / Twilio REST API
+        Providers-->>SMSSvc: Gateway ACK / SID
+        SMSSvc-->>Worker: { success: true, provider, messageId }
+        Worker->>Model: status = 'sent', provider info saved
+    end
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Channel Deep Dives -->
+    <section id="channel-deep-dives">
+      <h2><span class="section-num">04</span> Channel-Specific Execution Deep Dives</h2>
+
+      <!-- 4.1 Email -->
+      <div id="41-email-channel-emailservicejs">
+        <h3><i class="fa-solid fa-envelope" style="color: var(--accent-indigo);"></i> 4.1 Email Channel (<code>emailService.js</code>)</h3>
+        <p>
+          Manages connection pooling via Nodemailer, HTML template wrapping, and streaming remote PDF attachments (such as tax invoices or vouchers):
+        </p>
+
+        <div class="mermaid-wrapper">
+          <div class="mermaid">
+flowchart TD
+    E_START["sendEmail({ to, subject, htmlBody, attachments, mediaUrl })"] --> E_CHK_CREDS{"SMTP_USER & SMTP_PASS set?"}
+    E_CHK_CREDS -- "No" --> E_MOCK["logger.warn('SMTP credentials not set')<br/>return { success: true, provider: 'mock', messageId: 'mock_...' }"]
+    E_CHK_CREDS -- "Yes" --> E_TRANS["getTransporter()<br/>nodemailer.createTransport({ pool: true, maxConnections: 5 })"]
+    
+    E_TRANS --> E_CHK_MEDIA{"mediaUrl provided?"}
+    E_CHK_MEDIA -- "Yes" --> E_FETCH_PDF["axios.get(mediaUrl, { responseType: 'arraybuffer' })<br/>Buffer.from(response.data)"]
+    E_FETCH_PDF --> E_ATTACH["attachments.push({ filename: 'MaqamTravels_Document.pdf', content: Buffer, contentType: 'application/pdf' })"]
+    E_CHK_MEDIA -- "No" --> E_SEND["mailer.sendMail({ from, to, subject, html, attachments })"]
+    E_ATTACH --> E_SEND
+
+    E_SEND --> E_OK["return { success: true, provider: 'nodemailer', messageId: info.messageId, data: info }"]
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.2 WhatsApp -->
+      <div id="42-whatsapp-channel-whatsappservicejs">
+        <h3><i class="fa-brands fa-whatsapp" style="color: var(--accent-whatsapp);"></i> 4.2 WhatsApp Channel (<code>whatsapp.service.js</code>)</h3>
+        <p>
+          Integrates directly with <strong>Meta WhatsApp Cloud Graph API (v19.0)</strong> for official HSM template alerts:
+        </p>
+
+        <div class="mermaid-wrapper">
+          <div class="mermaid">
+flowchart TD
+    WA_START["sendWhatsAppTemplate({ to, templateName, languageCode, bodyVariables, mediaUrl })"] --> WA_CHK_CREDS{"WHATSAPP_PHONE_NUMBER_ID &<br/>WHATSAPP_ACCESS_TOKEN set?"}
+    WA_CHK_CREDS -- "No" --> WA_MOCK["logger.warn('Meta credentials not set')<br/>return { success: true, provider: 'mock', messageId: 'wa_mock_...' }"]
+    WA_CHK_CREDS -- "Yes" --> WA_CLEAN["recipient = String(to).replace(/[^0-9]/g, '')"]
+
+    WA_CLEAN --> WA_BUILD_COMP["Build Meta components:"]
+    WA_BUILD_COMP --> WA_CHK_DOC{"mediaUrl provided?"}
+    WA_CHK_DOC -- "Yes" --> WA_DOC["components.push({ type: 'header', parameters: [{ type: 'document', document: { link: mediaUrl } }] })"]
+    WA_CHK_DOC -- "No" --> WA_BODY["components.push({ type: 'body', parameters: bodyVariables.map(...) })"]
+    WA_DOC --> WA_BODY
+
+    WA_BODY --> WA_POST["axios.post('https://graph.facebook.com/v19.0/{phoneId}/messages', payload, { headers: { Authorization: Bearer token } })"]
+    WA_POST --> WA_OK["return { success: true, provider: 'meta_whatsapp', messageId: response.data.messages[0].id }"]
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.3 SMS -->
+      <div id="43-sms-channel-smsservicejs">
+        <h3><i class="fa-solid fa-message" style="color: var(--accent-cyan);"></i> 4.3 SMS Channel (<code>smsService.js</code>)</h3>
+        <p>
+          Routes between <strong>Fast2SMS DLT</strong> for domestic Indian numbers and <strong>Twilio REST API</strong> for international numbers:
+        </p>
+
+        <div class="mermaid-wrapper">
+          <div class="mermaid">
+flowchart TD
+    SMS_START["sendSMS({ phone, message, variables })"] --> SMS_PARSE["parsePhoneNumber(phone)<br/>clean = digits and '+'<br/>digitsOnly = strip '+'"]
+    SMS_PARSE --> SMS_CHK_REGION{"clean.startsWith('+91') OR<br/>length === 10?"}
+
+    SMS_CHK_REGION -- "Yes (Indian Phone)" --> SMS_FAST2SMS["mobile10Digits = digitsOnly.slice(-10)<br/>fast2smsService.sendOtpSMS(mobile10Digits, variables || message)"]
+    SMS_FAST2SMS --> SMS_F2S_RES["return { success: true, provider: 'fast2sms', data: response.data }"]
+
+    SMS_CHK_REGION -- "No (International)" --> SMS_CHK_TWILIO{"TWILIO_ACCOUNT_SID &<br/>TWILIO_AUTH_TOKEN set?"}
+    SMS_CHK_TWILIO -- "Yes" --> SMS_TWILIO_POST["axios.post('https://api.twilio.com/.../Messages.json', params, { auth: Basic })"]
+    SMS_TWILIO_POST --> SMS_TWILIO_RES["return { success: true, provider: 'twilio', messageId: response.data.sid }"]
+
+    SMS_CHK_TWILIO -- "No" --> SMS_MOCK["logger.warn('No international SMS provider configured')<br/>return { success: true, provider: 'mock', messageId: 'mock_...' }"]
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Function Reference Matrix -->
+    <section id="5-complete-function-calling-reference-matrix">
+      <h2><span class="section-num">05</span> Complete Function Calling Reference Matrix</h2>
+      <p>
+        The table below provides a quick mapping of all caller methods, target functions, argument signatures, and return values:
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Caller Function</th>
+              <th>Executed Function</th>
+              <th>File Location</th>
+              <th>Arguments Passed</th>
+              <th>Return Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1.0</strong></td>
+              <td>Domain Caller (e.g. <code>bookingSync.js</code>)</td>
+              <td><code>sendNotification()</code></td>
+              <td><code>notification.service.js</code></td>
+              <td><code>{ userId, recipient, channels, eventType, ... }</code></td>
+              <td><code>{ success, dispatchedChannels, results }</code></td>
+            </tr>
+            <tr>
+              <td><strong>1.1</strong></td>
+              <td><code>sendNotification()</code></td>
+              <td><code>_resolveChannels()</code></td>
+              <td><code>notification.service.js</code></td>
+              <td><code>channels, recipient</code></td>
+              <td><code>['email', 'whatsapp', 'sms']</code></td>
+            </tr>
+            <tr>
+              <td><strong>1.2</strong></td>
+              <td><code>sendNotification()</code></td>
+              <td><code>enqueueNotification()</code></td>
+              <td><code>notification.service.js</code></td>
+              <td><code>{ channel, recipientEmail, recipientPhone, ... }</code></td>
+              <td><code>logDoc</code> (MongoDB Document)</td>
+            </tr>
+            <tr>
+              <td><strong>1.3</strong></td>
+              <td><code>enqueueNotification()</code></td>
+              <td><code>NotificationLog.findOne()</code></td>
+              <td><code>notification.model.js</code></td>
+              <td><code>{ idempotencyKey }</code></td>
+              <td>Existing doc or <code>null</code></td>
+            </tr>
+            <tr>
+              <td><strong>1.4</strong></td>
+              <td><code>enqueueNotification()</code></td>
+              <td><code>NotificationLog.create()</code></td>
+              <td><code>notification.model.js</code></td>
+              <td><code>{ status: 'queued', channel, eventType, ... }</code></td>
+              <td><code>logDoc</code></td>
+            </tr>
+            <tr>
+              <td><strong>1.5</strong></td>
+              <td><code>enqueueNotification()</code></td>
+              <td><code>getNotificationQueue()</code></td>
+              <td><code>notification.worker.js</code></td>
+              <td><em>None</em></td>
+              <td>BullMQ <code>Queue</code> instance</td>
+            </tr>
+            <tr>
+              <td><strong>1.6</strong></td>
+              <td><code>enqueueNotification()</code></td>
+              <td><code>queue.add()</code></td>
+              <td><code>bullmq</code></td>
+              <td><code>'send-notification', { logId }, opts</code></td>
+              <td>BullMQ <code>Job</code></td>
+            </tr>
+            <tr>
+              <td><strong>2.0</strong></td>
+              <td>BullMQ Daemon</td>
+              <td><code>processNotificationJob()</code></td>
+              <td><code>notification.worker.js</code></td>
+              <td><code>logId</code></td>
+              <td>Execution Result</td>
+            </tr>
+            <tr>
+              <td><strong>2.1</strong></td>
+              <td><code>processNotificationJob()</code></td>
+              <td><code>NotificationLog.findById()</code></td>
+              <td><code>notification.model.js</code></td>
+              <td><code>logId</code></td>
+              <td><code>record</code></td>
+            </tr>
+            <tr>
+              <td><strong>3.A</strong></td>
+              <td><code>processNotificationJob()</code></td>
+              <td><code>sendEmail()</code></td>
+              <td><code>email/emailService.js</code></td>
+              <td><code>{ to, subject, htmlBody, mediaUrl }</code></td>
+              <td><code>{ success, provider: 'nodemailer', messageId }</code></td>
+            </tr>
+            <tr>
+              <td><strong>3.B</strong></td>
+              <td><code>processNotificationJob()</code></td>
+              <td><code>sendWhatsAppTemplate()</code></td>
+              <td><code>whatsapp/whatsapp.service.js</code></td>
+              <td><code>{ to, templateName, bodyVariables, mediaUrl }</code></td>
+              <td><code>{ success, provider: 'meta_whatsapp', messageId }</code></td>
+            </tr>
+            <tr>
+              <td><strong>3.C</strong></td>
+              <td><code>processNotificationJob()</code></td>
+              <td><code>sendSMS()</code></td>
+              <td><code>sms/smsService.js</code></td>
+              <td><code>{ phone, message, variables }</code></td>
+              <td><code>{ success, provider, messageId }</code></td>
+            </tr>
+            <tr>
+              <td><strong>4.0</strong></td>
+              <td><code>processNotificationJob()</code></td>
+              <td><code>record.save()</code></td>
+              <td><code>notification.model.js</code></td>
+              <td><code>status: 'sent', provider: { ... }</code></td>
+              <td>Updated document in MongoDB</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 6. Code Sample -->
+    <section id="code-sample">
+      <h2><span class="section-num">06</span> Single-Call Code API Example</h2>
+      <p>
+        How any application controller, checkout handler, or worker uses this single function in practice:
+      </p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-title"><i class="fa-brands fa-js"></i> Example: Single Omnichannel Notification Invocation</span>
+          <button class="copy-btn" onclick="copyCode(this)"><i class="fa-regular fa-copy"></i> Copy Code</button>
+        </div>
+        <pre><code class="language-javascript">const notificationService = require('./modules/notifications/notification.service');
+
+// ONE SINGLE CALL triggers Email, WhatsApp, and SMS simultaneously:
+const result = await notificationService.sendNotification({
+  userId: customer._id,
+  recipient: {
+    email: customer.email,
+    phone: customer.phone,
+  },
+  channels: ['email', 'whatsapp', 'sms'], // Or omit / 'all' to auto-detect
+  eventType: 'booking_confirmation',
+  subject: `Booking Confirmed: ${booking.bookingReference} - Maqam Travels`,
+  templateName: 'booking_confirmation_v1',
+  variables: [
+    customer.name, 
+    booking.bookingReference, 
+    booking.destination, 
+    booking.totalAmount
+  ],
+  messageText: `Dear ${customer.name}, your booking ${booking.bookingReference} is confirmed!`,
+  mediaUrl: booking.invoicePdfUrl, // Streams PDF e-voucher / invoice
+  idempotencyKey: `booking:${booking._id}:confirm`,
+});
+
+console.log(result);
+// Output:
+// {
+//   success: true,
+//   eventType: 'booking_confirmation',
+//   dispatchedChannels: ['email', 'whatsapp', 'sms'],
+//   results: {
+//     email: { channel: 'email', success: true, status: 'queued', logId: '66e1...' },
+//     whatsapp: { channel: 'whatsapp', success: true, status: 'queued', logId: '66e2...' },
+//     sms: { channel: 'sms', success: true, status: 'queued', logId: '66e3...' }
+//   }
+// }</code></pre>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Back to Top Button -->
+  <button id="back-to-top" title="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- Fullscreen Modal Overlay -->
+  <div id="fs-modal" class="fs-modal" style="display: none;">
+    <div class="fs-header">
+      <div class="fs-title" id="fs-title-text"><i class="fa-solid fa-diagram-project" style="color: var(--accent-cyan);"></i> Diagram Fullscreen Canvas</div>
+      <div class="diagram-toolbar">
+        <button class="d-btn fs-btn-in" title="Zoom In (+)"><i class="fa-solid fa-plus"></i></button>
+        <button class="d-btn fs-btn-out" title="Zoom Out (-)"><i class="fa-solid fa-minus"></i></button>
+        <button class="d-btn fs-btn-reset" title="Reset View"><i class="fa-solid fa-rotate-left"></i> <span class="fs-zoom-val">100%</span></button>
+        <button class="d-btn fs-btn-fit" title="Fit to Screen"><i class="fa-solid fa-expand"></i> Fit</button>
+        <button class="d-btn fs-btn-close" title="Exit Fullscreen (Esc)" style="background: rgba(244, 63, 94, 0.2); border-color: rgba(244, 63, 94, 0.4); color: #fda4af;"><i class="fa-solid fa-xmark"></i> Close (Esc)</button>
+      </div>
+    </div>
+    <div class="fs-viewport" id="fs-viewport">
+      <div class="fs-canvas" id="fs-canvas"></div>
+      <div class="fs-hint">
+        <span><i class="fa-solid fa-computer-mouse"></i> Scroll to zoom</span>
+        <span><i class="fa-solid fa-hand"></i> Click &amp; drag to pan</span>
+        <span><i class="fa-solid fa-keyboard"></i> Press Esc to close</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Highlight.js
+    hljs.highlightAll();
+
+    // Initialize Mermaid.js
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#0a0f1e',
+        primaryColor: '#1e293b',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#6366f1',
+        lineColor: '#94a3b8',
+        secondaryColor: '#0f172a',
+        tertiaryColor: '#1e293b'
+      },
+      flowchart: { curve: 'basis', useMaxWidth: false },
+      sequence: { useMaxWidth: false }
+    });
+
+    // ─────────────────────────────────────────────────────────────
+    // Interactive PanZoom Canvas Engine
+    // ─────────────────────────────────────────────────────────────
+    class DiagramPanZoom {
+      constructor(config) {
+        this.wrapper = config.wrapper;
+        this.viewport = config.viewport;
+        this.canvas = config.canvas;
+        this.zoomDisplay = config.zoomDisplay;
+
+        this.scale = 1;
+        this.panX = 0;
+        this.panY = 0;
+        this.isDragging = false;
+        this.startX = 0;
+        this.startY = 0;
+
+        this.init();
+      }
+
+      init() {
+        if (!this.viewport || !this.canvas) return;
+
+        this.updateTransform();
+
+        // Mouse drag to pan
+        this.viewport.addEventListener('mousedown', (e) => this.onMouseDown(e));
+        window.addEventListener('mousemove', (e) => this.onMouseMove(e));
+        window.addEventListener('mouseup', () => this.onMouseUp());
+
+        // Mouse wheel to zoom (anchored at cursor)
+        this.viewport.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
+
+        // Double-click to fit
+        this.viewport.addEventListener('dblclick', (e) => {
+          e.preventDefault();
+          this.fitToView();
+        });
+
+        // Touch support (1-finger pan, 2-finger pinch)
+        this.initTouch();
+
+        // Wire toolbar buttons
+        const btnIn = this.wrapper.querySelector('.btn-zoom-in, .fs-btn-in');
+        const btnOut = this.wrapper.querySelector('.btn-zoom-out, .fs-btn-out');
+        const btnReset = this.wrapper.querySelector('.btn-reset, .fs-btn-reset');
+        const btnFit = this.wrapper.querySelector('.btn-fit, .fs-btn-fit');
+        const btnFs = this.wrapper.querySelector('.btn-fullscreen');
+
+        if (btnIn) btnIn.addEventListener('click', () => this.zoomBy(1.25));
+        if (btnOut) btnOut.addEventListener('click', () => this.zoomBy(0.8));
+        if (btnReset) btnReset.addEventListener('click', () => this.reset());
+        if (btnFit) btnFit.addEventListener('click', () => this.fitToView());
+        if (btnFs) btnFs.addEventListener('click', () => openFullscreen(this));
+      }
+
+      updateTransform() {
+        this.canvas.style.transform = `translate3d(${this.panX}px, ${this.panY}px, 0) scale(${this.scale})`;
+        if (this.zoomDisplay) {
+          this.zoomDisplay.textContent = `${Math.round(this.scale * 100)}%`;
+        }
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+        this.isDragging = true;
+        this.startX = e.clientX - this.panX;
+        this.startY = e.clientY - this.panY;
+        this.viewport.classList.add('is-dragging');
+      }
+
+      onMouseMove(e) {
+        if (!this.isDragging) return;
+        this.panX = e.clientX - this.startX;
+        this.panY = e.clientY - this.startY;
+        this.updateTransform();
+      }
+
+      onMouseUp() {
+        if (!this.isDragging) return;
+        this.isDragging = false;
+        this.viewport.classList.remove('is-dragging');
+      }
+
+      onWheel(e) {
+        e.preventDefault();
+        const rect = this.viewport.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const factor = e.deltaY < 0 ? 1.15 : 0.87;
+        const newScale = Math.min(Math.max(0.15, this.scale * factor), 5.0);
+
+        this.panX = mouseX - (mouseX - this.panX) * (newScale / this.scale);
+        this.panY = mouseY - (mouseY - this.panY) * (newScale / this.scale);
+        this.scale = newScale;
+
+        this.updateTransform();
+      }
+
+      zoomBy(factor) {
+        const rect = this.viewport.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const newScale = Math.min(Math.max(0.15, this.scale * factor), 5.0);
+        this.panX = centerX - (centerX - this.panX) * (newScale / this.scale);
+        this.panY = centerY - (centerY - this.panY) * (newScale / this.scale);
+        this.scale = newScale;
+        this.updateTransform();
+      }
+
+      reset() {
+        this.scale = 1;
+        this.panX = 0;
+        this.panY = 0;
+        this.updateTransform();
+      }
+
+      fitToView() {
+        const svg = this.canvas.querySelector('svg');
+        if (!svg) return this.reset();
+
+        let natW = 1200;
+        let natH = 800;
+        if (svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width) {
+          natW = svg.viewBox.baseVal.width;
+          natH = svg.viewBox.baseVal.height;
+        } else {
+          const b = svg.getBBox ? svg.getBBox() : svg.getBoundingClientRect();
+          natW = b.width || 1200;
+          natH = b.height || 800;
+        }
+
+        const vpRect = this.viewport.getBoundingClientRect();
+        const padX = 40;
+        const padY = 40;
+        const scaleX = (vpRect.width - padX) / natW;
+        const scaleY = (vpRect.height - padY) / natH;
+        this.scale = Math.min(Math.max(0.18, Math.min(scaleX, scaleY)), 1.3);
+
+        this.panX = Math.max(16, (vpRect.width - natW * this.scale) / 2);
+        this.panY = Math.max(16, (vpRect.height - natH * this.scale) / 2);
+        this.updateTransform();
+      }
+
+      initTouch() {
+        let initialDist = 0;
+        let initialScale = 1;
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        this.viewport.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 1) {
+            touchStartX = e.touches[0].clientX - this.panX;
+            touchStartY = e.touches[0].clientY - this.panY;
+          } else if (e.touches.length === 2) {
+            initialDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            initialScale = this.scale;
+          }
+        }, { passive: true });
+
+        this.viewport.addEventListener('touchmove', (e) => {
+          if (e.touches.length === 1) {
+            this.panX = e.touches[0].clientX - touchStartX;
+            this.panY = e.touches[0].clientY - touchStartY;
+            this.updateTransform();
+          } else if (e.touches.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            const factor = dist / initialDist;
+            this.scale = Math.min(Math.max(0.15, initialScale * factor), 5.0);
+            this.updateTransform();
+          }
+        }, { passive: false });
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Fullscreen Overlay Handler
+    // ─────────────────────────────────────────────────────────────
+    let activeFsPanZoom = null;
+
+    function openFullscreen(panZoomInstance) {
+      const modal = document.getElementById('fs-modal');
+      const fsCanvas = document.getElementById('fs-canvas');
+      const fsTitle = document.getElementById('fs-title-text');
+      const headerTitle = panZoomInstance.wrapper.querySelector('.mermaid-title');
+
+      fsTitle.innerHTML = headerTitle ? headerTitle.innerHTML : '<i class="fa-solid fa-diagram-project" style="color: var(--accent-cyan);"></i> Diagram Canvas';
+      fsCanvas.innerHTML = '';
+
+      const svg = panZoomInstance.canvas.querySelector('svg');
+      if (!svg) return;
+      const clonedSvg = svg.cloneNode(true);
+      clonedSvg.style.maxWidth = 'none';
+      fsCanvas.appendChild(clonedSvg);
+
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+
+      const fsViewport = document.getElementById('fs-viewport');
+      activeFsPanZoom = new DiagramPanZoom({
+        wrapper: modal,
+        viewport: fsViewport,
+        canvas: fsCanvas,
+        zoomDisplay: modal.querySelector('.fs-zoom-val')
+      });
+
+      setTimeout(() => {
+        activeFsPanZoom.fitToView();
+      }, 50);
+    }
+
+    function closeFullscreen() {
+      const modal = document.getElementById('fs-modal');
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      activeFsPanZoom = null;
+    }
+
+    document.querySelector('.fs-btn-close')?.addEventListener('click', closeFullscreen);
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById('fs-modal')?.style.display !== 'none') {
+        closeFullscreen();
+      }
+    });
+
+    // ─────────────────────────────────────────────────────────────
+    // Setup Interactive PanZoom on all .mermaid-wrapper elements
+    // ─────────────────────────────────────────────────────────────
+    function setupInteractivePanZooms() {
+      document.querySelectorAll('.mermaid-wrapper').forEach((wrapper) => {
+        let header = wrapper.querySelector('.mermaid-header');
+        if (!header) {
+          header = document.createElement('div');
+          header.className = 'mermaid-header';
+          const titleSpan = document.createElement('span');
+          titleSpan.className = 'mermaid-title';
+          titleSpan.innerHTML = `<i class="fa-solid fa-diagram-project" style="color: var(--accent-cyan);"></i> Architectural Diagram`;
+          header.appendChild(titleSpan);
+          wrapper.insertBefore(header, wrapper.firstChild);
+        }
+
+        let toolbar = header.querySelector('.diagram-toolbar');
+        if (!toolbar) {
+          toolbar = document.createElement('div');
+          toolbar.className = 'diagram-toolbar';
+          toolbar.innerHTML = `
+            <button class="d-btn btn-zoom-in" title="Zoom In (+)"><i class="fa-solid fa-plus"></i></button>
+            <button class="d-btn btn-zoom-out" title="Zoom Out (-)"><i class="fa-solid fa-minus"></i></button>
+            <button class="d-btn btn-reset" title="Reset View"><i class="fa-solid fa-rotate-left"></i> <span class="zoom-val">100%</span></button>
+            <button class="d-btn btn-fit" title="Fit to Box"><i class="fa-solid fa-expand"></i> Fit</button>
+            <button class="d-btn btn-fullscreen" title="Open Fullscreen"><i class="fa-solid fa-maximize"></i> Fullscreen</button>
+          `;
+          header.appendChild(toolbar);
+        }
+
+        const mermaidDiv = wrapper.querySelector('.mermaid');
+        if (mermaidDiv && !mermaidDiv.parentElement.classList.contains('panzoom-viewport')) {
+          const viewport = document.createElement('div');
+          viewport.className = 'panzoom-viewport';
+          mermaidDiv.parentElement.insertBefore(viewport, mermaidDiv);
+          viewport.appendChild(mermaidDiv);
+
+          const hintBar = document.createElement('div');
+          hintBar.className = 'panzoom-hint-bar';
+          hintBar.innerHTML = `
+            <span><i class="fa-solid fa-hand" style="color: var(--accent-cyan);"></i> Click &amp; drag to pan</span>
+            <span><i class="fa-solid fa-computer-mouse" style="color: var(--accent-indigo);"></i> Scroll wheel to zoom</span>
+            <span><i class="fa-solid fa-arrows-rotate" style="color: var(--accent-emerald);"></i> Double-click to fit</span>
+          `;
+          wrapper.appendChild(hintBar);
+        }
+
+        const viewport = wrapper.querySelector('.panzoom-viewport');
+        const zoomDisplay = wrapper.querySelector('.zoom-val');
+        if (viewport && mermaidDiv) {
+          const pz = new DiagramPanZoom({
+            wrapper,
+            viewport,
+            canvas: mermaidDiv,
+            zoomDisplay
+          });
+          pz.fitToView();
+        }
+      });
+    }
+
+    // Initialize after window loads
+    window.addEventListener('load', () => {
+      document.querySelectorAll('.mermaid svg').forEach(svg => {
+        svg.style.maxWidth = 'none';
+      });
+
+      setupInteractivePanZooms();
+    });
+
+    // Copy code helper
+    function copyCode(btn) {
+      const codeBlock = btn.closest('.code-container').querySelector('code');
+      navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+      });
+    }
+
+    // Scroll progress & active nav
+    const progressBar = document.getElementById('progress-bar');
+    const backToTop = document.getElementById('back-to-top');
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
+
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      progressBar.style.width = scrolled + '%';
+
+      if (winScroll > 400) {
+        backToTop.classList.add('visible');
+      } else {
+        backToTop.classList.remove('visible');
+      }
+
+      let currentSectionId = '';
+      sections.forEach(section => {
+        const top = section.offsetTop - 120;
+        if (winScroll >= top) {
+          currentSectionId = section.getAttribute('id');
+        }
+      });
+
+      if (currentSectionId) {
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === `#${currentSectionId}`) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Mobile Sidebar toggle
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const sidebar = document.getElementById('sidebar');
+
+    mobileToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      const icon = mobileToggle.querySelector('i');
+      if (sidebar.classList.contains('open')) {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-xmark');
+      } else {
+        icon.classList.remove('fa-xmark');
+        icon.classList.add('fa-bars');
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+          sidebar.classList.remove('open');
+          const icon = mobileToggle.querySelector('i');
+          icon.classList.remove('fa-xmark');
+          icon.classList.add('fa-bars');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

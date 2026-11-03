@@ -1,0 +1,4 @@
+export default function BookingChart() {
+  const rows=[['Confirmed','86','bg-emerald-500','55%'],['Pending','12','bg-amber-500','20%'],['Cancelled','7','bg-red-500','12%'],['Payment Pending','5','bg-blue-500','8%']];
+  return <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><h3 className="font-bold text-slate-900">Booking Overview</h3><p className="text-xs text-slate-400">Current booking status</p><div className="mt-7 space-y-5">{rows.map(([name,value,color,width])=><div key={name}><div className="mb-1.5 flex justify-between text-sm"><span className="text-slate-600">{name}</span><span className="font-bold text-slate-800">{value}</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${color}`} style={{width}} /></div></div>)}</div></div>;
+}

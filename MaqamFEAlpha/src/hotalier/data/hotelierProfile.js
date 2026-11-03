@@ -1,0 +1,31 @@
+// Hotelier profile and hotel property descriptor matching the authenticated session
+export const mockHotelierProfile = {
+  user: {
+    id: "6abe102f97033b181b2b7126",
+    _id: "6abe102f97033b181b2b7126",
+    firstName: "arav",
+    lastName: "Doe",
+    fullName: "arav Doe",
+    email: "arav@gamil.com",
+    phone: "97864534558",
+    role: "hotelier",
+    isActive: true,
+    isVerified: false,
+    isPhoneVerified: false,
+    hotelId: "6abbab020d38868cbc2e4859",
+    hotelName: "InterContinental Riyadh",
+    lastLogin: null,
+    createdAt: "2026-10-01T07:47:59.169Z",
+  },
+  hotel: {
+    id: "6abbab020d38868cbc2e4859",
+    _id: "6abbab020d38868cbc2e4859",
+    name: "InterContinental Riyadh",
+    destination: "Riyadh, Saudi Arabia",
+    address: "King Fahd Road, Al Olaya, Riyadh",
+    starRating: 5,
+    images: [],
+    amenities: ["Free High-Speed WiFi", "Infinity Pool", "Executive Lounge", "Fine Dining Restaurants", "Spa & Wellness", "24/7 Front Desk"],
+    isActive: true,
+  },
+};

@@ -1,0 +1,18 @@
+components:
+  parameters:
+    PageNumber:
+      name: page
+      in: query
+      description: The page number to retrieve (1-based index)
+      required: false
+      schema:
+        type: integer
+        default: 1
+    PageLimit:
+      name: limit
+      in: query
+      description: The number of items to return per page
+      required: false
+      schema:
+        type: integer
+        default: 10

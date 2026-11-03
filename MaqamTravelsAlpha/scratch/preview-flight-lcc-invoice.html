@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice - MT-INV-LCC-202610-2106 | Maqam Travels</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --emerald-600: #059669;
+      --emerald-50: #ecfdf5;
+      --amber-600: #d97706;
+      --amber-50: #fffbeb;
+      --border-color: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f1f5f9;
+      color: var(--slate-800);
+      line-height: 1.5;
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Action Bar (Screen Only) */
+    .action-bar {
+      max-width: 860px;
+      margin: 20px auto 10px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease-in-out;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--slate-200);
+      color: var(--slate-700);
+    }
+
+    .btn-outline:hover {
+      background: var(--slate-50);
+    }
+
+    /* Invoice Page Sheet */
+    .invoice-container {
+      max-width: 860px;
+      margin: 0 auto 30px auto;
+      background: #ffffff;
+      padding: 36px 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Header Section */
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--slate-100);
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--slate-500);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    .agency-address {
+      font-size: 11px;
+      color: var(--slate-600);
+      line-height: 1.4;
+      margin-top: 8px;
+      max-width: 320px;
+    }
+
+    .invoice-title-block {
+      text-align: right;
+    }
+
+    .invoice-heading {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--slate-900);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-group {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-status-confirmed {
+      background: var(--emerald-50);
+      color: var(--emerald-600);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    .badge-status-pending {
+      background: var(--amber-50);
+      color: var(--amber-600);
+      border: 1px solid rgba(217, 119, 6, 0.2);
+    }
+
+    .badge-service {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid rgba(2, 132, 199, 0.2);
+    }
+
+    /* Grid Details */
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+
+    .detail-col h4 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--slate-500);
+      margin-bottom: 8px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--slate-200);
+      padding-bottom: 4px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+
+    .detail-label {
+      color: var(--slate-500);
+      font-weight: 500;
+    }
+
+    .detail-val {
+      color: var(--slate-900);
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .highlight-mono {
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    /* Section Headers */
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--slate-800);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-title::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 12px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    /* Flight Segments Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 12px;
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .data-table th {
+      background: #f8fafc;
+      color: var(--slate-600);
+      font-weight: 700;
+      text-align: left;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--slate-200);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--slate-200);
+      color: var(--slate-800);
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Fare Breakdown Table */
+    .fare-box {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 24px;
+    }
+
+    .fare-table {
+      width: 380px;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .fare-table td {
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--slate-100);
+    }
+
+    .fare-table td:last-child {
+      text-align: right;
+      font-weight: 600;
+      color: var(--slate-900);
+    }
+
+    .fare-table .total-row td {
+      padding-top: 10px;
+      padding-bottom: 10px;
+      border-top: 2px solid var(--slate-800);
+      border-bottom: 2px solid var(--slate-800);
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    /* Payment & GST Notice */
+    .info-boxes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .info-card {
+      background: #f8fafc;
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .info-card h5 {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--slate-700);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Footer & Compliance */
+    .invoice-footer {
+      border-top: 1px solid var(--slate-200);
+      padding-top: 16px;
+      text-align: center;
+      font-size: 10.5px;
+      color: var(--slate-500);
+      line-height: 1.5;
+    }
+
+    .footer-note {
+      font-style: italic;
+      margin-bottom: 4px;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: #ffffff !important;
+        font-size: 12px;
+      }
+      .action-bar {
+        display: none !important;
+      }
+      .invoice-container {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+      }
+      @page {
+        margin: 15mm 15mm 15mm 15mm;
+        size: A4 portrait;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Action Bar -->
+  <div class="action-bar">
+    <div style="font-weight: 600; color: var(--slate-700);">
+      Official Tax Invoice &amp; Flight Receipt
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="window.print()" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        Print / Save PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Invoice Document -->
+  <div class="invoice-container">
+
+    <!-- Header -->
+    <header class="invoice-header">
+      <div>
+        <div class="brand-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><path d="M22 2L11 13"></path><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          MAQAM TRAVELS
+        </div>
+        <div class="brand-sub">Premium Travel Services &amp; Flight Booking</div>
+        <div class="agency-address">
+          Worldmark 1, Aerocity, New Delhi, Delhi 110037, India<br>
+          <strong>GSTIN:</strong> 07AAACM1234F1Z8<br>
+          <strong>PAN:</strong> AAACM1234F | <strong>SAC Code:</strong> 996412<br>
+          <strong>Email:</strong> support@maqamtravels.com | <strong>Support:</strong> +91 11 4000 8899
+        </div>
+      </div>
+
+      <div class="invoice-title-block">
+        <div class="invoice-heading">TAX INVOICE</div>
+        <div class="badge-group">
+          <span class="badge badge-status-confirmed">CONFIRMED</span>
+          <span class="badge badge-service">LCC (Low-Cost Carrier)</span>
+        </div>
+        <div style="margin-top: 10px; font-size: 11px; color: var(--slate-600);">
+          <div>Invoice Date: <strong>10 Oct 2026, 03:30 pm</strong></div>
+          <div>Place of Supply: <strong>Plot 45, Sector 18, Gurugram, Haryana</strong></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Details Grid: Invoice & Customer/GST -->
+    <div class="details-grid">
+      <div class="detail-col">
+        <h4>Booking &amp; Invoice Reference</h4>
+        <div class="detail-row">
+          <span class="detail-label">Invoice Number:</span>
+          <span class="detail-val highlight-mono">MT-INV-LCC-202610-2106</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Airline PNR:</span>
+          <span class="detail-val highlight-mono" style="font-size: 13px;">6E9XYZ</span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">Booking Reference:</span>
+          <span class="detail-val">2106</span>
+        </div>
+        
+      </div>
+
+      <div class="detail-col">
+        <h4>Billed To (Customer / Corporate)</h4>
+        <div class="detail-row">
+          <span class="detail-label">Customer Name:</span>
+          <span class="detail-val">Rahul Sharma</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Email:</span>
+          <span class="detail-val">rahul.sharma@example.com</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Contact:</span>
+          <span class="detail-val">+91 99999 88888</span>
+        </div>
+        
+        <div class="detail-row" style="margin-top: 6px; border-top: 1px dashed #e2e8f0; padding-top: 6px;">
+          <span class="detail-label">Company:</span>
+          <span class="detail-val"><strong>Acme Corp Technologies Pvt Ltd</strong></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Buyer GSTIN:</span>
+          <span class="detail-val highlight-mono">07AAACA1234F1Z1</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Company Address:</span>
+          <span class="detail-val" style="max-width: 200px;">Plot 45, Sector 18, Gurugram, Haryana</span>
+        </div>
+      
+      </div>
+    </div>
+
+    <!-- Flight Segments -->
+    <div class="section-title">Flight Journey Itinerary</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Sector &amp; Flight</th>
+          <th>Departure</th>
+          <th>Arrival</th>
+          <th>Duration &amp; Class</th>
+          <th>Baggage</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td>
+            <strong>IndiGo (6E-2501)</strong><br>
+            <span style="color: var(--slate-500); font-size: 11px;">Delhi [DEL] → Ahmedabad [AMD]</span>
+          </td>
+          <td>
+            <strong>Delhi (DEL) (T3)</strong><br>
+            <span style="color: var(--slate-600);">15 Oct 2026, 08:00 am</span>
+          </td>
+          <td>
+            <strong>Ahmedabad (AMD) (T1)</strong><br>
+            <span style="color: var(--slate-600);">15 Oct 2026, 09:35 am</span>
+          </td>
+          <td>
+            1h 35m<br>
+            <span style="color: var(--slate-500); font-size: 11px;">Class: Economy</span>
+          </td>
+          <td>
+            Check-in: <strong>15 Kg</strong><br>
+            Cabin: 7 Kg
+          </td>
+        </tr>
+      
+      </tbody>
+    </table>
+
+    <!-- Passenger & E-Ticket Details -->
+    <div class="section-title">Passenger &amp; E-Ticket Details</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 35px;">#</th>
+          <th>Passenger Name</th>
+          <th>Type</th>
+          <th>E-Ticket Number</th>
+          <th>Ticket Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td>1</td>
+          <td><strong>Mr Rahul Sharma</strong></td>
+          <td><span class="badge" style="background: #f1f5f9; color: #475569;">Adult</span></td>
+          <td><span class="highlight-mono">6E9XYZ-1</span></td>
+          <td>
+            <span class="badge badge-status-confirmed">OK</span>
+          </td>
+        </tr>
+      
+      </tbody>
+    </table>
+
+    <!-- Financial Fare Breakdown -->
+    <div class="fare-box">
+      <table class="fare-table">
+        <tr>
+          <td>Air Base Fare:</td>
+          <td>INR 3,691.00</td>
+        </tr>
+        <tr>
+          <td>Airline Taxes &amp; Surcharges (YQ/UDF/PSF):</td>
+          <td>INR 1,465.00</td>
+        </tr>
+        
+        <tr>
+          <td>Agency Convenience &amp; Service Fee:</td>
+          <td>INR 250.00</td>
+        </tr>
+        
+        <tr>
+          <td>CGST @ 9%:</td>
+          <td>INR 22.50</td>
+        </tr>
+        <tr>
+          <td>SGST @ 9%:</td>
+          <td>INR 22.50</td>
+        </tr>
+      
+        <tr class="total-row">
+          <td>Total Invoice Amount:</td>
+          <td>INR 5,156.00</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Payment & Compliance Info Cards -->
+    <div class="info-boxes">
+      <div class="info-card">
+        <h5>Payment Receipt</h5>
+        <div><strong>Payment Gateway:</strong> RAZORPAY</div>
+        <div><strong>Transaction / Order ID:</strong> <span class="highlight-mono">order_Oihw87413k</span></div>
+        <div><strong>Payment Status:</strong> <span style="color: var(--emerald-600); font-weight: 700;">PAID</span></div>
+        <div><strong>Total Paid:</strong> INR 5,156.00 (Full Settlement)</div>
+      </div>
+      <div class="info-card">
+        <h5>Tax Compliance Declaration</h5>
+        <div><strong>Service Classification:</strong> Air Passenger Transport</div>
+        <div><strong>SAC Codes:</strong> 996411 (Domestic) / 996412 (International)</div>
+        <div><strong>Reverse Charge Mechanism:</strong> No</div>
+        <div>Tax invoice generated pursuant to Section 31 of CGST Act, 2017.</div>
+      </div>
+    </div>
+
+    <!-- Terms and Footer -->
+    <footer class="invoice-footer">
+      <div class="footer-note">This is a system-generated computer invoice and e-ticket receipt; no physical signature is required.</div>
+      <div>
+        For customer support, amendments, or cancellations, please contact <strong>support@maqamtravels.com</strong> or call <strong>+91 11 4000 8899</strong>.<br>
+        Thank you for choosing Maqam Travels for your journey!
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+components:
+  schemas:
+    SuccessEnvelope:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Operation completed successfully
+        data:
+          type: object
+          nullable: true
+          description: Payload of the response.
+        meta:
+          type: object
+          nullable: true
+          description: Metadata containing pagination, tokens, or headers details.

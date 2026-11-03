@@ -1,0 +1,118 @@
+{
+  "Error": {
+    "ErrorCode": "0",
+    "ErrorMessage": ""
+  },
+  "TraceId": "273937",
+  "SrdvType": "MixAPI",
+  "IsPriceChanged": false,
+  "Results": {
+    "SrdvIndex": "1",
+    "ResultIndex": "OB3_0_0",
+    "Source": "Other",
+    "ButtonColor": "#add8e6",
+    "TextColor": "#000000",
+    "SingleSlotBooking": "No",
+    "IsLCC": true,
+    "HoldAllowed": false,
+    "IsRefundable": true,
+    "IsPriceChanged": false,
+    "AirlineRemark": "SpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet MainSpiceJet Main.",
+    "IsPassportFullDetailRequiredAtBook": false,
+    "IsPassportRequiredAtBook": false,
+    "IsHoldMandatoryWithSSR": false,
+    "DocumentRequired": false,
+    "GSTAllowed": true,
+    "IsGSTMandatory": false,
+    "IsBaggageRequired": false,
+    "IsMealRequired": false,
+    "IsSeatRequired": false,
+    "AdultDobRequired": false,
+    "Fare": {
+      "Currency": "INR",
+      "BaseFare": 4359,
+      "Tax": 1071,
+      "YQTax": 599,
+      "OtherCharges": 25.77,
+      "TransactionFee": "0",
+      "AdditionalTxnFeeOfrd": 0,
+      "AdditionalTxnFeePub": 0,
+      "AirTransFee": "0",
+      "Discount": 0,
+      "PublishedFare": 5455.77,
+      "OfferedFare": 5456,
+      "CommissionEarned": 0,
+      "TdsOnCommission": 0
+    },
+    "FareBreakdown": [
+      {
+        "PassengerType": 1,
+        "PassengerCount": 1,
+        "BaseFare": 4359,
+        "Tax": 1071,
+        "YQTax": 599,
+        "AdditionalTxnFeeOfrd": 0,
+        "AdditionalTxnFeePub": 0
+      }
+    ],
+    "Segments": [
+      [
+        {
+          "Baggage": "15 KG",
+          "CabinBaggage": "7KG (7 KG X 1 pcs)",
+          "CabinClassName": "Economy",
+          "CabinClassCode": 2,
+          "TripIndicator": 1,
+          "SegmentIndicator": 1,
+          "Airline": {
+            "AirlineCode": "SG",
+            "AirlineName": "SpiceJet",
+            "FlightNumber": "476",
+            "FareClass": "RS",
+            "OperatingCarrier": ""
+          },
+          "NoOfSeatAvailable": "not set",
+          "Origin": {
+            "AirportCode": "DEL",
+            "AirportName": "Indira Gandhi Airport",
+            "Terminal": "1D",
+            "CityCode": "DEL",
+            "CityName": "Delhi",
+            "CountryCode": "IN",
+            "CountryName": "India"
+          },
+          "DepTime": "2026-08-15T16:30:00",
+          "Destination": {
+            "AirportCode": "BOM",
+            "AirportName": "Chhatrapati Shivaji International Airport",
+            "Terminal": "1",
+            "CityCode": "BOM",
+            "CityName": "Mumbai",
+            "CountryCode": "IN",
+            "CountryName": "India"
+          },
+          "ArrTime": "2026-08-15T18:40:00",
+          "Duration": 130,
+          "GroundTime": 0,
+          "Mile": 0,
+          "StopOver": false,
+          "StopPoint": "",
+          "StopPointArrivalTime": "0001-01-01T00:00:00",
+          "StopPointDepartureTime": "0001-01-01T00:00:00",
+          "Craft": "73H",
+          "Remark": null,
+          "IsETicketEligible": true,
+          "FlightStatus": "Confirmed",
+          "Status": ""
+        }
+      ]
+    ],
+    "AirlineCode": "SG",
+    "ValidatingAirline": "SG",
+    "AirlineRules": {
+      "FirstNameMinChar": 1,
+      "LastNameMinChar": 2
+    }
+  },
+  "LogPath": "2026/07/27"
+}

@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hotelier & HotelStock Integration & Workflow Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.82);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.35);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-blue: #38bdf8;
+      --accent-indigo: #6366f1;
+      --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    .glow-bg {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at 50% 10%, rgba(99, 102, 241, 0.18) 0%, rgba(11, 15, 25, 0) 70%),
+                  radial-gradient(circle at 85% 35%, rgba(56, 189, 248, 0.12) 0%, rgba(11, 15, 25, 0) 60%),
+                  radial-gradient(circle at 15% 75%, rgba(168, 85, 247, 0.12) 0%, rgba(11, 15, 25, 0) 60%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 48px 24px 120px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: var(--accent-blue);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 14px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 32px;
+      margin-bottom: 36px;
+      box-shadow: var(--glass-shadow);
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 14px;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--accent-blue);
+      margin: 24px 0 12px;
+    }
+
+    p {
+      color: #d1d5db;
+      margin-bottom: 16px;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 24px;
+      margin-top: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 18px;
+    }
+
+    .sub-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 22px;
+    }
+
+    .sub-card.emerald { border-left: 4px solid var(--accent-emerald); }
+    .sub-card.indigo { border-left: 4px solid var(--accent-indigo); }
+    .sub-card.amber { border-left: 4px solid var(--accent-amber); }
+    .sub-card.rose { border-left: 4px solid var(--accent-rose); }
+    .sub-card.blue { border-left: 4px solid var(--accent-blue); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.04);
+      color: #93c5fd;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Code Tags & Blocks */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      padding: 3px 8px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: #38bdf8;
+    }
+
+    pre {
+      background: #070a13;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 18px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      color: #e2e8f0;
+      margin: 14px 0;
+    }
+
+    /* Tag Pills */
+    .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .pill-green { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .pill-amber { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .pill-rose { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
+    .pill-indigo { background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.4); }
+
+    /* Mermaid diagrams */
+    .mermaid-container {
+      background: #090e1a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 24px;
+      margin: 20px 0;
+      overflow-x: auto;
+    }
+
+    /* Alerts */
+    .alert {
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin: 20px 0;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fde68a;
+    }
+    .alert-danger {
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fecdd3;
+    }
+    .alert-info {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #bae6fd;
+    }
+    .alert-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    ul, ol {
+      margin-left: 24px;
+      margin-bottom: 16px;
+      color: #d1d5db;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-bg"></div>
+
+  <div class="container">
+    <header>
+      <div class="badge">Architecture & API Flow Specification</div>
+      <h1>Hotelier & HotelStock Lifecycle Guide</h1>
+      <p class="subtitle">
+        How external hotel partners manage contracted room inventory (<code>HotelStock</code>), the review-gated admin approval queue, and how approved batches plug into live Packages & Offers.
+      </p>
+    </header>
+
+    <!-- SECTION 1: CRITICAL DOMAIN SEPARATION -->
+    <section class="card">
+      <h2>1. The Two Distinct "Hotel" Domains in the System</h2>
+      <p>
+        To prevent confusion, understand that this platform operates <strong>two independent hotel subsystems</strong> that serve different business models:
+      </p>
+
+      <div class="grid-2">
+        <div class="sub-card blue">
+          <span class="pill pill-indigo">Domain A: Live OTA Engine</span>
+          <h3 style="color:#60a5fa; margin-top:10px;">SRDV Live Hotel Booking</h3>
+          <p style="font-size:0.9rem;">
+            Dynamic third-party API integration. Live price, live availability, instant booking API calls for retail customers searching individual hotels worldwide.
+          </p>
+          <ul style="font-size:0.85rem;">
+            <li><strong>Service:</strong> <code>hotel-search.service.js</code>, <code>hotel-booking.service.js</code></li>
+            <li><strong>Model:</strong> <code>hotel.model.js</code> (stores <code>HotelBooking</code>)</li>
+            <li><strong>Catalog:</strong> <code>hotelCity.model.js</code> (~139k cities)</li>
+            <li><strong>Actor:</strong> Public Retail Customer</li>
+          </ul>
+        </div>
+
+        <div class="sub-card emerald">
+          <span class="pill pill-green">Domain B: Wholesale & Packages</span>
+          <h3 style="color:#34d399; margin-top:10px;">Partner Hotelier & HotelStock</h3>
+          <p style="font-size:0.9rem;">
+            Direct contracted wholesale room blocks negotiated with specific partner hotels. Bundled into holiday packages and flash offers or managed via self-service.
+          </p>
+          <ul style="font-size:0.85rem;">
+            <li><strong>Service:</strong> <code>hotelier.service.js</code>, <code>crm.service.js</code></li>
+            <li><strong>Stock Model:</strong> <code>hotelStock.model.js</code></li>
+            <li><strong>Partner Hotel:</strong> <code>hotelEntity.model.js</code> (name, destination, address, isActive)</li>
+            <li><strong>Actor:</strong> Partner Hotelier & Agency Admin</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: END-TO-END FLOW (MERMAID) -->
+    <section class="card">
+      <h2>2. End-to-End Visual Architecture & State Machine</h2>
+      <p>
+        The lifecycle of a wholesale room block from hotelier creation through admin approval to customer booking:
+      </p>
+
+      <div class="mermaid-container">
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Hotelier as Hotelier Partner
+    participant HotelierAPI as /api/v1/hotelier
+    participant DB as MongoDB (HotelStock)
+    participant AdminCRM as /api/v1/crm (Admin)
+    participant Engine as Package / Offer Engine
+    actor Customer as Public Customer
+
+    Note over Hotelier,HotelierAPI: Step 1: Stock Submission
+    Hotelier->>HotelierAPI: POST /stock (dates, roomType, rate, unitCount)
+    HotelierAPI->>DB: Save HotelStock (reviewStatus = "pending_review")
+    Note over DB,Engine: Units exist, but NOT sellable yet!
+
+    Note over AdminCRM,DB: Step 2: Quality & Rate Verification
+    AdminCRM->>DB: GET /hotel-stock/pending
+    AdminCRM->>DB: PATCH /hotel-stock/:id/review { decision: "approved" }
+    DB-->>DB: Update reviewStatus = "approved"
+
+    Note over Engine,Customer: Step 3: Bundling & Dynamic Availability
+    AdminCRM->>Engine: Attach HotelStock to Package or Offer
+    Customer->>Engine: View Package/Offer Page
+    Engine->>DB: Compute Live Availability (reviewStatus=="approved" && hotel.isActive==true)
+    DB-->>Customer: Display available seats/rooms
+
+    Note over Customer,DB: Step 4: Checkout & Atomic Claim
+    Customer->>Engine: Book Package / Offer
+    Engine->>DB: claimUnitsFromStock() (units.$.status = "assigned")
+    DB-->>Customer: Booking Confirmed
+
+    Note over Hotelier,DB: Step 5: Partner In-Stay Controls
+    Hotelier->>HotelierAPI: PATCH /stock/:id/units/:unitId { status: "blocked" }
+    Note right of HotelierAPI: Instant block for room maintenance (No re-review needed)
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: WHAT THE HOTELIER CAN DO -->
+    <section class="card">
+      <h2>3. Hotelier Capabilities (According to Current Code)</h2>
+      <p>
+        The hotelier is authenticated via JWT with <code>role: "hotelier"</code> and bound to a specific <code>hotelId</code>. All operations are strictly confined to batches where <code>stock.hotelId === req.user.hotelId</code>.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>HTTP Route</th>
+            <th>Payload Example</th>
+            <th>Effect on <code>reviewStatus</code></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>List Own Inventory</strong></td>
+            <td><code>GET /api/v1/hotelier/stock</code></td>
+            <td><em>None</em></td>
+            <td><span class="pill pill-indigo">Read Only</span> (sanitized units)</td>
+          </tr>
+          <tr>
+            <td><strong>Create New Batch</strong></td>
+            <td><code>POST /api/v1/hotelier/stock</code></td>
+            <td>
+              <code>{ destination, roomType, checkIn, checkOut, pricePerNight, meals, reservationRef, nameAdditionDeadline, unitCount: 10 }</code>
+            </td>
+            <td><span class="pill pill-amber">pending_review</span> (New batch created)</td>
+          </tr>
+          <tr>
+            <td><strong>Edit Rate or Dates</strong></td>
+            <td><code>PATCH /api/v1/hotelier/stock/:id</code></td>
+            <td>
+              <code>{ pricePerNight: 4500, checkIn: "2026-11-01" }</code>
+            </td>
+            <td><span class="pill pill-rose">Resets to pending_review</span> (Admin must re-approve)</td>
+          </tr>
+          <tr>
+            <td><strong>Add Units to Batch</strong></td>
+            <td><code>POST /api/v1/hotelier/stock/:id/units</code></td>
+            <td>
+              <code>{ count: 5 }</code>
+            </td>
+            <td><span class="pill pill-rose">Resets to pending_review</span> (Admin must re-approve)</td>
+          </tr>
+          <tr>
+            <td><strong>Toggle Room Hold</strong></td>
+            <td><code>PATCH /api/v1/hotelier/stock/:id/units/:unitId</code></td>
+            <td>
+              <code>{ status: "available" | "blocked" }</code>
+            </td>
+            <td><span class="pill pill-green">No Change</span> (Instant toggle for maintenance)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Strict Guardrails & Security Boundaries</h3>
+      <ul>
+        <li><strong>No Direct Approval:</strong> Hoteliers can <em>never</em> modify <code>reviewStatus</code>, <code>reviewedBy</code>, or <code>reviewNotes</code>.</li>
+        <li><strong>No Booking Tampering:</strong> Hoteliers can <em>never</em> change unit status to <code>assigned</code> or <code>used</code>. Those statuses are reserved for the checkout booking engine.</li>
+        <li><strong>No Locked Unit Overwrite:</strong> Hoteliers cannot change the status of an already <code>assigned</code> or <code>used</code> room unit.</li>
+        <li><strong>PII & Cost Masking:</strong> <code>sanitizeStockForHotelier()</code> hides all guest names, passenger lists, booking IDs, and agency pricing markups. Unit status is mapped to <code>available</code>, <code>blocked</code>, or <code>unavailable</code>.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 4: ADMIN CRM GATEWAY -->
+    <section class="card">
+      <h2>4. Agency Admin CRM Review Bridge</h2>
+      <p>
+        Stock created or edited by hoteliers does not reach the public storefront until an Admin or Super Admin approves it via CRM routes.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Endpoint</th>
+            <th>Role Required</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>GET /api/v1/crm/hotel-stock/pending</code></td>
+            <td>Admin / Super Admin</td>
+            <td>Review queue of all hotelier submissions awaiting action. Populates hotel details.</td>
+          </tr>
+          <tr>
+            <td><code>PATCH /api/v1/crm/hotel-stock/:id/review</code></td>
+            <td>Admin / Super Admin</td>
+            <td>Body: <code>{ decision: "approved" | "rejected", reviewNotes: "..." }</code></td>
+          </tr>
+          <tr>
+            <td><code>GET /api/v1/crm/hotel-stock/approved</code></td>
+            <td>Admin / Super Admin</td>
+            <td>Catalog of ready-to-sell batches used by Package / Offer builder dropdowns.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 5: HOW IT CONNECTS TO PACKAGES & OFFERS -->
+    <section class="card">
+      <h2>5. How <code>HotelStock</code> Connects with Packages, Offers & Availability</h2>
+
+      <div class="grid-2">
+        <div class="sub-card indigo">
+          <h3 style="color:#818cf8; margin-top:0;">1. Dynamic Live Availability Calculation</h3>
+          <p style="font-size:0.9rem;">
+            Implemented in <code>availability.service.js</code>. Stock availability is <strong>never statically cached</strong>. It is computed live on read using:
+          </p>
+          <pre>function isStockUsable(stockDoc) {
+  if (!stockDoc) return false;
+  // 1. Must be approved by Admin
+  if (stockDoc.reviewStatus !== "approved") return false;
+  // 2. Hotel property must be active
+  if (stockDoc.hotelId && stockDoc.hotelId.isActive === false) return false;
+  return true;
+}</pre>
+          <p style="font-size:0.85rem; color:#9ca3af;">
+            If an admin deactivates a hotel (<code>isActive: false</code>), all its packages and offers immediately show as <strong>0 seats available</strong> without needing a database update job.
+          </p>
+        </div>
+
+        <div class="sub-card emerald">
+          <h3 style="color:#34d399; margin-top:0;">2. Atomic Claim at Checkout</h3>
+          <p style="font-size:0.9rem;">
+            Implemented in <code>stockClaim.service.js</code>. When a customer confirms payment:
+          </p>
+          <pre>const query = { 
+  _id: stockId, 
+  "units.status": "available", 
+  reviewStatus: "approved" 
+};
+// Atomically sets units.$.status = "assigned"
+// Links assignedToBooking = bookingId</pre>
+          <p style="font-size:0.85rem; color:#9ca3af;">
+            If the hotelier edited the batch while the customer was browsing, <code>reviewStatus</code> became <code>pending_review</code> and the checkout claim safely fails with an error rather than overselling.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: CODE MISTAKES, RISKS & OBSERVATIONS -->
+    <section class="card" style="border-color: rgba(244, 63, 94, 0.4);">
+      <h2 style="color:#fb7185;">6. Potential Mistakes, Clutter & Code Observations to Review</h2>
+      <p>
+        Here are the exact architectural gaps, quirks, and potential bugs identified directly in the current implementation:
+      </p>
+
+      <div class="alert alert-danger">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>1. Model Collision Danger: <code>hotelInventory.model.js</code></strong>
+          <p style="font-size:0.9rem; margin-top:4px;">
+            Inside <code>server/modules/hotels/hotelInventory.model.js</code>, line 49 executes: <code>mongoose.model('Hotel', hotelInventorySchema)</code>. Meanwhile, <code>hotelEntity.model.js</code> also defines <code>mongoose.model('Hotel', hotelSchema)</code>. If <code>hotelInventory.model.js</code> is ever required before <code>hotelEntity.model.js</code>, Mongoose will throw an <code>OverwriteModelError</code>. Since <code>hotelInventory.model.js</code> is completely unused, it is orphaned dead code and should be deleted.
+          </p>
+        </div>
+      </div>
+
+      <div class="alert alert-warning">
+        <div class="alert-icon">⚡</div>
+        <div>
+          <strong>2. Misplaced Domain File: <code>hotelEntity.model.js</code></strong>
+          <p style="font-size:0.9rem; margin-top:4px;">
+            <code>hotelEntity.model.js</code> (which defines partner hotel profiles like contract notes, tie-up dates, contact person) is located inside <code>server/modules/hotels/</code> alongside SRDV live OTA code. It has zero relation to SRDV and is exclusively used by <code>modules/hotelier/</code>, <code>modules/crm/</code>, and <code>modules/packages/stock/</code>. It should logically live under <code>modules/hotelier/hotel.model.js</code> or <code>modules/packages/stock/</code>.
+          </p>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <div class="alert-icon">✔</div>
+        <div>
+          <strong>3. Rejection & Resubmission Workflow (Confirmed Standard Flow)</strong>
+          <p style="font-size:0.9rem; margin-top:4px;">
+            If an admin rejects a batch with feedback (e.g. <em>"Rate too high, please reduce to ₹4,000"</em> or <em>"Fix date typo"</em>), the hotelier can edit the batch. The code resets <code>reviewStatus = 'pending_review'</code> and sends it back to the admin queue. This avoids forcing hoteliers to re-type batches from scratch for simple fixes.
+          </p>
+        </div>
+      </div>
+
+      <div class="alert alert-info" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.1); color: #a7f3d0;">
+        <div class="alert-icon">🛡️</div>
+        <div>
+          <strong>4. Active Booking Protection (Guard 1 Implemented)</strong>
+          <p style="font-size:0.9rem; margin-top:4px;">
+            In <code>hotelier.service.js</code>, if any room unit in a batch is already booked by a customer (<code>status === 'assigned'</code> or <code>'used'</code>), hoteliers are <strong>strictly blocked</strong> from changing dates (<code>checkIn</code>, <code>checkOut</code>), <code>destination</code>, or <code>roomType</code>. Attempting to do so returns an immediate <code>400 Bad Request</code>, protecting active customer reservations from date corruption.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: ACTIVE TEST CREDENTIALS & FRONTEND GUIDE -->
+    <section class="card" style="border-color: rgba(56, 189, 248, 0.4);">
+      <h2 style="color: var(--accent-blue);">7. Active Test Credentials & Frontend Dropdown Integration</h2>
+      <p>
+        The following test entities and user accounts are <strong>active and persisted in the database</strong>. The frontend team can use these immediately without needing to re-seed:
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Email</th>
+            <th>Password</th>
+            <th>Assigned Hotel Entity & ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-rose">Admin</span></td>
+            <td><code>admin1@gmail.com</code></td>
+            <td><code>Admin1234</code></td>
+            <td>Full Agency CRM System Access</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-green">Hotelier 1</span></td>
+            <td><code>hotelier1@gmail.com</code></td>
+            <td><code>Hotelier1234!</code></td>
+            <td><strong>Atlantis The Royal</strong> (<code>6aaa35d9d1cad56b320149b5</code>)</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-amber">Hotelier 2</span></td>
+            <td><code>hotelier2@gmail.com</code></td>
+            <td><code>Hotelier1234!</code></td>
+            <td><strong>Grand Hyatt Dubai</strong> (<code>6aa7a264deb5e62eec46e8f8</code>)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>How Frontend Implements "Add Room / Hotel Stock"</h3>
+      <p>
+        To create a room allotment in the CRM, the frontend must pass a valid <code>hotelId</code>. Here is the exact recommended workflow:
+      </p>
+      <ol>
+        <li>
+          <strong>Fetch Hotels on Page Load:</strong> Send <code>GET /api/v1/crm/hotels</code> to populate the Hotel dropdown (e.g. <code>&lt;option value="hotel._id"&gt;hotel.name (hotel.destination)&lt;/option&gt;</code>).
+        </li>
+        <li>
+          <strong>Submit Room Allotment:</strong> Send <code>POST /api/v1/crm/stocks/hotels</code> with:
+          <pre>{
+  "hotelId": "6aaa35d9d1cad56b320149b5",
+  "roomType": "Royal Sky Suite",
+  "checkIn": "2026-11-20T00:00:00.000Z",
+  "checkOut": "2026-11-25T00:00:00.000Z",
+  "pricePerNight": 5500,
+  "meals": ["breakfast", "dinner"],
+  "reservationRef": "ATL-ROYAL-BLK-01",
+  "nameAdditionDeadline": "2026-11-15T00:00:00.000Z",
+  "totalUnits": 10
+}</pre>
+        </li>
+        <li>
+          <strong>If Hotel Doesn't Exist:</strong> Open modal to <code>POST /api/v1/crm/hotels</code> (name, destination, address, contactPerson, contactPhone, contactEmail, etc.). On success, automatically select the returned <code>_id</code> in the dropdown.
+        </li>
+      </ol>
+    </section>
+
+    <!-- SECTION 8: SUMMARY & ACTION ITEMS -->
+    <section class="card">
+      <h2>8. Summary & Recommended Action Plan</h2>
+      <ol>
+        <li><strong>Delete Orphaned Mock:</strong> Safely remove <code>server/modules/hotels/hotelInventory.model.js</code> to eliminate Mongoose model registration collisions.</li>
+        <li><strong>Keep SRDV Isolated:</strong> Maintain <code>server/modules/hotels/</code> strictly for live SRDV hotel search and booking.</li>
+        <li><strong>Link Documentation:</strong> Ensure this flow document and <code>FRONTEND_CRM_HOTEL_AND_HOTELIER_INTEGRATION_GUIDE.md</code> are referenced across package and offer documentation.</li>
+      </ol>
+    </section>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#090e1a',
+        primaryColor: '#6366f1',
+        primaryTextColor: '#f3f4f6',
+        primaryBorderColor: '#4f46e5',
+        lineColor: '#38bdf8',
+        secondaryColor: '#1e293b',
+        tertiaryColor: '#0f172a'
+      }
+    });
+  </script>
+</body>
+</html>

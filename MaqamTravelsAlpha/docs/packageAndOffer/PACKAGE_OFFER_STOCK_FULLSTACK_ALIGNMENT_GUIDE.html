@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Packages, Offers & Wholesale Stocks — Interactive Fullstack Alignment & API Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #07090e;
+      --bg-secondary: #0d121f;
+      --bg-card: rgba(17, 24, 39, 0.7);
+      --bg-card-hover: rgba(31, 41, 55, 0.8);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.5);
+      --text-main: #f9fafb;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent-indigo: #6366f1;
+      --accent-blue: #38bdf8;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      --glass-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+      --code-bg: #090d16;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Ambient Background Glows */
+    .ambient-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      background: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 25%, rgba(56, 189, 248, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+    }
+
+    /* Left Navigation Drawer */
+    aside.sidebar {
+      width: 320px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background: rgba(13, 18, 31, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-text h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text span {
+      font-size: 0.72rem;
+      color: var(--accent-blue);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 14px 10px 36px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent-indigo);
+      background: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .search-box svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      fill: var(--text-dim);
+    }
+
+    .nav-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px;
+    }
+
+    .nav-section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      padding: 8px 12px 6px;
+      margin-top: 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-item.active {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent-blue);
+      font-weight: 600;
+      border-left: 3px solid var(--accent-indigo);
+    }
+
+    .method-chip {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .chip-get { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .chip-post { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .chip-patch { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .chip-delete { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+    /* Main Content Area */
+    main.content {
+      flex: 1;
+      padding: 40px 60px 100px;
+      max-width: 1200px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Hero Header */
+    .hero-banner {
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 850px;
+      line-height: 1.6;
+    }
+
+    .stat-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .stat-card .label {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-card .value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-top: 4px;
+      color: var(--text-main);
+    }
+
+    /* Cards & Containers */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 40px;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--glass-shadow);
+      position: relative;
+    }
+
+    .section-card:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    /* Architecture Callouts & Alerts */
+    .alert-box {
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .alert-info {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: #bae6fd;
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #fde68a;
+    }
+
+    .alert-critical {
+      background: rgba(244, 63, 94, 0.08);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      color: #fecdd3;
+    }
+
+    /* Tables */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    table.data-table th {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 14px 18px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+    }
+
+    table.data-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-main);
+    }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Interactive Simulator */
+    .simulator-container {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 16px;
+      padding: 28px;
+      margin: 28px 0;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .simulator-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+
+    .sim-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .sim-grid { grid-template-columns: 1fr; }
+    }
+
+    .sim-component-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .sim-component-item.disabled {
+      opacity: 0.5;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .sim-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sim-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .sim-select {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      margin-top: 10px;
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .sim-receipt {
+      background: rgba(10, 15, 25, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .receipt-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+
+    .receipt-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.3rem;
+      font-weight: 800;
+      padding: 16px 0 8px;
+      color: var(--accent-emerald);
+    }
+
+    /* Endpoint Accordion Cards */
+    .endpoint-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .endpoint-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .endpoint-header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .endpoint-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .endpoint-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .endpoint-summary {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .endpoint-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .auth-badge {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .auth-admin { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
+    .auth-customer { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
+    .auth-public { background: rgba(16, 185, 129, 0.12); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+
+    .endpoint-body {
+      display: none;
+      padding: 24px 20px;
+      border-top: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    .endpoint-body.open {
+      display: block;
+    }
+
+    .code-block-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      background: #060910;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    pre.code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 0 0 8px 8px;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    /* Tabs Filter Bar */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-indigo);
+      border-color: var(--accent-indigo);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    }
+
+    /* Architectural Critique / Adapter Evaluation Section */
+    .critique-card {
+      background: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(30, 27, 75, 0.4) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 16px;
+      padding: 32px;
+      margin-top: 48px;
+    }
+
+    .critique-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .critique-grid { grid-template-columns: 1fr; }
+      aside.sidebar { display: none; }
+      main.content { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <!-- Left Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <div class="brand-icon">TP</div>
+        <div class="brand-text">
+          <h1>TravelPlatform API</h1>
+          <span>Fullstack Alignment</span>
+        </div>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24"><path d="M21.71 20.29l-5.01-5.01C17.54 13.68 18 11.91 18 10c0-4.41-3.59-8-8-8S2 5.59 2 10s3.59 8 8 8c1.91 0 3.68-.46 5.28-1.3l5.01 5.01c.39.39 1.02.39 1.41 0 .39-.39.39-1.02.01-1.42zM4 10c0-3.31 2.69-6 6-6s6 2.69 6 6-2.69 6-6 6-6-2.69-6-6z"/></svg>
+        <input type="text" id="endpointSearch" placeholder="Filter endpoints or topics..." onkeyup="filterEndpoints()" />
+      </div>
+    </div>
+
+    <div class="nav-scroll">
+      <div class="nav-section-title">Core Concepts</div>
+      <a href="#architecture" class="nav-item">3-Tier Hierarchy</a>
+      <a href="#lifecycle" class="nav-item">Stock Unit State Machine</a>
+      <a href="#option-a-math" class="nav-item">Option A Pricing Math</a>
+      <a href="#simulator" class="nav-item">Live Price Simulator</a>
+      <a href="#adapter-analysis" class="nav-item">Universal Adapter Critique</a>
+
+      <div class="nav-section-title">Step 1: Wholesale Stocks (Tier 1)</div>
+      <a href="#stocks-overview" class="nav-item"><span class="method-chip chip-get">GET</span>/stocks/overview</a>
+      <a href="#stocks-flights-post" class="nav-item"><span class="method-chip chip-post">POST</span>/stocks/flights</a>
+      <a href="#stocks-flights-get" class="nav-item"><span class="method-chip chip-get">GET</span>/stocks/flights</a>
+      <a href="#stocks-hotels-post" class="nav-item"><span class="method-chip chip-post">POST</span>/stocks/hotels</a>
+      <a href="#stocks-hotels-get" class="nav-item"><span class="method-chip chip-get">GET</span>/stocks/hotels</a>
+
+      <div class="nav-section-title">Step 2: Retail Offers (Tier 2)</div>
+      <a href="#offers-crm-post" class="nav-item"><span class="method-chip chip-post">POST</span>/crm/offers</a>
+      <a href="#offers-crm-get" class="nav-item"><span class="method-chip chip-get">GET</span>/crm/offers</a>
+      <a href="#offers-crm-direct" class="nav-item"><span class="method-chip chip-post">POST</span>/crm/offers/book-for-customer</a>
+      <a href="#offers-pub-get" class="nav-item"><span class="method-chip chip-get">GET</span>/offers</a>
+      <a href="#offers-pub-book" class="nav-item"><span class="method-chip chip-post">POST</span>/offers/:id/book</a>
+
+      <div class="nav-section-title">Step 3: Curated Packages (Tier 3)</div>
+      <a href="#pkg-crm-post" class="nav-item"><span class="method-chip chip-post">POST</span>/crm/packages</a>
+      <a href="#pkg-crm-get" class="nav-item"><span class="method-chip chip-get">GET</span>/crm/packages</a>
+      <a href="#pkg-crm-direct" class="nav-item"><span class="method-chip chip-post">POST</span>/crm/packages/book-for-customer</a>
+      <a href="#pkg-crm-update" class="nav-item"><span class="method-chip chip-patch">PATCH</span>/crm/packages/bookings/:id</a>
+      <a href="#pkg-crm-remark" class="nav-item"><span class="method-chip chip-patch">PATCH</span>/crm/packages/bookings/:id/remark</a>
+      <a href="#pkg-pub-get" class="nav-item"><span class="method-chip chip-get">GET</span>/packages</a>
+      <a href="#pkg-pub-quote" class="nav-item"><span class="method-chip chip-post">POST</span>/packages/:id/quote</a>
+      <a href="#pkg-pub-book" class="nav-item"><span class="method-chip chip-post">POST</span>/packages/book</a>
+      
+      <div class="nav-section-title">Reference</div>
+      <a href="#matrix" class="nav-item">Master API Matrix</a>
+    </div>
+  </aside>
+
+  <!-- Main Scrollable Content -->
+  <main class="content">
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <div class="version-badge">Version 2.2.0 • Production Ready</div>
+      <h1 class="hero-title">Packages, Offers & Wholesale Stocks</h1>
+      <p class="hero-subtitle">Definitive engineering blueprint & interactive fullstack API guide for Customer Web/App and CRM Operations Portals. Aligned with 3-tier inventory hierarchy, Option A dynamic pricing, and stock hold lifecycle. Note: Visas are sold 100% standalone via <code>/api/v1/visa/*</code>.</p>
+
+      <div class="stat-cards-grid">
+        <div class="stat-card">
+          <div class="label">Inventory Architecture</div>
+          <div class="value">3-Tier Hierarchy</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Customizer Formula</div>
+          <div class="value">Option A (Anchored)</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Hold Auto-Release Timer</div>
+          <div class="value">30 Minutes</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Minimum Component Rule</div>
+          <div class="value">&ge; 2 Offers Guardrail</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: 3-Tier Architecture & Mandatory Prerequisites -->
+    <section id="architecture" class="section-card">
+      <h2 class="section-title">
+        <span style="color: var(--accent-indigo);">1.</span> System Architecture & Mandatory Pre-Requisite Hierarchy
+      </h2>
+      <p class="section-desc">
+        The platform enforces a strict prerequisite sequence. You cannot construct packages without existing offers, and you cannot construct retail offers without physical wholesale inventory stocks.
+      </p>
+
+      <div class="mermaid" style="margin: 24px 0; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+flowchart TD
+    classDef stockStyle fill:#1e1b4b,stroke:#6366f1,color:#e0e7ff,stroke-width:2px;
+    classDef offerStyle fill:#0c4a6e,stroke:#38bdf8,color:#e0f2fe,stroke-width:2px;
+    classDef pkgStyle fill:#064e3b,stroke:#10b981,color:#ecfdf5,stroke-width:2px;
+    classDef bookStyle fill:#3b0764,stroke:#a855f7,color:#f3e8ff,stroke-width:2px;
+
+    subgraph Tier1 ["STEP 1: Wholesale Stocks (Cost Price) — Mandatory 1st Prerequisite"]
+        TS["TicketStock<br/>(Flight Seats, bulk PNR block, costPerUnit)"]:::stockStyle
+        HS["HotelStock<br/>(Contracted Room Allotments, pricePerNight)"]:::stockStyle
+    end
+
+    subgraph Tier2 ["STEP 2: Standalone Retail Offers — Mandatory 2nd Prerequisite"]
+        OF_F["Flight Offer<br/>(Linked to TicketStock, sellPrice: ₹15,000)"]:::offerStyle
+        OF_H["Hotel Offer<br/>(Linked to HotelStock, sellPrice: ₹20,000)"]:::offerStyle
+    end
+
+    subgraph Tier3 ["STEP 3: Curated Packages — Composite Product (Requires >= 2 Offers)"]
+        PKG["Package Document<br/>• offerRefs: [Flight Offer, Hotel Offer]<br/>• Unbundled Total: ₹35,000<br/>• Bundle Discount: 10%<br/>• Base Sell Price: ₹31,500"]:::pkgStyle
+    end
+
+    subgraph UserFlow ["STEP 4: Booking & Operations Flow"]
+        CUSTOM["Interactive Customizer / Direct Quote<br/>• POST /api/v1/packages/:id/quote<br/>• Swaps/Opt-outs dynamically calculated"]
+        PB_CUST["Customer Booking Flow<br/>• POST /api/v1/packages/book<br/>• 30-min auto-release timer"]:::bookStyle
+        PB_CRM["CRM Direct Agent Booking<br/>• POST /api/v1/crm/packages/book-for-customer<br/>• Direct 'used' lock & Bank Transfer"]:::bookStyle
+    end
+
+    TS -->|flightRef.stock| OF_F
+    HS -->|hotelRef.stock| OF_H
+    OF_F & OF_H ===>|offerRefs (min 2)| PKG
+    PKG --> CUSTOM
+    CUSTOM --> PB_CUST
+    PKG --> PB_CRM
+    PB_CUST & PB_CRM -->|Atomic Unit Lock (available -> held -> used)| TS & HS
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Hierarchy Level</th>
+              <th>Core Entities</th>
+              <th>Why It Must Be Created First</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color: var(--accent-indigo);">Step 1: Wholesale Stock</strong></td>
+              <td><code>TicketStock</code>, <code>HotelStock</code></td>
+              <td>Establishes physical baseline capacity and cost price. Individual seat/room units are provisioned with <code>available</code> state.</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--accent-blue);">Step 2: Retail Offers</strong></td>
+              <td><code>Offer</code> (flight/hotel)</td>
+              <td>Assigns retail selling prices, inclusions, and marketing copy referencing Tier 1 stock. Can be sold standalone or used as package components.</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--accent-emerald);">Step 3: Curated Packages</strong></td>
+              <td><code>Package</code></td>
+              <td>Curated composite bundles referencing &ge; 2 Tier-2 Offer components. Applies bundle discount percentages and swappable alternative matrices.</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--accent-purple);">Step 4: Bookings & Operations</strong></td>
+              <td><code>PackageBooking</code>, <code>OfferBooking</code></td>
+              <td>Reserves physical Tier-1 units atomically (online 30-min hold vs CRM direct 'used' lock), creates master bookings, and handles ops fulfillment.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section: Stock Unit Lifecycle State Machine -->
+    <section id="lifecycle" class="section-card">
+      <h2 class="section-title">
+        <span style="color: var(--accent-indigo);">2.</span> Stock Unit Lifecycle State Machine
+      </h2>
+      <p class="section-desc">
+        Physical inventory units (airline seats and hotel rooms) transition through three strict states to guarantee zero double-booking and automatic stock replenishment on expiration or cancellation.
+      </p>
+
+      <div class="mermaid" style="margin: 20px 0; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+stateDiagram-v2
+    [*] --> available: Stock Batch Created (Admin / Hotelier Approved)
+    available --> held: Online Booking Created (Customer POST /packages/book)
+    available --> used: Direct Offline Booking (CRM Agent POST /book-for-customer)
+    held --> used: Payment Verified (Razorpay/PayPal Webhook)
+    held --> available: 30-Min Expiration Worker OR Customer Cancellation
+    used --> available: Admin/Customer Booking Cancelled (Refund & Stock Release)
+    used --> [*]: Travel Completed
+      </div>
+    </section>
+
+    <!-- Section: Option A Pricing Math -->
+    <section id="option-a-math" class="section-card">
+      <h2 class="section-title">
+        <span style="color: var(--accent-indigo);">3.</span> Option A Pricing Math Explained
+      </h2>
+      <p class="section-desc">
+        Under Option A, the bundle discount is locked onto the default bundle. When users customize, additions and removals happen at standalone retail face-value.
+      </p>
+
+      <div class="alert-box alert-info">
+        <div>
+          <strong>The Golden Formula:</strong><br/>
+          <code>Final Customized Price = Base Package Sell Price - Total Deductions (Opt-outs) + Total Deltas (Swaps)</code>
+        </div>
+      </div>
+
+      <div class="alert-box alert-warning">
+        <div>
+          <strong>Guardrail Rule (Minimum 2 Components):</strong><br/>
+          A package must maintain at least 2 active items at all times. If a user unchecks items until only 1 remains, the customizer rejects the request with HTTP 400.
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: Interactive Customizer Simulator -->
+    <section id="simulator" class="simulator-container">
+      <div class="simulator-header">
+        <div class="sim-title">
+          <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+          Interactive Option A Pricing Simulator
+        </div>
+        <div style="font-size: 0.8rem; color: var(--accent-blue); font-weight: 600;">LIVE DYNAMIC PREVIEW</div>
+      </div>
+
+      <div class="sim-grid">
+        <!-- Components Selector -->
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Package Inclusions</h4>
+          
+          <!-- Flight Component -->
+          <div class="sim-component-item" id="simFlightCard">
+            <div class="sim-row">
+              <label class="sim-checkbox-label">
+                <input type="checkbox" id="simFlightCheck" checked disabled />
+                <div>
+                  <div>Direct Flight DEL-DXB (IndiGo)</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Mandatory base component • Retail: ₹15,000</div>
+                </div>
+              </label>
+              <span style="font-weight: 700; color: #fff;">₹15,000</span>
+            </div>
+          </div>
+
+          <!-- Hotel Component (Swappable) -->
+          <div class="sim-component-item" id="simHotelCard">
+            <div class="sim-row">
+              <label class="sim-checkbox-label">
+                <input type="checkbox" id="simHotelCheck" checked onchange="recalculateSim()" />
+                <div>
+                  <div>Hotel Accommodation</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Swappable luxury category</div>
+                </div>
+              </label>
+              <span id="simHotelPriceDisplay" style="font-weight: 700; color: #fff;">₹20,000</span>
+            </div>
+            <select class="sim-select" id="simHotelSelect" onchange="recalculateSim()">
+              <option value="base" data-price="20000" data-delta="0">City Marina 3-Star (Default: ₹20,000)</option>
+              <option value="upgrade" data-price="26000" data-delta="6000">Luxury Marina 5-Star Resort (Upgrade: +₹6,000)</option>
+            </select>
+          </div>
+
+          <!-- Activity Component (Optional) -->
+          <div class="sim-component-item" id="simActivityCard">
+            <div class="sim-row">
+              <label class="sim-checkbox-label">
+                <input type="checkbox" id="simActivityCheck" checked onchange="recalculateSim()" />
+                <div>
+                  <div>Desert Safari & Bedouin Camp</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Optional item • Retail: ₹5,000</div>
+                </div>
+              </label>
+              <span style="font-weight: 700; color: #fff;">₹5,000</span>
+            </div>
+          </div>
+
+          <!-- Travellers Counter -->
+          <div style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border);">
+            <span style="font-size: 0.9rem; font-weight: 600;">Passenger / Quantity Count</span>
+            <input type="number" id="simQty" value="2" min="1" max="10" style="width: 60px; padding: 6px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 6px; text-align: center; font-weight: 700;" onchange="recalculateSim()" />
+          </div>
+        </div>
+
+        <!-- Dynamic Receipt Box -->
+        <div class="sim-receipt">
+          <div>
+            <h4 style="font-size: 0.95rem; margin-bottom: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Live Price Breakdown</h4>
+            
+            <div class="receipt-line">
+              <span>Unbundled Component Total</span>
+              <span>₹40,000</span>
+            </div>
+            <div class="receipt-line">
+              <span>Bundle Discount (10%)</span>
+              <span style="color: var(--accent-rose);">-₹4,000</span>
+            </div>
+            <div class="receipt-line" style="color: #fff; font-weight: 600;">
+              <span>Base Package Sell Price</span>
+              <span>₹36,000</span>
+            </div>
+            <div class="receipt-line" id="simDeductionsLine">
+              <span>Opt-Out Deductions</span>
+              <span id="simDeductionsVal" style="color: var(--accent-amber);">₹0</span>
+            </div>
+            <div class="receipt-line" id="simDeltasLine">
+              <span>Hotel Swap Delta</span>
+              <span id="simDeltasVal" style="color: var(--accent-blue);">+₹0</span>
+            </div>
+            <div class="receipt-line" style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 6px;">
+              <span>Final Per-Pax Price</span>
+              <span id="simPerPaxVal" style="font-weight: 700; color: #fff;">₹36,000</span>
+            </div>
+            <div class="receipt-line">
+              <span>Active Components Count</span>
+              <span id="simActiveCount" style="font-weight: 700; color: var(--accent-emerald);">3 items</span>
+            </div>
+          </div>
+
+          <div>
+            <div id="simGuardrailAlert" style="display: none; margin-bottom: 12px; padding: 8px 12px; background: rgba(244,63,94,0.15); border: 1px solid rgba(244,63,94,0.3); border-radius: 6px; color: #fca5a5; font-size: 0.8rem;">
+              ⚠️ Guardrail Triggered: A package must have &ge; 2 active components!
+            </div>
+            <div class="receipt-total">
+              <span>Total Payable Amount</span>
+              <span id="simTotalAmount">₹72,000</span>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-dim); text-align: right;">Calculated dynamically via Option A logic</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter Tabs for Endpoints -->
+    <div class="filter-tabs">
+      <button class="tab-btn active" onclick="filterTab('all', this)">All Endpoints</button>
+      <button class="tab-btn" onclick="filterTab('stocks', this)">Step 1: Stocks (Tier 1)</button>
+      <button class="tab-btn" onclick="filterTab('offers', this)">Step 2: Offers (Tier 2)</button>
+      <button class="tab-btn" onclick="filterTab('packages', this)">Step 3: Packages (Tier 3)</button>
+      <button class="tab-btn" onclick="filterTab('crm-ops', this)">CRM Ops & Bookings</button>
+    </div>
+
+    <!-- SECTION 1: Wholesale Stocks (Tier 1) -->
+    <div class="category-block" data-category="stocks">
+      <h3 style="font-size: 1.3rem; margin-bottom: 16px; color: var(--accent-indigo); display: flex; align-items: center; gap: 8px;">
+        <span>Step 1:</span> Wholesale Stocks (Tier 1 Prerequisite)
+      </h3>
+
+      <!-- Stocks Overview -->
+      <div class="endpoint-card" id="stocks-overview">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <div class="endpoint-left">
+            <span class="method-chip chip-get">GET</span>
+            <span class="endpoint-path">/api/v1/crm/stocks/overview</span>
+            <span class="endpoint-summary">Inventory Utilization Dashboard & Metrics</span>
+          </div>
+          <div class="endpoint-badges">
+            <span class="auth-badge auth-admin">Admin Auth</span>
+          </div>
+        </div>
+        <div class="endpoint-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">Returns consolidated health and allocation counts for all wholesale flight seats and hotel rooms (total, available, held, used, expiring soon).</p>
+          <div class="code-block-header">Response (200 OK)<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre class="code-block">{
+  "success": true,
+  "overview": {
+    "flights": {
+      "total": 120,
+      "available": 85,
+      "held": 15,
+      "used": 20,
+      "expiringSoon": 5
+    },
+    "hotels": {
+      "total": 90,
+      "available": 60,
+      "held": 10,
+      "used": 20,
+      "expiringSoon": 0
+    },
+    "totalStockBatches": 8
+  }
+}</pre>
+        </div>
+      </div>
+
+      <!-- Add Flight Stock Batch -->
+      <div class="endpoint-card" id="stocks-flights-post">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <div class="endpoint-left">
+            <span class="method-chip chip-post">POST</span>
+            <span class="endpoint-path">/api/v1/crm/stocks/flights</span>
+            <span class="endpoint-summary">Add Bulk Flight Ticket Stock Batch</span>
+          </div>
+          <div class="endpoint-badges">
+            <span class="auth-badge auth-admin">Admin Auth</span>
+          </div>
+        </div>
+        <div class="endpoint-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">Adds bulk PNR block seats to inventory. Auto-generates individual unit items in available status.</p>
+          <div class="code-block-header">Request Body (JSON)<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre class="code-block">{
+  "airline": "IndiGo",
+  "flightNumber": "6E-1452",
+  "origin": "DEL",
+  "destination": "DXB",
+  "departureDate": "2026-11-15T08:30:00.000Z",
+  "arrivalDate": "2026-11-15T12:00:00.000Z",
+  "cabinClass": "Economy",
+  "pnr": "IND99812A",
+  "nameAdditionDeadline": "2026-11-10T23:59:59.000Z",
+  "costPerUnit": 9500,
+  "totalUnits": 30
+}</pre>
+        </div>
+      </div>
+
+      <!-- Add Hotel Stock Allotment -->
+      <div class="endpoint-card" id="stocks-hotels-post">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <div class="endpoint-left">
+            <span class="method-chip chip-post">POST</span>
+            <span class="endpoint-path">/api/v1/crm/stocks/hotels</span>
+            <span class="endpoint-summary">Add Contracted Hotel Room Allotment</span>
+          </div>
+          <div class="endpoint-badges">
+            <span class="auth-badge auth-admin">Admin Auth</span>
+          </div>
+        </div>
+        <div class="endpoint-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">Adds contracted hotel room nights. Auto-generates individual room units in available status.</p>
+          <div class="code-block-header">Request Body (JSON)<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre class="code-block">{
+  "hotelId": "66d4a101e944f7b6b199e100",
+  "roomType": "Deluxe King Room",
+  "checkIn": "2026-11-15T14:00:00.000Z",
+  "checkOut": "2026-11-20T11:00:00.000Z",
+  "pricePerNight": 3500,
+  "meals": ["breakfast"],
+  "reservationRef": "HYATT-BLK-8821",
+  "totalUnits": 15
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Standalone Retail Offers (Tier 2) -->
+    <div class="category-block" data-category="offers">
+      <h3 style="font-size: 1.3rem; margin: 32px 0 16px; color: var(--accent-blue); display: flex; align-items: center; gap: 8px;">
+        <span>Step 2:</span> Standalone Retail Offers (Tier 2 Prerequisite)
+      </h3>
+
+      <!-- Create Retail Offer -->
+      <div class="endpoint-card" id="offers-crm-post">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <div class="endpoint-left">
+            <span class="method-chip chip-post">POST</span>
+            <span class="endpoint-path">/api/v1/crm/offers</span>
+            <span class="endpoint-summary">Create Retail Offer Linked to Stock</span>
+          </div>
+          <div class="endpoint-badges">
+            <span class="auth-badge auth-admin">Admin Auth</span>
+          </div>
+        </div>
+        <div class="endpoint-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">Creates standalone retail product linked directly to <code>TicketStock</code> or <code>HotelStock</code>. Automatically computes wholesale margin %.</p>
+          <div class="code-block-header">Request Body (JSON)<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre class="code-block">{
+  "title": "Direct Flight to Dubai — IndiGo Special",
+  "destination": "Dubai",
+  "itemType": "flight",
+  "flightRef": {
+    "stock": "66d4a8e2e944f7b6b199e811",
+    "unitsPerBooking": 1
+  },
+  "sellPrice": 12500,
+  "originalPrice": 15000,
+  "inclusions": ["7kg Cabin", "30kg Baggage"],
+  "startDate": "2026-11-15T08:30:00.000Z",
+  "endDate": "2026-11-15T12:00:00.000Z"
+}</pre>
+        </div>
+      </div>
+
+      <!-- CRM Direct Offer Booking -->
+      <div class="endpoint-card" id="offers-crm-direct">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <div class="endpoint-left">
+            <span class="method-chip chip-post">POST</span>
+            <span class="endpoint-path">/api/v1/crm/offers/book-for-customer</span>
+            <span class="endpoint-summary">Direct Offer Booking via Bank Transfer</span>
+          </div>
+          <div class="endpoint-badges">
+            <span class="auth-badge auth-admin">Admin/Agent Auth</span>
+          </div>
+        </div>
+        <div class="endpoint-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">Direct walk-in customer booking. Directly locks physical stock unit as 'used' and records offline payment transaction.</p>
+          <div class="code-block-header">Request Body (JSON)<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre class="code-block">{
+  "customerId": "66d4a8e2...",
+  "offerId": "66d4a999...",
+  "quantity": 1,
+  "travellers": [{ "travellerId": "66c1b011...", "isLead": true }],
+  "payment": {
+    "method": "bank_transfer",
+    "referenceNumber": "NEFT-HDFC-991282",
+    "notes": "Direct bank deposit verified"
+  }
+}</pre>
+        </div>
+      </div>
+
+      <!-- Public Offer Booking -->
+      <div class="endpoint-card" id="offers-pub-book">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <div class="endpoint-left">
+            <span class="method-chip chip-post">POST</span>
+            <span class="endpoint-path">/api/v1/offers/:id/book</span>
+            <span class="endpoint-summary">Customer Book Standalone Offer (30-Min Hold)</span>
+          </div>
+          <div class="endpoint-badges">
+            <span class="auth-badge auth-customer">Customer Auth</span>
+          </div>
+        </div>
+        <div class="endpoint-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">Creates customer offer booking and places a 30-minute lock on underlying stock unit pending checkout payment.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Curated Packages (Tier 3) -->
+    <div class="category-block" data-category="packages">
+      <h3 style="font-size: 1.3rem; margin: 32px 0 16px; color: var(--accent-emerald); display: flex; align-items: center; gap: 8px;">
+        <span>Step 3:</span> Curated Packages (Tier 3 Composite Product)
+      </h3>
+
+      <!-- Create Package -->
+      <div class="endpoint-card" id="pkg-crm-post">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <div class="endpoint-left">
+            <span class="method-chip chip-post">POST</span>
+            <span class="endpoint-path">/api/v1/crm/packages</span>
+            <span class="endpoint-summary">Create Package (&ge; 2 Components Guardrail)</span>
+          </div>
+          <div class="endpoint-badges">
+            <span class="auth-badge auth-admin">Admin Auth</span>
+          </div>
+        </div>
+        <div class="endpoint-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">Assembles a package bundle from Tier 2 offers. Server auto-computes sellPrice from retail items and discount percentage.</p>
+          <div class="code-block-header">Request Body (JSON)<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre class="code-block">{
+  "title": "Dubai Luxury Explorer 6D5N",
+  "destination": "Dubai",
+  "offerRefs": [
+    { "offer": "66d4a999...", "isOptional": false, "allowSwap": false },
+    { "offer": "66d4a202...", "isOptional": true, "allowSwap": true },
+    { "offer": "66d4a404...", "isOptional": true, "allowSwap": false }
+  ],
+  "bundleDiscountPercentage": 10,
+  "validity": { "from": "2026-10-01", "to": "2026-12-31" }
+}</pre>
+        </div>
+      </div>
+
+      <!-- Dynamic Customizer Quote Preview -->
+      <div class="endpoint-card" id="pkg-pub-quote">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <div class="endpoint-left">
+            <span class="method-chip chip-post">POST</span>
+            <span class="endpoint-path">/api/v1/packages/:id/quote</span>
+            <span class="endpoint-summary">Live Option A Dynamic Recalculation</span>
+          </div>
+          <div class="endpoint-badges">
+            <span class="auth-badge auth-public">Public</span>
+          </div>
+        </div>
+        <div class="endpoint-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">Instant price recalculation engine called on UI toggles and hotel/flight swaps.</p>
+          <div class="code-block-header">Request Body (JSON)<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre class="code-block">{
+  "quantity": 2,
+  "excludedOfferIds": ["66d4a404..."],
+  "swappedOffers": [{ "originalOfferId": "66d4a202...", "replacementOfferId": "66d4a555..." }]
+}</pre>
+        </div>
+      </div>
+
+      <!-- Direct Package Booking for Customer -->
+      <div class="endpoint-card" id="pkg-crm-direct">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <div class="endpoint-left">
+            <span class="method-chip chip-post">POST</span>
+            <span class="endpoint-path">/api/v1/crm/packages/book-for-customer</span>
+            <span class="endpoint-summary">CRM Direct Package Booking via Bank Transfer</span>
+          </div>
+          <div class="endpoint-badges">
+            <span class="auth-badge auth-admin">Admin/Agent Auth</span>
+          </div>
+        </div>
+        <div class="endpoint-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">Agent books package directly for customer. Bypasses 30-min hold, directly sets stock units to 'used', and creates confirmed master booking.</p>
+        </div>
+      </div>
+
+      <!-- Update Confirmed Booking Safe Details -->
+      <div class="endpoint-card" id="pkg-crm-update">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <div class="endpoint-left">
+            <span class="method-chip chip-patch">PATCH</span>
+            <span class="endpoint-path">/api/v1/crm/packages/bookings/:id</span>
+            <span class="endpoint-summary">Update Confirmed Booking (Safe Operational Details)</span>
+          </div>
+          <div class="endpoint-badges">
+            <span class="auth-badge auth-admin">Admin/Agent Auth</span>
+          </div>
+        </div>
+        <div class="endpoint-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">Safely update travel dates or contact details without mutating structural inventory items or claimed units.</p>
+        </div>
+      </div>
+
+      <!-- Add Remark to Booking -->
+      <div class="endpoint-card" id="pkg-crm-remark">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <div class="endpoint-left">
+            <span class="method-chip chip-patch">PATCH</span>
+            <span class="endpoint-path">/api/v1/crm/packages/bookings/:id/remark</span>
+            <span class="endpoint-summary">Add Operational Remark & Audit Trail</span>
+          </div>
+          <div class="endpoint-badges">
+            <span class="auth-badge auth-admin">Admin/Agent Auth</span>
+          </div>
+        </div>
+        <div class="endpoint-body">
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">Appends timestamped operational remarks to the booking dossier.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Architectural Evaluation: Universal Travel Service Adapter -->
+    <section id="adapter-analysis" class="critique-card">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <div style="background: var(--accent-purple); width: 10px; height: 10px; border-radius: 999px;"></div>
+        <span style="font-size: 0.8rem; font-weight: 700; color: #d8b4fe; text-transform: uppercase; letter-spacing: 0.08em;">Architectural Evaluation</span>
+      </div>
+      <h2 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 12px;">
+        Is the Current Module a "Perfect Adapter" for Services like Insurance or Tour Guides?
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+        <strong>Verdict: Not Yet a Universal Adapter.</strong> The current architecture is well-designed for Flights and Hotels, but exhibits coupling that would require code refactoring to cleanly support Insurance, Tour Guides, or Car Transfers.
+      </p>
+
+      <div class="critique-grid">
+        <!-- What's Missing -->
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+          <h4 style="color: #38bdf8; font-size: 1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <span>⚡</span> Current Architecture Status
+          </h4>
+          <ul style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.7; padding-left: 18px;">
+            <li><strong>Uniform Offer Packaging:</strong> Visas have been decoupled into standalone products. <code>Package.model.js</code> now bundles <code>offerRefs</code> only. Packages act as pure Offer containers.</li>
+            <li><strong>Hardcoded <code>itemType</code> in Offers:</strong> <code>Offer.model.js</code> currently accepts <code>enum: ['flight', 'hotel']</code> with pre-save hooks for <code>flightRef</code> / <code>hotelRef</code>.</li>
+            <li><strong>Inventory Claim Engine:</strong> <code>stockClaim.service.js</code> is pre-configured with <code>TicketStock</code> and <code>HotelStock</code>.</li>
+          </ul>
+        </div>
+
+        <!-- How to Plug in Guide & Insurance -->
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+          <h4 style="color: #86efac; font-size: 1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <span>✅</span> Guide & Insurance Integration Path
+          </h4>
+          <ul style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.7; padding-left: 18px;">
+            <li><strong>Expand Offer <code>itemType</code>:</strong> Add <code>'guide'</code> and <code>'insurance'</code> to the Offer schema with <code>guideRef</code> and <code>insuranceRef</code>.</li>
+            <li><strong>Register in <code>STOCK_MODELS</code>:</strong> Add <code>GuideStock</code> and <code>InsuranceStock</code> into <code>stockClaim.service.js</code>. The atomic unit lock engine works out of the box.</li>
+            <li><strong>Zero Package UI Changes:</strong> Because Packages bundle Offers generically, Guide and Insurance offers will appear in the Package Builder dropdown with zero Package schema or UI rewrites!</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Master API Matrix Section -->
+    <section id="matrix" class="section-card" style="margin-top: 48px;">
+      <h2 class="section-title">
+        <span style="color: var(--accent-indigo);">4.</span> Master API Matrix (Quick Reference)
+      </h2>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Domain</th>
+              <th>Method</th>
+              <th>Endpoint URL</th>
+              <th>Auth Level</th>
+              <th>Business Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Wholesale Stock</strong></td><td><span class="method-chip chip-get">GET</span></td><td><code>/api/v1/crm/stocks/overview</code></td><td>Admin</td><td>Consolidated inventory utilization dashboard</td></tr>
+            <tr><td><strong>Wholesale Stock</strong></td><td><span class="method-chip chip-post">POST</span></td><td><code>/api/v1/crm/stocks/flights</code></td><td>Admin</td><td>Create bulk flight PNR ticket stock batch</td></tr>
+            <tr><td><strong>Wholesale Stock</strong></td><td><span class="method-chip chip-get">GET</span></td><td><code>/api/v1/crm/stocks/flights</code></td><td>Admin</td><td>List and filter wholesale flight stocks</td></tr>
+            <tr><td><strong>Wholesale Stock</strong></td><td><span class="method-chip chip-post">POST</span></td><td><code>/api/v1/crm/stocks/hotels</code></td><td>Admin</td><td>Add contracted hotel room allotment</td></tr>
+            <tr><td><strong>Wholesale Stock</strong></td><td><span class="method-chip chip-get">GET</span></td><td><code>/api/v1/crm/stocks/hotels</code></td><td>Admin</td><td>List and filter hotel room stocks</td></tr>
+            <tr><td><strong>Retail Offers</strong></td><td><span class="method-chip chip-post">POST</span></td><td><code>/api/v1/crm/offers</code></td><td>Admin</td><td>Create retail offer linked to Ticket/Hotel stock</td></tr>
+            <tr><td><strong>Retail Offers</strong></td><td><span class="method-chip chip-get">GET</span></td><td><code>/api/v1/crm/offers</code></td><td>Admin</td><td>List offers with margin % and live stock</td></tr>
+            <tr><td><strong>Retail Offers</strong></td><td><span class="method-chip chip-post">POST</span></td><td><code>/api/v1/crm/offers/book-for-customer</code></td><td>Admin/Agent</td><td>Direct offline offer booking via Bank Transfer</td></tr>
+            <tr><td><strong>Retail Offers</strong></td><td><span class="method-chip chip-get">GET</span></td><td><code>/api/v1/offers</code></td><td>Public</td><td>Customer browse active standalone offers</td></tr>
+            <tr><td><strong>Retail Offers</strong></td><td><span class="method-chip chip-post">POST</span></td><td><code>/api/v1/offers/:id/book</code></td><td>Customer</td><td>Customer book offer (30-minute stock hold)</td></tr>
+            <tr><td><strong>Curated Packages</strong></td><td><span class="method-chip chip-post">POST</span></td><td><code>/api/v1/crm/packages</code></td><td>Admin</td><td>Create package bundle (&ge; 2 components)</td></tr>
+            <tr><td><strong>Curated Packages</strong></td><td><span class="method-chip chip-get">GET</span></td><td><code>/api/v1/crm/packages</code></td><td>Admin</td><td>List packages with cost and profit analytics</td></tr>
+            <tr><td><strong>Curated Packages</strong></td><td><span class="method-chip chip-get">GET</span></td><td><code>/api/v1/crm/packages/bookings</code></td><td>Admin/Agent</td><td>List all package bookings with filters</td></tr>
+            <tr><td><strong>Curated Packages</strong></td><td><span class="method-chip chip-post">POST</span></td><td><code>/api/v1/crm/packages/book-for-customer</code></td><td>Admin/Agent</td><td>Direct package booking for customer (Bank Transfer)</td></tr>
+            <tr><td><strong>Curated Packages</strong></td><td><span class="method-chip chip-patch">PATCH</span></td><td><code>/api/v1/crm/packages/bookings/:id</code></td><td>Admin/Agent</td><td>Safely update travel dates or contact info</td></tr>
+            <tr><td><strong>Curated Packages</strong></td><td><span class="method-chip chip-patch">PATCH</span></td><td><code>/api/v1/crm/packages/bookings/:id/remark</code></td><td>Admin/Agent</td><td>Append operational remark / audit trail</td></tr>
+            <tr><td><strong>Curated Packages</strong></td><td><span class="method-chip chip-get">GET</span></td><td><code>/api/v1/packages</code></td><td>Public</td><td>Browse public active packages</td></tr>
+            <tr><td><strong>Curated Packages</strong></td><td><span class="method-chip chip-post">POST</span></td><td><code>/api/v1/packages/:id/quote</code></td><td>Public</td><td>Live Option A customizer recalculation</td></tr>
+            <tr><td><strong>Curated Packages</strong></td><td><span class="method-chip chip-post">POST</span></td><td><code>/api/v1/packages/book</code></td><td>Customer</td><td>Customer package booking with visa upload</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+
+    // Endpoint Accordion Toggle
+    function toggleEndpoint(header) {
+      const body = header.nextElementSibling;
+      body.classList.toggle('open');
+    }
+
+    // Copy Code Helper
+    function copyCode(btn) {
+      const pre = btn.parentElement.nextElementSibling;
+      navigator.clipboard.writeText(pre.innerText);
+      const orig = btn.innerText;
+      btn.innerText = 'Copied!';
+      setTimeout(() => btn.innerText = orig, 1500);
+    }
+
+    // Tab Filter
+    function filterTab(category, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const blocks = document.querySelectorAll('.category-block');
+      blocks.forEach(block => {
+        if (category === 'all') {
+          block.style.display = 'block';
+        } else if (category === 'crm-ops') {
+          block.style.display = (block.dataset.category === 'packages' || block.dataset.category === 'stocks') ? 'block' : 'none';
+        } else {
+          block.style.display = block.dataset.category === category ? 'block' : 'none';
+        }
+      });
+    }
+
+    // Search Filter
+    function filterEndpoints() {
+      const query = document.getElementById('endpointSearch').value.toLowerCase();
+      const cards = document.querySelectorAll('.endpoint-card');
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(query) ? 'block' : 'none';
+      });
+    }
+
+    // Interactive Option A Simulator Recalculation
+    function recalculateSim() {
+      const flightIncluded = document.getElementById('simFlightCheck').checked;
+      const hotelIncluded = document.getElementById('simHotelCheck').checked;
+      const activityIncluded = document.getElementById('simActivityCheck').checked;
+      const hotelSelect = document.getElementById('simHotelSelect');
+      const qty = parseInt(document.getElementById('simQty').value) || 1;
+
+      // Base Package Prices (Sample: 15,000 + 20,000 + 5,000 = 40,000 - 10% = 36,000)
+      const basePackageSellPrice = 36000;
+      const flightRetail = 15000;
+      const hotelRetailBase = 20000;
+      const activityRetail = 5000;
+
+      let deductions = 0;
+      let deltas = 0;
+      let activeCount = 0;
+
+      if (flightIncluded) activeCount++;
+
+      // Hotel logic
+      const hotelCard = document.getElementById('simHotelCard');
+      if (hotelIncluded) {
+        activeCount++;
+        hotelCard.classList.remove('disabled');
+        hotelSelect.disabled = false;
+        if (hotelSelect.value === 'upgrade') {
+          deltas += 6000;
+          document.getElementById('simHotelPriceDisplay').innerText = '₹26,000';
+        } else {
+          document.getElementById('simHotelPriceDisplay').innerText = '₹20,000';
+        }
+      } else {
+        hotelCard.classList.add('disabled');
+        hotelSelect.disabled = true;
+        deductions += hotelRetailBase;
+      }
+
+      // Activity logic (Desert Safari)
+      const activityCard = document.getElementById('simActivityCard');
+      if (activityIncluded) {
+        activeCount++;
+        activityCard.classList.remove('disabled');
+      } else {
+        activityCard.classList.add('disabled');
+        deductions += activityRetail;
+      }
+
+      // Guardrail Check (&ge; 2 components)
+      const guardAlert = document.getElementById('simGuardrailAlert');
+      if (activeCount < 2) {
+        guardAlert.style.display = 'block';
+      } else {
+        guardAlert.style.display = 'none';
+      }
+
+      const finalPerPax = basePackageSellPrice - deductions + deltas;
+      const totalPayable = finalPerPax * qty;
+
+      // Update UI
+      document.getElementById('simDeductionsVal').innerText = deductions > 0 ? `-₹${deductions.toLocaleString('en-IN')}` : '₹0';
+      document.getElementById('simDeltasVal').innerText = deltas > 0 ? `+₹${deltas.toLocaleString('en-IN')}` : '+₹0';
+      document.getElementById('simPerPaxVal').innerText = `₹${finalPerPax.toLocaleString('en-IN')}`;
+      document.getElementById('simActiveCount').innerText = `${activeCount} item${activeCount === 1 ? '' : 's'}`;
+      document.getElementById('simTotalAmount').innerText = `₹${totalPayable.toLocaleString('en-IN')}`;
+    }
+
+    // Initialize Simulator on load
+    recalculateSim();
+  </script>
+</body>
+</html>

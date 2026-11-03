@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Module Architecture & Lifecycle — Maqam Travels</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'neutral',
+      sequence: {
+        showSequenceNumbers: true,
+        actorMargin: 50,
+        boxMargin: 10,
+        boxTextMargin: 5,
+        noteMargin: 10,
+        messageMargin: 35,
+        mirrorActors: false
+      }
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --accent: #818cf8;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h1, h2, h3, h4 {
+      color: var(--primary);
+      margin-top: 1.5em;
+    }
+    h1 {
+      font-size: 2.2rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 1.6rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .diagram-container {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 25px 0;
+      overflow-x: auto;
+    }
+    .alert {
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 16px 0;
+      border-left: 4px solid;
+    }
+    .alert-info {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: var(--primary);
+      color: #e0f2fe;
+    }
+    .alert-warning {
+      background: rgba(251, 191, 36, 0.1);
+      border-color: var(--warning);
+      color: #fef3c7;
+    }
+    .alert-success {
+      background: rgba(52, 211, 153, 0.1);
+      border-color: var(--success);
+      color: #d1fae5;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: #243248;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    code {
+      background: #090d16;
+      color: #38bdf8;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-built { background: rgba(52, 211, 153, 0.2); color: #34d399; }
+    .badge-missing { background: rgba(248, 113, 113, 0.2); color: #f87171; }
+    .badge-blue { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✈️ Flight Module — Complete Architecture & Flow</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem;">
+      Single comprehensive source of truth covering SRDV APIs, BullMQ background workers, LCC vs. GDS ticketing sequences, payment capture, markup mechanics, and the complete 3-step cancellation & refund lifecycle.
+    </p>
+
+    <!-- Section 1: SRDV API Full Inventory -->
+    <h2>1. SRDV Flight APIs — Full Inventory & Implemented Status</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>SRDV API Endpoint</th>
+          <th>Direction</th>
+          <th>Purpose</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><code>POST /Search</code></td>
+          <td>You → SRDV</td>
+          <td>Search available flight routes</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><code>POST /FareQuote</code></td>
+          <td>You → SRDV</td>
+          <td>Lock live price, check passport/GST mandatory flags</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><code>POST /SSR</code></td>
+          <td>You → SRDV</td>
+          <td>Fetch available meals, baggage, and seat options</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><code>POST /SeatMap</code></td>
+          <td>You → SRDV</td>
+          <td>Fetch live seat layout for selection</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><code>POST /TicketLCC</code></td>
+          <td>You → SRDV</td>
+          <td>Book + issue ticket instantly (IndiGo, SpiceJet, Akasa)</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><code>POST /Book</code> (Hold GDS)</td>
+          <td>You → SRDV</td>
+          <td>Create PNR hold without ticketing (Air India, Emirates)</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><code>POST /TicketGDS</code></td>
+          <td>Worker → SRDV</td>
+          <td>Asynchronous e-ticket issuance via BullMQ worker after payment capture</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td><code>POST /GetCalendarFare</code></td>
+          <td>You → SRDV</td>
+          <td>Fetch calendar lowest fares across 30 days</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td><code>POST /api/v1/flights/callback</code></td>
+          <td>SRDV → You</td>
+          <td>Inbound Webhook: Updates tickets on Success, triggers 100% full auto-refund on Failed/Aborted</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td><code>POST /GetCancellationCharges</code></td>
+          <td>You → SRDV</td>
+          <td>Query airline penalty amount before cancelling</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td><code>POST /SendChangeRequest</code></td>
+          <td>You → SRDV</td>
+          <td>Submit per-passenger cancellation ticket to airline</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td><code>POST /GetCancelStatus</code></td>
+          <td>You → SRDV</td>
+          <td>Poll cancellation status and airline refund wallet credit</td>
+          <td><span class="badge badge-built">✅ Built & Tested</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 2: Modular Background Worker Architecture -->
+    <h2>2. Modular Background Worker Registry</h2>
+    <div class="card">
+      <p style="margin-top: 0; color: var(--text-muted);">
+        All background workers are cleanly organized into domain directories under <code>server/workers/</code> and booted together via <code>startAllWorkers()</code> in <code>server.js</code>:
+      </p>
+      <pre style="background: #090d16; padding: 15px; border-radius: 8px; color: #38bdf8; font-size: 0.9rem; overflow-x: auto;">
+server/workers/
+├── index.js                          (Central bootloader: startAllWorkers / stopAllWorkers)
+│
+├── hotels/
+│   ├── hotel-book.worker.js          (Queue: hotel-book)
+│   ├── hotel-poll-status.worker.js   (Queue: hotel-poll-status)
+│   └── hotel-booking-status.worker.js (Periodic / Admin sweeper)
+│
+├── flights/
+│   └── flight-ticket-gds.worker.js   (Queue: flight-ticket-gds — 3 retries, distributed lock)
+│
+└── packages/
+    └── stock-expiration.worker.js    (5-min timer: cleans unpaid held stock)
+      </pre>
+    </div>
+
+    <!-- Section 3: LCC Flow Diagram -->
+    <h2>3. Complete Flow — LCC Flight (IndiGo, SpiceJet, Akasa)</h2>
+    <p>LCC = <strong>Ticket is issued instantly</strong> at booking time, and payment is captured right after.</p>
+    <div class="diagram-container">
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor FE as Frontend
+    participant BE as Backend (flight.service.js)
+    participant SRDV as SRDV API
+    participant Redis as Redis Cache
+    participant DB as MongoDB
+    participant Pay as Payment Gateway (PayPal / Razorpay)
+
+    FE->>BE: POST /flights/search
+    BE->>SRDV: POST /Search
+    SRDV-->>BE: Flight results
+    BE->>Redis: Cache traceId + srdvIndex + resultIndex
+    BE-->>FE: Cleaned results WITH markup applied
+
+    FE->>BE: POST /flights/fare-quote
+    BE->>Redis: Lookup cached search entry
+    BE->>SRDV: POST /FareQuote
+    SRDV-->>BE: Confirmed fare
+    BE->>Redis: Cache fare snapshot
+    BE-->>FE: confirmedFare with markup, requirements
+
+    FE->>BE: POST /flights/book
+    BE->>Redis: Lookup cached fare snapshot
+    BE->>DB: Create FlightBooking (status: "initiated")
+    BE->>SRDV: POST /TicketLCC ← ticket issued HERE
+    SRDV-->>BE: PNR, BookingId, TicketNumber
+    BE->>DB: Update FlightBooking (status: "confirmed")
+    BE-->>FE: { bookingId, pnr, totalAmount, paymentRequired: true }
+
+    FE->>Pay: POST /payments/paypal/create-order
+    Pay-->>FE: { paypalOrderId, redirectUrl }
+    FE->>FE: Customer approves payment
+    FE->>Pay: POST /payments/paypal/capture
+
+    Note over Pay,DB: bookingSync.js → ensureBookingConfirmed()
+    Pay->>DB: Payment status = "paid"
+    Pay->>DB: FlightBooking already confirmed → link paymentId
+    Pay->>DB: Create Master Booking record
+    Pay-->>FE: { status: "paid" }
+      </div>
+    </div>
+
+    <!-- Section 4: GDS Flow Diagram (BullMQ Worker) -->
+    <h2>4. Complete Flow — GDS Flight (BullMQ Worker + Outbox)</h2>
+    <p>GDS = <strong>PNR is held first</strong> with a deadline (<code>lastTicketDate</code>). Payment capture enqueues a background job to issue the e-ticket asynchronously without blocking the user.</p>
+    <div class="diagram-container">
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor FE as Frontend
+    participant BE as Backend (flight.service.js)
+    participant SRDV as SRDV API
+    participant DB as MongoDB
+    participant Pay as Payment Gateway
+    participant Sync as bookingSync.js
+    participant Queue as BullMQ (flight-ticket-gds)
+    participant Worker as flight-ticket-gds.worker.js
+
+    FE->>BE: POST /flights/book
+    BE->>DB: Create FlightBooking (status: "initiated")
+    BE->>SRDV: POST /Book (Hold GDS) ← holds PNR, NO ticket yet
+    SRDV-->>BE: PNR, BookingId, LastTicketDate
+    BE->>DB: Update FlightBooking (status: "pending")
+    BE-->>FE: { bookingId, pnr, totalAmount, lastTicketDate }
+
+    Note over FE: Customer pays before lastTicketDate
+
+    FE->>Pay: POST /payments/paypal/create-order
+    Pay-->>FE: { paypalOrderId, redirectUrl }
+    FE->>FE: Customer approves payment
+    FE->>Pay: POST /payments/paypal/capture
+
+    Note over Pay,Sync: bookingSync.js → Payment Captured
+    Sync->>DB: Record OutboxEvent (PAYMENT_RECEIVED)
+    Sync->>Queue: Enqueue Job (flight-ticket-gds)
+    Pay-->>FE: { status: "paid", message: "Payment received, issuing e-ticket" }
+
+    Note over Queue,Worker: Background Ticketing Execution
+    Queue->>Worker: Process Job (bookingId)
+    Worker->>DB: Acquire Distributed Lock (flight-ticket-gds:id)
+    Worker->>Worker: Check lastTicketDate deadline
+    Worker->>SRDV: POST /TicketGDS
+    SRDV-->>Worker: TicketNumbers, InvoiceNo, TicketStatus
+    Worker->>DB: FlightBooking.status = "confirmed" + populate ticket numbers
+    Worker->>DB: Create Master Booking record
+    Worker->>DB: Record OutboxEvent (TICKET_GDS_SUCCESS)
+      </div>
+    </div>
+
+    <!-- Section 5: Markup Mechanics -->
+    <h2>5. Markup Flow — How Platform Profit Is Calculated</h2>
+    <div class="card">
+      <div style="display: flex; flex-direction: column; gap: 15px;">
+        <div style="background: #090d16; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary);">
+          <h4 style="margin: 0 0 5px 0; color: var(--primary);">Stage 1: Search & Calendar</h4>
+          <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem;">
+            <code>totalAmount = OfferedFare × (1 + FLIGHT_MARKUP_PERCENT / 100)</code><br/>
+            Cleaned and sent to frontend as the displayed catalog price.
+          </p>
+        </div>
+        <div style="background: #090d16; padding: 15px; border-radius: 8px; border-left: 4px solid var(--warning);">
+          <h4 style="margin: 0 0 5px 0; color: var(--warning);">Stage 2: FareQuote</h4>
+          <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem;">
+            Same markup formula applied to the live, locked fare snapshot returned by SRDV.
+          </p>
+        </div>
+        <div style="background: #090d16; padding: 15px; border-radius: 8px; border-left: 4px solid var(--success);">
+          <h4 style="margin: 0 0 5px 0; color: var(--success);">Stage 3: Booking Storage</h4>
+          <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem;">
+            <code>baseTicketAmount = OfferedFare × (1 + markupPercent / 100)</code><br/>
+            <code>totalAmount = baseTicketAmount + ancillaries (meals/baggage/seats)</code><br/>
+            <code>markupAmount = totalAmount - OfferedFare</code> (Saved in DB — acts as non-refundable agency fee on cancellation).
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 6: Complete Cancellation & Refund Lifecycle -->
+    <h2>6. Cancellation, Change Request & Refund Lifecycle (Full 3-Step Flow)</h2>
+    
+    <div class="card">
+      <h4 style="margin: 0 0 10px 0; color: #fff;">💡 Markup Preservation Rule on Cancellation</h4>
+      <p style="margin: 0 0 10px 0; color: var(--text-muted); font-size: 0.95rem;">
+        When a customer cancels a flight, the platform retains the <strong>Agency Markup Fee</strong> (Maqam platform profit) and deducts the <strong>Airline Penalty</strong> returned by SRDV:
+      </p>
+      <div style="background: #090d16; padding: 12px 16px; border-radius: 8px; border-left: 4px solid var(--primary); font-family: monospace; color: #38bdf8; font-size: 0.95rem;">
+        Customer Refund = Total Paid - Airline Penalty - Maqam Agency Fee Retained
+      </div>
+      <div style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px; background: #090d16; padding: 12px; border-radius: 6px;">
+          <strong style="color: var(--warning);">Example A (₹1,100 Booking):</strong><br/>
+          <span style="color: var(--text-muted); font-size: 0.9rem;">
+            • Total Paid: ₹1,100 (Supplier: ₹1,000 + Maqam Fee: ₹100)<br/>
+            • Airline Penalty: -₹100<br/>
+            • Maqam Fee Retained: -₹100<br/>
+            • <strong>Customer Refund = ₹900</strong><br/>
+            • <em>(SRDV credits ₹900 to Maqam Wallet; Maqam refunds ₹900 via Gateway)</em>
+          </span>
+        </div>
+        <div style="flex: 1; min-width: 250px; background: #090d16; padding: 12px; border-radius: 6px;">
+          <strong style="color: var(--success);">Example B (₹7,500 Booking):</strong><br/>
+          <span style="color: var(--text-muted); font-size: 0.9rem;">
+            • Total Paid: ₹7,500 (Supplier: ₹6,750 + Maqam Fee: ₹750)<br/>
+            • Airline Penalty: -₹2,250<br/>
+            • Maqam Fee Retained: -₹750<br/>
+            • <strong>Customer Refund = ₹4,500</strong><br/>
+            • <em>(SRDV credits ₹4,500 to Maqam Wallet; Maqam refunds ₹4,500 via Gateway)</em>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="diagram-container">
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor FE as Frontend
+    participant BE as Backend (flight.service.js)
+    participant SRDV as SRDV API
+    participant DB as MongoDB
+    participant Pay as Payment Gateway (PayPal / Razorpay)
+
+    Note over FE,BE: Step 1: Preview Penalty & Estimated Refund
+    FE->>BE: GET /flights/bookings/:id/cancellation-charges
+    BE->>SRDV: POST /GetCancellationCharges
+    SRDV-->>BE: { TotalCancellationCharge: 2250, TotalRefundAmount: 4500 }
+    Note over BE: Formula: 7500 (Total) - 2250 (Penalty) - 750 (Markup) = 4500
+    BE-->>FE: { totalBookingAmount: 7500, airlinePenalty: 2250, agencyFee: 750, expectedCustomerRefund: 4500 }
+
+    Note over FE: Customer reviews breakdown and clicks "Confirm Cancellation"
+
+    Note over FE,BE: Step 2: Submit Cancellation to Airline & Gateway Refund
+    FE->>BE: POST /flights/bookings/:id/cancel
+    loop For each passenger (SRDV 1-pax per request rule)
+        BE->>SRDV: POST /SendChangeRequest (TicketData: [Pax])
+        SRDV-->>BE: { ChangeRequestId: "CR_123", Status: "Pending" }
+    end
+    BE->>Pay: refundPayment(paymentId, customerRefundAmount: 4500)
+    Pay-->>BE: { refundId: "PAYPAL_REF_123" }
+    BE->>DB: Save FlightRefund (changeRequests: [CR_123], gatewayRefundId, status: "processed")
+    BE->>DB: FlightBooking.status = "cancelled", Booking.status = "cancelled"
+    BE-->>FE: { status: "cancelled", refund: { customerRefundAmount: 4500, gatewayRefundId } }
+
+    Note over FE,BE: Step 3: Track Live Cancellation & Airline Wallet Credit Status
+    FE->>BE: GET /flights/bookings/:id/cancel-status
+    BE->>SRDV: POST /GetCancelStatus (ChangeRequestId: "CR_123")
+    SRDV-->>BE: { CancelStatus: "Cancelled", RefundStatus: "Processed", RefundAmount: "4500" }
+    BE->>DB: Sync status & remarks to FlightRefund subdocument
+    BE-->>FE: { refundStatus: "processed", isFullyProcessedByAirline: true, changeRequestStatuses }
+      </div>
+    </div>
+
+    <!-- Section 7: Inbound Webhook Callback Flow -->
+    <h2>7. SRDV Inbound Status Callback Webhook (<code>POST /api/v1/flights/callback</code>)</h2>
+    <div class="card">
+      <p style="margin-top: 0; color: var(--text-muted);">
+        SRDV asynchronously notifies our system when a delayed booking resolves. The webhook verifies credentials, updates passenger ticket numbers on <code>Success</code>, and triggers a <strong>100% full automated refund</strong> to the customer if the booking is <code>Failed</code> or <code>Aborted</code>.
+      </p>
+      <div class="diagram-container">
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant SRDV as SRDV Supplier
+    participant Hook as POST /api/v1/flights/callback
+    participant DB as MongoDB
+    participant Pay as Payment Gateway (PayPal / Razorpay)
+
+    SRDV->>Hook: POST /callback { BookingId, Status: "Success" | "Failed", Passengers }
+    Hook->>Hook: Verify ClientId, UserName, Password
+
+    alt Status == "Success"
+        Hook->>DB: Update FlightBooking.status = "confirmed", PNR, Ticket numbers
+        Hook->>DB: Update Master Booking.status = "confirmed"
+        Hook-->>SRDV: { Error: { ErrorCode: 0, ErrorMessage: "" } }
+    else Status == "Failed" or "Aborted"
+        Hook->>Pay: Trigger 100% Full Refund (No penalties)
+        Pay-->>Hook: Gateway Refund Processed
+        Hook->>DB: Create FlightRefund (100% refund), FlightBooking.status = "failed"
+        Hook-->>SRDV: { Error: { ErrorCode: 0, ErrorMessage: "" } }
+    end
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-success" style="margin-top: 30px;">
+      <strong>💡 Interactive Documentation:</strong><br/>
+      You can open this <code>flight_module_architecture.html</code> file in any browser anytime to review the complete interactive architecture and sequence diagrams.
+    </div>
+  </div>
+</body>
+</html>

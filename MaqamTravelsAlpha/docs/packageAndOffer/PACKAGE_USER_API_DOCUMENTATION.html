@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Package Module — Customer &amp; User API Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #080b12;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent-indigo: #6366f1;
+      --accent-cyan: #06b6d4;
+      --accent-blue: #38bdf8;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      --code-bg: #030712;
+      --sidebar-width: 320px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Ambient Background Glows */
+    .ambient-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+    }
+
+    /* Sidebar Navigation */
+    aside.sidebar {
+      width: var(--sidebar-width);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a5b4fc, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .sidebar-header p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .search-box {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-box input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent-indigo);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    .nav-sections {
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-grow: 1;
+    }
+
+    .nav-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      font-weight: 700;
+      padding: 12px 12px 6px 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .nav-item.active {
+      background: rgba(99, 102, 241, 0.15);
+      color: #c7d2fe;
+      border-left: 3px solid var(--accent-indigo);
+    }
+
+    .method-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-get { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); }
+    .badge-post { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-put { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-delete { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
+    .badge-auth { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); border: 1px solid rgba(168, 85, 247, 0.3); }
+
+    /* Main Content Area */
+    main.content {
+      margin-left: var(--sidebar-width);
+      padding: 48px 64px 96px 64px;
+      flex-grow: 1;
+      max-width: 1200px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Hero Header */
+    .hero-header {
+      margin-bottom: 48px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 32px;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      color: #a5b4fc;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      margin-bottom: 16px;
+    }
+
+    .hero-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-header p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.7;
+    }
+
+    .meta-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .meta-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-chip strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Section Cards */
+    .section-block {
+      margin-bottom: 56px;
+      scroll-margin-top: 32px;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-main);
+    }
+
+    .section-title::before {
+      content: "";
+      width: 4px;
+      height: 24px;
+      background: var(--accent-indigo);
+      border-radius: 2px;
+    }
+
+    /* Endpoint Cards */
+    .endpoint-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 32px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      transition: border-color 0.2s ease;
+    }
+
+    .endpoint-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .endpoint-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .endpoint-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .endpoint-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .endpoint-title {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+
+    .endpoint-body {
+      padding: 24px;
+    }
+
+    .endpoint-desc {
+      color: #cbd5e1;
+      font-size: 0.92rem;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    /* Param & Schema Tables */
+    .table-container {
+      margin-bottom: 24px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .table-header-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      font-weight: 700;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .param-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .param-type {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+    }
+
+    .req-tag {
+      font-size: 0.7rem;
+      color: var(--accent-rose);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .opt-tag {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    /* Code Blocks */
+    .code-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .code-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      color: #c7d2fe;
+      border-color: var(--accent-indigo);
+    }
+
+    pre {
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    /* Alert Boxes */
+    .alert-box {
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      font-size: 0.88rem;
+    }
+
+    .alert-info {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #c7d2fe;
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fde68a;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #a7f3d0;
+    }
+
+    /* Mermaid Diagram Block */
+    .diagram-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    /* Math Formula Block */
+    .formula-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.7));
+      border: 1px solid var(--border-accent);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .formula-card h3 {
+      color: #c7d2fe;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+
+    .formula-expression {
+      background: #030712;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      color: #38bdf8;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      aside.sidebar {
+        display: none;
+      }
+      main.content {
+        margin-left: 0;
+        padding: 32px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Maqam Packages</h2>
+      <p>Customer / User API</p>
+    </div>
+    <div class="search-box">
+      <input type="text" id="apiSearch" placeholder="Filter endpoints..." onkeyup="filterMenu()" />
+    </div>
+    <nav class="nav-sections">
+      <div class="nav-label">Getting Started</div>
+      <a href="#overview" class="nav-item">Overview &amp; Workflow</a>
+      <a href="#summary" class="nav-item">Endpoints Summary</a>
+      <a href="#formula" class="nav-item">Option A Pricing Formula</a>
+      <a href="#mechanics" class="nav-item">Component Selection Mechanics</a>
+
+      <div class="nav-label">Catalog &amp; Customizer</div>
+      <a href="#ep-browse" class="nav-item">
+        <span class="method-badge badge-get">GET</span>
+        <span>Browse Packages</span>
+      </a>
+      <a href="#ep-get-all-bookings" class="nav-item">
+        <span class="method-badge badge-get">GET</span>
+        <span>Get User Bookings</span>
+      </a>
+      <a href="#ep-details" class="nav-item">
+        <span class="method-badge badge-get">GET</span>
+        <span>Package Details</span>
+      </a>
+      <a href="#ep-quote" class="nav-item">
+        <span class="method-badge badge-post">POST</span>
+        <span>Customizer Live Quote</span>
+      </a>
+
+      <div class="nav-label">Bookings &amp; Orders</div>
+      <a href="#ep-book" class="nav-item">
+        <span class="method-badge badge-post">POST</span>
+        <span>Book Package</span>
+      </a>
+      <a href="#ep-get-booking" class="nav-item">
+        <span class="method-badge badge-get">GET</span>
+        <span>Get Booking by ID</span>
+      </a>
+      <a href="#ep-cancel-booking" class="nav-item">
+        <span class="method-badge badge-post">POST</span>
+        <span>Cancel Booking</span>
+      </a>
+
+      <div class="nav-label">Reference</div>
+      <a href="#errors" class="nav-item">Error Codes</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="content">
+
+    <!-- Hero Header -->
+    <header class="hero-header">
+      <div class="hero-tag">
+        <span>✨ Customer &amp; User Facing API</span>
+      </div>
+      <h1>Package Module API Documentation</h1>
+      <p>
+        Enables customers to discover bundled travel packages, customize individual flight &amp; hotel components, attach dedicated tour guides, receive real-time dynamic quotes under <strong>Option A pricing</strong>, and atomically book inventory stock units.
+      </p>
+
+      <div class="meta-badges">
+        <div class="meta-chip"><strong>Base URL:</strong> <code>/api/v1/packages</code></div>
+        <div class="meta-chip"><strong>Auth:</strong> Bearer Token (JWT) for Booking endpoints</div>
+        <div class="meta-chip"><strong>Pricing Engine:</strong> Option A (Anchored Base - Deductions + Swap Deltas + Guide)</div>
+      </div>
+    </header>
+
+    <!-- Section 1: Overview & Flow -->
+    <section id="overview" class="section-block">
+      <h2 class="section-title">1. Workflow &amp; Architecture</h2>
+
+      <div class="diagram-card">
+        <pre class="mermaid">
+flowchart TD
+    A[Browse Packages\nGET /api/v1/packages] --> B[View Package Details & Alternatives\nGET /api/v1/packages/:id]
+    B --> C[Customizer Live Quote Preview\nPOST /api/v1/packages/:id/quote]
+    C -->|Opt-outs, Swaps, Guide| C
+    C --> D[Book Customized Package\nPOST /api/v1/packages/book]
+    D -->|JWT Auth Required| E[Stock Claimed & Master Booking Synced\nStatus: Pending]
+    E --> F[List Customer Bookings\nGET /api/v1/packages/getAllBookingPackage]
+    E --> G[Track Single Booking Details\nGET /api/v1/packages/bookings/:id]
+    G -->|Optional| H[Cancel Booking & Release Stock\nPOST /api/v1/packages/bookings/:id/cancel]
+        </pre>
+      </div>
+    </section>
+
+    <!-- Section 2: Endpoints Summary -->
+    <section id="summary" class="section-block">
+      <h2 class="section-title">2. API Endpoints Summary</h2>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Endpoint</th>
+              <th>Auth Required</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="method-badge badge-get">GET</span></td>
+              <td><code>/api/v1/packages</code></td>
+              <td><span class="opt-tag">Public</span></td>
+              <td>Browse, paginate, and search active packages with itemized breakdown &amp; live availability</td>
+            </tr>
+            <tr>
+              <td><span class="method-badge badge-get">GET</span></td>
+              <td><code>/api/v1/packages/getAllBookingPackage</code></td>
+              <td><span class="method-badge badge-auth">Bearer JWT</span></td>
+              <td>Retrieve all package bookings for the authenticated user's profile (Alias: <code>/bookings</code>)</td>
+            </tr>
+            <tr>
+              <td><span class="method-badge badge-get">GET</span></td>
+              <td><code>/api/v1/packages/:id</code></td>
+              <td><span class="opt-tag">Public</span></td>
+              <td>Retrieve full package details, day-by-day itinerary, and eligible swappable alternatives</td>
+            </tr>
+            <tr>
+              <td><span class="method-badge badge-post">POST</span></td>
+              <td><code>/api/v1/packages/:id/quote</code></td>
+              <td><span class="opt-tag">Public</span></td>
+              <td>Calculate real-time customizer quote with opt-outs, swaps &amp; guide (Option A formula)</td>
+            </tr>
+            <tr>
+              <td><span class="method-badge badge-post">POST</span></td>
+              <td><code>/api/v1/packages/book</code></td>
+              <td><span class="method-badge badge-auth">Bearer JWT</span></td>
+              <td>Book package, claim physical inventory units atomically, freeze snapshot &amp; sync Master Booking</td>
+            </tr>
+            <tr>
+              <td><span class="method-badge badge-get">GET</span></td>
+              <td><code>/api/v1/packages/bookings/:id</code></td>
+              <td><span class="method-badge badge-auth">Bearer JWT</span></td>
+              <td>Fetch single booking snapshot, assigned operations case officer &amp; claimed stock units</td>
+            </tr>
+            <tr>
+              <td><span class="method-badge badge-post">POST</span></td>
+              <td><code>/api/v1/packages/bookings/:id/cancel</code></td>
+              <td><span class="method-badge badge-auth">Bearer JWT</span></td>
+              <td>Cancel booking, release claimed inventory units back to available stock &amp; cancel Master Booking</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 3: Option A Pricing Formula -->
+    <section id="formula" class="section-block">
+      <h2 class="section-title">3. Option A Pricing Engine</h2>
+      <div class="formula-card">
+        <h3>Dynamic Pricing Formula</h3>
+        <div class="formula-expression">
+          finalSellPrice = max(0, basePackageSellPrice - totalDeductions + totalSwapDeltas + guidePrice)
+        </div>
+        <div class="formula-expression">
+          totalAmount = finalSellPrice &times; quantity
+        </div>
+        <ul style="margin-left: 20px; margin-top: 14px; color: var(--text-muted); font-size: 0.88rem; display: flex; flex-direction: column; gap: 8px;">
+          <li><strong>Anchored Base Discount:</strong> The bundle discount (<code>bundleDiscountPercentage</code>) applies exclusively to bundled base items. If a guide was pre-included in the package retail price, its base fee is backed out to establish the pure base offer sum.</li>
+          <li><strong>Opt-Out Deductions:</strong> Excluded optional items deduct their individual retail price multiplied by units: <code>(offer.sellPrice &times; unitsPerBooking)</code>.</li>
+          <li><strong>Swap Deltas:</strong> Replacement upgrades/downgrades add or subtract the exact delta: <code>(Replacement Price &times; units) - (Original Price &times; units)</code>.</li>
+          <li><strong>Tour Guide Add-on:</strong> When a guide is selected (or <code>includeGuide: true</code> / <code>guideId</code> provided), the verified guide rate is added directly without bundle discount attenuation.</li>
+          <li><strong>Safety Guardrail:</strong> At least <strong>2 Offer components</strong> must remain active per package booking. Opting out beyond this threshold triggers a <code>400 Bad Request</code>.</li>
+        </ul>
+      </div>
+
+      <!-- Component Selection Mechanics -->
+      <div class="formula-card" id="mechanics" style="margin-top: 24px;">
+        <h3>Component Selection Mechanics: <code>includedOfferIds</code> vs <code>excludedOfferIds</code></h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+          Individual travel components (flights, hotels) in a package are standalone <strong>Offer</strong> documents. Understanding where the keys originate and what their values represent is critical for customizer forms:
+        </p>
+
+        <div class="table-container" style="margin-bottom: 20px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Concept</th>
+                <th><code>excludedOfferIds</code></th>
+                <th><code>includedOfferIds</code></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Where it appears</strong></td>
+                <td><strong>Request Body</strong> (<code>POST /:id/quote</code>, <code>POST /book</code>) &amp; Response (<code>customizedSelections</code>)</td>
+                <td><strong>Request Body</strong> (<code>POST /:id/quote</code>, <code>POST /book</code>) &amp; <strong>Response Payload</strong> (<code>customizedSelections.includedOfferIds</code>)</td>
+              </tr>
+              <tr>
+                <td><strong>Data Type</strong></td>
+                <td><code>array&lt;string&gt;</code> (24-char hex MongoDB ObjectIds)</td>
+                <td><code>array&lt;string&gt;</code> (24-char hex MongoDB ObjectIds)</td>
+              </tr>
+              <tr>
+                <td><strong>Client Requirement</strong></td>
+                <td><strong>Optional</strong> (pass <code>[]</code> if keeping all default offers)</td>
+                <td><strong>Optional</strong> (client may pass explicit Offer ObjectIds to include; any omitted optional offers are excluded)</td>
+              </tr>
+              <tr>
+                <td><strong>Source of Value</strong></td>
+                <td>Selected from <code>GET /packages/:id</code> &rarr; <code>priceBreakdown[].id</code> where <code>isOptional: true</code></td>
+                <td>Computed: default bundled offers kept + replacement offers from swaps</td>
+              </tr>
+              <tr>
+                <td><strong>Direct Meaning</strong></td>
+                <td><strong>Opt-out list:</strong> Optional items user chose to remove from the package</td>
+                <td><strong>Active manifest:</strong> Exact items booked for which inventory units are claimed</td>
+              </tr>
+              <tr>
+                <td><strong>Stock Impact</strong></td>
+                <td><strong>No stock claimed</strong>; retail price deducted from total</td>
+                <td><strong>Physical units claimed</strong> (<code>TicketStock</code>, <code>HotelStock</code>) atomically</td>
+              </tr>
+              <tr>
+                <td><strong>Guardrail Rule</strong></td>
+                <td>Cannot exclude mandatory offers (<code>isOptional: false</code>)</td>
+                <td>Must have at least <strong>2 active offer components</strong> (<code>length &gt;= 2</code>)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="alert-box alert-warning">
+          <span>⚠️</span>
+          <div>
+            <strong>Critical ID Distinction:</strong> Always use <code>priceBreakdown[].id</code> (which contains the Offer's <code>_id</code>). <strong>Never use <code>refId</code></strong> (which is the MongoDB subdocument reference ID inside <code>offerRefs</code>).
+          </div>
+        </div>
+
+        <div class="code-wrapper">
+          <div class="code-topbar">
+            <span class="code-label">Example: Customized Selections in Booking Response</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>"customizedSelections": {
+  "includedOfferIds": [
+    "66d4a8e2e944f7b6b199e810", // Default IndiGo flight kept
+    "66d4a8e2e944f7b6b199e899"  // 5-Star Hotel replacement from swappedOffers
+  ],
+  "excludedOfferIds": [
+    "66d4a8e2e944f7b6b199e812"  // Optional desert safari excluded
+  ],
+  "swappedOffers": [
+    {
+      "originalOfferId": "66d4a8e2e944f7b6b199e811",
+      "replacementOfferId": "66d4a8e2e944f7b6b199e899"
+    }
+  ]
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Endpoints Details -->
+    <section id="endpoints" class="section-block">
+      <h2 class="section-title">4. API Endpoint Details</h2>
+
+      <!-- 4.1 Browse Packages -->
+      <div class="endpoint-card" id="ep-browse">
+        <div class="endpoint-header">
+          <div class="endpoint-left">
+            <span class="method-badge badge-get">GET</span>
+            <span class="endpoint-path">/api/v1/packages</span>
+            <span class="endpoint-title">— Browse &amp; Search Packages</span>
+          </div>
+          <span class="method-badge" style="background: rgba(148, 163, 184, 0.15); color: #cbd5e1;">Public</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-desc">
+            Returns a paginated list of public active packages with itemized components, base pricing, tour guide availability, and live stock capacity.
+          </div>
+
+          <div class="table-container">
+            <div class="table-header-title">Query Parameters</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">destination</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Filter by destination city/country (case-insensitive regex, e.g. <code>Dubai</code>, <code>Makkah</code>)</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">sellPriceMin</span></td>
+                  <td><span class="param-type">number</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Minimum package price filter</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">sellPriceMax</span></td>
+                  <td><span class="param-type">number</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Maximum package price filter</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">page</span></td>
+                  <td><span class="param-type">integer</span></td>
+                  <td><span class="opt-tag">Optional (1)</span></td>
+                  <td>Page number for pagination</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">limit</span></td>
+                  <td><span class="param-type">integer</span></td>
+                  <td><span class="opt-tag">Optional (10)</span></td>
+                  <td>Number of packages per page</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">cURL Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>curl -X GET "http://localhost:5000/api/v1/packages?destination=Dubai&amp;sellPriceMin=20000&amp;sellPriceMax=60000&amp;page=1&amp;limit=10"</code></pre>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">Success Response (200 OK)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>{
+  "success": true,
+  "message": "Packages fetched successfully",
+  "data": {
+    "packages": [
+      {
+        "_id": "66d4a8e2e944f7b6b199e815",
+        "title": "Dubai Explorer 5D4N",
+        "description": "Complete Dubai package with return flights, 4-star hotel, and transfers",
+        "destination": "Dubai",
+        "images": [
+          "https://res.cloudinary.com/travelagency/image/upload/dubai_hero.jpg"
+        ],
+        "bundleDiscountPercentage": 10,
+        "sellPrice": 36000,
+        "inclusions": [
+          "Return Flights (DEL-DXB)",
+          "4-Star Luxury Hotel",
+          "Airport Transfers"
+        ],
+        "itinerary": [
+          {
+            "day": 1,
+            "title": "Arrival in Dubai &amp; Marina Dhow Cruise",
+            "description": "Airport pickup and hotel check-in.",
+            "assignedOffers": [
+              {
+                "offer": "66d4a8e2e944f7b6b199e810",
+                "role": "flight_arrival",
+                "notes": "Flight lands at DXB Terminal 3"
+              }
+            ]
+          }
+        ],
+        "validity": {
+          "from": "2026-10-01T00:00:00.000Z",
+          "to": "2026-12-31T23:59:59.000Z"
+        },
+        "availableSlots": 14,
+        "priceBreakdown": [
+          {
+            "id": "66d4a8e2e944f7b6b199e810",
+            "refId": "66d4a8e2e944f7b6b199e809",
+            "title": "IndiGo DEL-DXB Return Flight",
+            "itemType": "flight",
+            "retailPrice": 15000,
+            "unitsPerBooking": 1,
+            "totalRetail": 15000,
+            "isOptional": false,
+            "isDefaultSelected": true,
+            "allowSwap": true,
+            "details": {
+              "destination": "Dubai",
+              "images": [
+                "https://res.cloudinary.com/travelagency/image/upload/indigo.jpg"
+              ],
+              "flightDetails": {
+                "_id": "66d4a8e2e944f7b6b199e805",
+                "airline": "IndiGo",
+                "flightNumber": "6E-1234",
+                "departure": "2026-11-01T08:00:00.000Z",
+                "arrival": "2026-11-01T10:30:00.000Z",
+                "origin": "DEL",
+                "destination": "DXB",
+                "units": 20
+              },
+              "hotelDetails": null
+            }
+          },
+          {
+            "id": "66d4a8e2e944f7b6b199e811",
+            "refId": "66d4a8e2e944f7b6b199e808",
+            "title": "City Marina 4-Star Stay",
+            "itemType": "hotel",
+            "retailPrice": 25000,
+            "unitsPerBooking": 1,
+            "totalRetail": 25000,
+            "isOptional": true,
+            "isDefaultSelected": true,
+            "allowSwap": true,
+            "details": {
+              "destination": "Dubai",
+              "images": [
+                "https://res.cloudinary.com/travelagency/image/upload/hotel.jpg"
+              ],
+              "flightDetails": null,
+              "hotelDetails": {
+                "_id": "66d4a8e2e944f7b6b199e806",
+                "hotelId": {
+                  "_id": "66d4a8e2e944f7b6b199e801",
+                  "name": "City Marina Hotel",
+                  "location": "Dubai Marina",
+                  "starRating": 4,
+                  "isActive": true
+                },
+                "roomType": "Deluxe Double",
+                "checkIn": "2026-11-01T14:00:00.000Z",
+                "checkOut": "2026-11-05T11:00:00.000Z",
+                "units": 15,
+                "reviewStatus": "approved"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "total": 1,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 1
+    }
+  },
+  "meta": {
+    "total": 1,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 1
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.2 Get All User Bookings -->
+      <div class="endpoint-card" id="ep-get-all-bookings">
+        <div class="endpoint-header">
+          <div class="endpoint-left">
+            <span class="method-badge badge-get">GET</span>
+            <span class="endpoint-path">/api/v1/packages/getAllBookingPackage</span>
+            <span class="endpoint-title">— Get All User Bookings (Alias: <code>/bookings</code>)</span>
+          </div>
+          <span class="method-badge badge-auth">Bearer JWT</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-desc">
+            Returns all customized package bookings created by the authenticated customer for their own profile, sorted in descending order of creation date (<code>createdAt: -1</code>), with pagination, populated package summary, and assigned operations officer.
+          </div>
+
+          <div class="table-container">
+            <div class="table-header-title">Query Parameters</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">status</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Filter bookings by lifecycle status: <code>initiated</code>, <code>pending</code>, <code>confirmed</code>, <code>cancelled</code></td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">packageId</span></td>
+                  <td><span class="param-type">string (ObjectId)</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Filter bookings for a specific package</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">page</span></td>
+                  <td><span class="param-type">integer</span></td>
+                  <td><span class="opt-tag">Optional (1)</span></td>
+                  <td>Page number for pagination</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">limit</span></td>
+                  <td><span class="param-type">integer</span></td>
+                  <td><span class="opt-tag">Optional (10)</span></td>
+                  <td>Items per page (min: 1, max: 100)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">cURL Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>curl -X GET "http://localhost:5000/api/v1/packages/getAllBookingPackage?status=pending&amp;page=1&amp;limit=10" \
+  -H "Authorization: Bearer &lt;CUSTOMER_JWT_TOKEN&gt;"</code></pre>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">Success Response (200 OK)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>{
+  "success": true,
+  "message": "Package bookings retrieved successfully",
+  "data": [
+    {
+      "_id": "66d4b555e944f7b6b199e825",
+      "userId": "66c1b011e944f7b6b199e801",
+      "packageId": {
+        "_id": "66d4a8e2e944f7b6b199e815",
+        "title": "Dubai Explorer 5D4N",
+        "destination": "Dubai",
+        "sellPrice": 36000,
+        "images": [
+          "https://res.cloudinary.com/travelagency/image/upload/dubai_hero.jpg"
+        ],
+        "itinerary": [
+          {
+            "day": 1,
+            "title": "Arrival in Dubai &amp; Marina Dhow Cruise",
+            "description": "Airport pickup and hotel check-in."
+          }
+        ]
+      },
+      "guideSelected": "Sheikh Ahmad Al-Makki",
+      "guideLocation": [
+        "Dubai"
+      ],
+      "guidePrice": 1500,
+      "packageSnapshot": {
+        "title": "Dubai Explorer 5D4N",
+        "destination": "Dubai",
+        "basePackageSellPrice": 36000,
+        "bundleDiscountPercentage": 10,
+        "deductions": 0,
+        "swapDeltas": 10000,
+        "finalSellPrice": 47500,
+        "guidePrice": 1500,
+        "guideSelected": "Sheikh Ahmad Al-Makki"
+      },
+      "customizedSelections": {
+        "includedOfferIds": [
+          "66d4a8e2e944f7b6b199e810",
+          "66d4a8e2e944f7b6b199e899"
+        ],
+        "excludedOfferIds": [],
+        "swappedOffers": [
+          {
+            "originalOfferId": "66d4a8e2e944f7b6b199e811",
+            "replacementOfferId": "66d4a8e2e944f7b6b199e899"
+          }
+        ]
+      },
+      "travellers": [
+        {
+          "travellerId": "66c1b011e944f7b6b199e801",
+          "isLead": true
+        }
+      ],
+      "quantity": 1,
+      "totalAmount": 47500,
+      "status": "pending",
+      "assignedTo": {
+        "_id": "66ce08f0e944f7b6b199e810",
+        "firstName": "Sarah",
+        "lastName": "Agent",
+        "email": "sarah.agent@maqam.com",
+        "phone": "+971501234567",
+        "avatar": "https://res.cloudinary.com/travelagency/image/upload/sarah.jpg"
+      },
+      "claimedUnits": [
+        {
+          "stockModel": "TicketStock",
+          "stock": "66d4a8e2e944f7b6b199e805",
+          "unitId": "66d4a8e2e944f7b6b199e814"
+        },
+        {
+          "stockModel": "HotelStock",
+          "stock": "66d4a8e2e944f7b6b199e888",
+          "unitId": "66d4a8e2e944f7b6b199e820"
+        }
+      ],
+      "claimedFlightUnits": [],
+      "claimedHotelUnits": [],
+      "createdAt": "2026-09-11T10:00:00.000Z",
+      "updatedAt": "2026-09-11T10:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "total": 1,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 1
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.3 Package Details -->
+      <div class="endpoint-card" id="ep-details">
+        <div class="endpoint-header">
+          <div class="endpoint-left">
+            <span class="method-badge badge-get">GET</span>
+            <span class="endpoint-path">/api/v1/packages/:id</span>
+            <span class="endpoint-title">— Package Details &amp; Swappable Alternatives</span>
+          </div>
+          <span class="method-badge" style="background: rgba(148, 163, 184, 0.15); color: #cbd5e1;">Public</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-desc">
+            Retrieves full details of a specific package including the day-by-day itinerary, itemized price breakdown, and eligible alternative offers (hotels/flights in the same destination) that users can swap in with calculated retail price deltas.
+          </div>
+
+          <div class="table-container">
+            <div class="table-header-title">Path Parameters</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">id</span></td>
+                  <td><span class="param-type">string (ObjectId)</span></td>
+                  <td><span class="req-tag">Required</span></td>
+                  <td>Package Unique ObjectId</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">cURL Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>curl -X GET "http://localhost:5000/api/v1/packages/66d4a8e2e944f7b6b199e815"</code></pre>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">Success Response (200 OK)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>{
+  "success": true,
+  "message": "Package details fetched successfully",
+  "data": {
+    "_id": "66d4a8e2e944f7b6b199e815",
+    "title": "Dubai Explorer 5D4N",
+    "description": "Complete Dubai package with return flights, 4-star hotel, and transfers",
+    "destination": "Dubai",
+    "images": [
+      "https://res.cloudinary.com/travelagency/image/upload/dubai_hero.jpg"
+    ],
+    "bundleDiscountPercentage": 10,
+    "sellPrice": 36000,
+    "inclusions": [
+      "Return Flights (DEL-DXB)",
+      "4-Star Luxury Hotel",
+      "Airport Transfers"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "Arrival in Dubai &amp; Marina Dhow Cruise",
+        "description": "Airport pickup, check-in, and evening marina cruise.",
+        "assignedOffers": [
+          {
+            "offer": "66d4a8e2e944f7b6b199e810",
+            "role": "flight_arrival",
+            "notes": "Flight lands at DXB Terminal 3"
+          }
+        ]
+      }
+    ],
+    "validity": {
+      "from": "2026-10-01T00:00:00.000Z",
+      "to": "2026-12-31T23:59:59.000Z"
+    },
+    "availableSlots": 14,
+    "priceBreakdown": [
+      {
+        "id": "66d4a8e2e944f7b6b199e810",
+        "refId": "66d4a8e2e944f7b6b199e809",
+        "title": "IndiGo DEL-DXB Return Flight",
+        "itemType": "flight",
+        "retailPrice": 15000,
+        "unitsPerBooking": 1,
+        "totalRetail": 15000,
+        "isOptional": false,
+        "isDefaultSelected": true,
+        "allowSwap": true,
+        "details": {
+          "destination": "Dubai",
+          "images": [
+            "https://res.cloudinary.com/travelagency/image/upload/indigo.jpg"
+          ],
+          "flightDetails": {
+            "_id": "66d4a8e2e944f7b6b199e805",
+            "airline": "IndiGo",
+            "flightNumber": "6E-1234",
+            "departure": "2026-11-01T08:00:00.000Z",
+            "arrival": "2026-11-01T10:30:00.000Z",
+            "origin": "DEL",
+            "destination": "DXB",
+            "units": 20
+          },
+          "hotelDetails": null
+        }
+      },
+      {
+        "id": "66d4a8e2e944f7b6b199e811",
+        "refId": "66d4a8e2e944f7b6b199e808",
+        "title": "City Marina 4-Star Stay",
+        "itemType": "hotel",
+        "retailPrice": 25000,
+        "unitsPerBooking": 1,
+        "totalRetail": 25000,
+        "isOptional": true,
+        "isDefaultSelected": true,
+        "allowSwap": true,
+        "details": {
+          "destination": "Dubai",
+          "images": [
+            "https://res.cloudinary.com/travelagency/image/upload/hotel.jpg"
+          ],
+          "flightDetails": null,
+          "hotelDetails": {
+            "_id": "66d4a8e2e944f7b6b199e806",
+            "hotelId": {
+              "_id": "66d4a8e2e944f7b6b199e801",
+              "name": "City Marina Hotel",
+              "location": "Dubai Marina",
+              "starRating": 4,
+              "isActive": true
+            },
+            "roomType": "Deluxe Double",
+            "checkIn": "2026-11-01T14:00:00.000Z",
+            "checkOut": "2026-11-05T11:00:00.000Z",
+            "units": 15,
+            "reviewStatus": "approved"
+          }
+        }
+      }
+    ],
+    "availableAlternatives": {
+      "offers": {
+        "66d4a8e2e944f7b6b199e811": [
+          {
+            "_id": "66d4a8e2e944f7b6b199e899",
+            "title": "Luxury Marina 5-Star Resort",
+            "itemType": "hotel",
+            "destination": "Dubai",
+            "sellPrice": 35000,
+            "priceDelta": 10000,
+            "images": [
+              "https://res.cloudinary.com/travelagency/image/upload/resort5star.jpg"
+            ],
+            "flightDetails": null,
+            "hotelDetails": {
+              "_id": "66d4a8e2e944f7b6b199e888",
+              "hotelId": {
+                "_id": "66d4a8e2e944f7b6b199e880",
+                "name": "Luxury Marina Resort & Spa",
+                "location": "Dubai Marina",
+                "starRating": 5,
+                "isActive": true
+              },
+              "roomType": "Sea View Suite",
+              "checkIn": "2026-11-01T14:00:00.000Z",
+              "checkOut": "2026-11-05T11:00:00.000Z",
+              "units": 10,
+              "reviewStatus": "approved"
+            }
+          }
+        ]
+      }
+    }
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.4 Live Customizer Quote -->
+      <div class="endpoint-card" id="ep-quote">
+        <div class="endpoint-header">
+          <div class="endpoint-left">
+            <span class="method-badge badge-post">POST</span>
+            <span class="endpoint-path">/api/v1/packages/:id/quote</span>
+            <span class="endpoint-title">— Live Dynamic Customizer Quote</span>
+          </div>
+          <span class="method-badge" style="background: rgba(148, 163, 184, 0.15); color: #cbd5e1;">Public</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-desc">
+            Recalculates pricing in real time based on user customizations (opting out of optional items, swapping hotels/flights, or attaching a dedicated guide). Enforces the <strong>Option A formula</strong> and the minimum 2 active offer components guardrail.
+          </div>
+
+          <div class="table-container">
+            <div class="table-header-title">Request Body Fields</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">quantity</span></td>
+                  <td><span class="param-type">integer</span></td>
+                  <td><span class="opt-tag">Optional (1)</span></td>
+                  <td>Number of package packages (must be <code>&gt;= 1</code>)</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">excludedOfferIds</span></td>
+                  <td><span class="param-type">array&lt;ObjectId&gt;</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td><strong>Opt-Out List:</strong> Array of Offer ObjectIds (<code>string[]</code>) to exclude (e.g. <code>["66d4a8e2e944f7b6b199e812"]</code>). Must be bundled in package with <code>isOptional: true</code>. <em>(Clients do <strong>not</strong> send <code>includedOfferIds</code>)</em></td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">swappedOffers</span></td>
+                  <td><span class="param-type">array&lt;object&gt;</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>List of <code>{ originalOfferId, replacementOfferId }</code> pairings</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">includeGuide</span></td>
+                  <td><span class="param-type">boolean</span></td>
+                  <td><span class="opt-tag">Optional (false)</span></td>
+                  <td>Set <code>true</code> to attach tour guide services</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">guideId</span></td>
+                  <td><span class="param-type">string (ObjectId)</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Optional Guide model document ID to pull verified guide bio, rating &amp; hourly/full-day rates</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">guideSelected</span></td>
+                  <td><span class="param-type">string / ObjectId</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Guide name string or Guide document ObjectId</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">guideLocation</span></td>
+                  <td><span class="param-type">string / array</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Destination or area for guide</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">guidePrice</span></td>
+                  <td><span class="param-type">number</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Custom guide price override (defaults to package <code>guidePrice</code> if omitted)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">cURL Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>curl -X POST "http://localhost:5000/api/v1/packages/66d4a8e2e944f7b6b199e815/quote" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "quantity": 1,
+    "swappedOffers": [
+      {
+        "originalOfferId": "66d4a8e2e944f7b6b199e811",
+        "replacementOfferId": "66d4a8e2e944f7b6b199e899"
+      }
+    ],
+    "includeGuide": true,
+    "guideSelected": "Sheikh Ahmad Al-Makki",
+    "guideLocation": "Dubai",
+    "guidePrice": 1500
+  }'</code></pre>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">Success Response (200 OK)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>{
+  "success": true,
+  "message": "Quote review fetched successfully",
+  "data": {
+    "packageId": "66d4a8e2e944f7b6b199e815",
+    "packageTitle": "Dubai Explorer 5D4N",
+    "basePackageSellPrice": 36000,
+    "bundleDiscountPercentage": 10,
+    "deductions": 0,
+    "swapDeltas": 10000,
+    "guidePrice": 1500,
+    "guideSelected": "Sheikh Ahmad Al-Makki",
+    "guideLocation": [
+      "Dubai"
+    ],
+    "guideDetails": {
+      "fullName": "Sheikh Ahmad Al-Makki"
+    },
+    "finalSellPrice": 47500,
+    "quantity": 1,
+    "totalAmount": 47500,
+    "activeComponentsCount": 2,
+    "items": [
+      {
+        "id": "66d4a8e2e944f7b6b199e810",
+        "name": "IndiGo DEL-DXB Return Flight",
+        "type": "flight",
+        "retailPrice": 15000,
+        "units": 1,
+        "isIncluded": true
+      },
+      {
+        "id": "66d4a8e2e944f7b6b199e899",
+        "originalOfferId": "66d4a8e2e944f7b6b199e811",
+        "name": "Luxury Marina 5-Star Resort",
+        "type": "hotel",
+        "retailPrice": 35000,
+        "units": 1,
+        "isIncluded": true,
+        "isSwapped": true,
+        "originalPrice": 25000,
+        "delta": 10000,
+        "replacementDetails": {
+          "flightDetails": null,
+          "hotelDetails": {
+            "_id": "66d4a8e2e944f7b6b199e888",
+            "hotelId": {
+              "_id": "66d4a8e2e944f7b6b199e880",
+              "name": "Luxury Marina Resort & Spa",
+              "location": "Dubai Marina",
+              "starRating": 5,
+              "isActive": true
+            },
+            "roomType": "Sea View Suite",
+            "checkIn": "2026-11-01T14:00:00.000Z",
+            "checkOut": "2026-11-05T11:00:00.000Z",
+            "units": 10,
+            "reviewStatus": "approved"
+          }
+        }
+      },
+      {
+        "id": "guide-tour-addon",
+        "name": "Guide: Sheikh Ahmad Al-Makki",
+        "type": "guide_tour",
+        "retailPrice": 1500,
+        "units": 1,
+        "isIncluded": true,
+        "guideLocation": [
+          "Dubai"
+        ]
+      }
+    ]
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.5 Book Customized Package -->
+      <div class="endpoint-card" id="ep-book">
+        <div class="endpoint-header">
+          <div class="endpoint-left">
+            <span class="method-badge badge-post">POST</span>
+            <span class="endpoint-path">/api/v1/packages/book</span>
+            <span class="endpoint-title">— Book Customized Package</span>
+          </div>
+          <span class="method-badge badge-auth">Bearer JWT</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-desc">
+            Creates a customized package booking for the authenticated user, atomically claims physical wholesale stock units (<code>TicketStock</code>, <code>HotelStock</code>), freezes the immutable package snapshot, and creates/syncs a corresponding record in <code>MasterBooking</code> (<code>status: "pending"</code>).
+          </div>
+
+          <div class="table-container">
+            <div class="table-header-title">Request Body Fields</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">packageId</span></td>
+                  <td><span class="param-type">string (ObjectId)</span></td>
+                  <td><span class="req-tag">Required</span></td>
+                  <td>Target package ObjectId</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">quantity</span></td>
+                  <td><span class="param-type">integer</span></td>
+                  <td><span class="opt-tag">Optional (1)</span></td>
+                  <td>Number of package units (must be <code>&gt;= 1</code>)</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">travellers</span></td>
+                  <td><span class="param-type">array&lt;object&gt;</span></td>
+                  <td><span class="req-tag">Required</span></td>
+                  <td>Array of traveller objects. <strong>Exactly one</strong> must be marked <code>isLead: true</code></td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">travellers[].travellerId</span></td>
+                  <td><span class="param-type">string (ObjectId)</span></td>
+                  <td><span class="req-tag">Required</span></td>
+                  <td>Saved Traveller profile ObjectId from <code>/api/v1/account/travellers</code></td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">travellers[].isLead</span></td>
+                  <td><span class="param-type">boolean</span></td>
+                  <td><span class="req-tag">Required</span></td>
+                  <td>Must be <code>true</code> for exactly one primary contact traveller</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">excludedOfferIds</span></td>
+                  <td><span class="param-type">array&lt;ObjectId&gt;</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td><strong>Opt-Out List:</strong> Array of Offer ObjectIds (<code>string[]</code>) to exclude from booking (e.g. <code>["66d4a8e2e944f7b6b199e812"]</code>). Pass <code>[]</code> if no items are opted out. <em>(Clients do <strong>not</strong> send <code>includedOfferIds</code>)</em></td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">swappedOffers</span></td>
+                  <td><span class="param-type">array&lt;object&gt;</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Swapped offer pairings (<code>originalOfferId</code>, <code>replacementOfferId</code>)</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">includeGuide</span></td>
+                  <td><span class="param-type">boolean</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Set <code>true</code> to include dedicated tour guide service</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">guideSelected</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Guide name or identifier</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">guideLocation</span></td>
+                  <td><span class="param-type">string / array</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Destination or area for guide</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">guidePrice</span></td>
+                  <td><span class="param-type">number</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Guide fee override</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">cURL Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>curl -X POST "http://localhost:5000/api/v1/packages/book" \
+  -H "Authorization: Bearer &lt;CUSTOMER_JWT_TOKEN&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "packageId": "66d4a8e2e944f7b6b199e815",
+    "quantity": 1,
+    "travellers": [
+      {
+        "travellerId": "66c1b011e944f7b6b199e801",
+        "isLead": true
+      }
+    ],
+    "swappedOffers": [
+      {
+        "originalOfferId": "66d4a8e2e944f7b6b199e811",
+        "replacementOfferId": "66d4a8e2e944f7b6b199e899"
+      }
+    ],
+    "includeGuide": true,
+    "guideSelected": "Sheikh Ahmad Al-Makki",
+    "guideLocation": "Dubai",
+    "guidePrice": 1500
+  }'</code></pre>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">Success Response (201 Created)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>{
+  "success": true,
+  "message": "Created successfully",
+  "data": {
+    "message": "Customized package booking created. Proceed to payment.",
+    "data": {
+      "_id": "66d4b555e944f7b6b199e825",
+      "bookingId": "66d4b555e944f7b6b199e825",
+      "packageId": "66d4a8e2e944f7b6b199e815",
+      "totalAmount": 47500,
+      "guideSelected": "Sheikh Ahmad Al-Makki",
+      "guideLocation": [
+        "Dubai"
+      ],
+      "guidePrice": 1500,
+      "status": "pending",
+      "quantity": 1,
+      "customizedSelections": {
+        "includedOfferIds": [
+          "66d4a8e2e944f7b6b199e810",
+          "66d4a8e2e944f7b6b199e899"
+        ],
+        "excludedOfferIds": [],
+        "swappedOffers": [
+          {
+            "originalOfferId": "66d4a8e2e944f7b6b199e811",
+            "replacementOfferId": "66d4a8e2e944f7b6b199e899"
+          }
+        ]
+      },
+      "packageSnapshot": {
+        "title": "Dubai Explorer 5D4N",
+        "destination": "Dubai",
+        "basePackageSellPrice": 36000,
+        "bundleDiscountPercentage": 10,
+        "deductions": 0,
+        "swapDeltas": 10000,
+        "finalSellPrice": 47500,
+        "guidePrice": 1500,
+        "guideSelected": "Sheikh Ahmad Al-Makki",
+        "guideLocation": [
+          "Dubai"
+        ],
+        "guideDetails": {
+          "fullName": "Sheikh Ahmad Al-Makki"
+        },
+        "inclusions": [
+          "Return Flights",
+          "4-Star Luxury Hotel",
+          "Airport Transfers"
+        ],
+        "itinerary": [
+          {
+            "day": 1,
+            "title": "Arrival in Dubai &amp; Marina Dhow Cruise",
+            "description": "Airport pickup and hotel check-in."
+          }
+        ],
+        "validity": {
+          "from": "2026-10-01T00:00:00.000Z",
+          "to": "2026-12-31T23:59:59.000Z"
+        },
+        "items": [
+          {
+            "id": "66d4a8e2e944f7b6b199e810",
+            "name": "IndiGo DEL-DXB Return Flight",
+            "type": "flight",
+            "retailPrice": 15000,
+            "units": 1,
+            "isIncluded": true
+          },
+          {
+            "id": "66d4a8e2e944f7b6b199e899",
+            "originalOfferId": "66d4a8e2e944f7b6b199e811",
+            "name": "Luxury Marina 5-Star Resort",
+            "type": "hotel",
+            "retailPrice": 35000,
+            "units": 1,
+            "isIncluded": true,
+            "isSwapped": true,
+            "originalPrice": 25000,
+            "delta": 10000
+          },
+          {
+            "id": "guide-tour-addon",
+            "name": "Guide: Sheikh Ahmad Al-Makki",
+            "type": "guide_tour",
+            "retailPrice": 1500,
+            "units": 1,
+            "isIncluded": true,
+            "guideLocation": [
+              "Dubai"
+            ]
+          }
+        ]
+      },
+      "claimedUnits": [
+        {
+          "stockModel": "TicketStock",
+          "stock": "66d4a8e2e944f7b6b199e805",
+          "unitId": "66d4a8e2e944f7b6b199e814"
+        },
+        {
+          "stockModel": "HotelStock",
+          "stock": "66d4a8e2e944f7b6b199e888",
+          "unitId": "66d4a8e2e944f7b6b199e820"
+        }
+      ]
+    }
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.6 Get Booking by ID -->
+      <div class="endpoint-card" id="ep-get-booking">
+        <div class="endpoint-header">
+          <div class="endpoint-left">
+            <span class="method-badge badge-get">GET</span>
+            <span class="endpoint-path">/api/v1/packages/bookings/:id</span>
+            <span class="endpoint-title">— Get Customer Booking by ID</span>
+          </div>
+          <span class="method-badge badge-auth">Bearer JWT</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-desc">
+            Retrieves details of an existing package booking belonging to the authenticated customer, including customized selections, frozen snapshot, claimed inventory units, and assigned operations case officer.
+          </div>
+
+          <div class="table-container">
+            <div class="table-header-title">Path Parameters</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">id</span></td>
+                  <td><span class="param-type">string (ObjectId)</span></td>
+                  <td><span class="req-tag">Required</span></td>
+                  <td>Package Booking ObjectId</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">cURL Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>curl -X GET "http://localhost:5000/api/v1/packages/bookings/66d4b555e944f7b6b199e825" \
+  -H "Authorization: Bearer &lt;CUSTOMER_JWT_TOKEN&gt;"</code></pre>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">Success Response (200 OK)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>{
+  "success": true,
+  "message": "Fetch the booking successfully",
+  "data": {
+    "_id": "66d4b555e944f7b6b199e825",
+    "userId": "66c1b011e944f7b6b199e801",
+    "packageId": "66d4a8e2e944f7b6b199e815",
+    "guideSelected": "Sheikh Ahmad Al-Makki",
+    "guideLocation": [
+      "Dubai"
+    ],
+    "guidePrice": 1500,
+    "quantity": 1,
+    "totalAmount": 47500,
+    "status": "pending",
+    "assignedTo": {
+      "_id": "66ce08f0e944f7b6b199e810",
+      "firstName": "Sarah",
+      "lastName": "Agent",
+      "email": "sarah.agent@maqam.com",
+      "phone": "+971501234567",
+      "avatar": "https://res.cloudinary.com/travelagency/image/upload/sarah.jpg"
+    },
+    "customizedSelections": {
+      "includedOfferIds": [
+        "66d4a8e2e944f7b6b199e810",
+        "66d4a8e2e944f7b6b199e899"
+      ],
+      "excludedOfferIds": [],
+      "swappedOffers": [
+        {
+          "originalOfferId": "66d4a8e2e944f7b6b199e811",
+          "replacementOfferId": "66d4a8e2e944f7b6b199e899"
+        }
+      ]
+    },
+    "travellers": [
+      {
+        "travellerId": "66c1b011e944f7b6b199e801",
+        "isLead": true
+      }
+    ],
+    "packageSnapshot": {
+      "title": "Dubai Explorer 5D4N",
+      "destination": "Dubai",
+      "basePackageSellPrice": 36000,
+      "bundleDiscountPercentage": 10,
+      "deductions": 0,
+      "swapDeltas": 10000,
+      "finalSellPrice": 47500,
+      "guidePrice": 1500,
+      "guideSelected": "Sheikh Ahmad Al-Makki",
+      "guideLocation": [
+        "Dubai"
+      ],
+      "inclusions": [
+        "Return Flights",
+        "4-Star Luxury Hotel",
+        "Airport Transfers"
+      ],
+      "itinerary": [
+        {
+          "day": 1,
+          "title": "Arrival in Dubai &amp; Marina Dhow Cruise",
+          "description": "Airport pickup and hotel check-in."
+        }
+      ]
+    },
+    "claimedUnits": [
+      {
+        "stockModel": "TicketStock",
+        "stock": "66d4a8e2e944f7b6b199e805",
+        "unitId": "66d4a8e2e944f7b6b199e814"
+      },
+      {
+        "stockModel": "HotelStock",
+        "stock": "66d4a8e2e944f7b6b199e888",
+        "unitId": "66d4a8e2e944f7b6b199e820"
+      }
+    ],
+    "claimedFlightUnits": [],
+    "claimedHotelUnits": [],
+    "createdAt": "2026-09-11T10:00:00.000Z",
+    "updatedAt": "2026-09-11T10:00:00.000Z"
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4.7 Cancel Booking -->
+      <div class="endpoint-card" id="ep-cancel-booking">
+        <div class="endpoint-header">
+          <div class="endpoint-left">
+            <span class="method-badge badge-post">POST</span>
+            <span class="endpoint-path">/api/v1/packages/bookings/:id/cancel</span>
+            <span class="endpoint-title">— Cancel Customer Booking</span>
+          </div>
+          <span class="method-badge badge-auth">Bearer JWT</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="endpoint-desc">
+            Cancels a booking in <code>initiated</code> or <code>pending</code> status, atomically releases claimed stock units (<code>TicketStock</code>, <code>HotelStock</code>) back to available wholesale inventory, sets booking status to <code>cancelled</code>, and synchronizes the cancellation on the linked <code>MasterBooking</code>.
+          </div>
+
+          <div class="table-container">
+            <div class="table-header-title">Request Body Fields</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">reason</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="opt-tag">Optional</span></td>
+                  <td>Explanation for cancellation (default: <code>"User requested cancellation"</code>)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">cURL Example</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>curl -X POST "http://localhost:5000/api/v1/packages/bookings/66d4b555e944f7b6b199e825/cancel" \
+  -H "Authorization: Bearer &lt;CUSTOMER_JWT_TOKEN&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reason": "Change of travel plans"
+  }'</code></pre>
+          </div>
+
+          <div class="code-wrapper">
+            <div class="code-topbar">
+              <span class="code-label">Success Response (200 OK)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code>{
+  "success": true,
+  "message": "Cancel the package successfully",
+  "data": {
+    "_id": "66d4b555e944f7b6b199e825",
+    "userId": "66c1b011e944f7b6b199e801",
+    "packageId": "66d4a8e2e944f7b6b199e815",
+    "status": "cancelled",
+    "cancellationReason": "Change of travel plans",
+    "cancelledAt": "2026-09-11T10:15:00.000Z",
+    "totalAmount": 47500,
+    "quantity": 1,
+    "claimedUnits": [],
+    "claimedFlightUnits": [],
+    "claimedHotelUnits": [],
+    "updatedAt": "2026-09-11T10:15:00.000Z"
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Section 5: Error Codes Reference -->
+    <section id="errors" class="section-block">
+      <h2 class="section-title">5. Error Responses Reference</h2>
+
+      <div class="endpoint-desc">
+        All errors adhere to standard HTTP status codes and return a JSON payload with <code>success: false</code> and a descriptive error message:
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-topbar">
+          <span class="code-label">Error Response Envelope</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>{
+  "success": false,
+  "message": "Descriptive error message"
+}</code></pre>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Status Code</th>
+              <th>Error Message</th>
+              <th>Cause / Resolution</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>400 Bad Request</code></td>
+              <td><code>At least one traveller is required</code></td>
+              <td>The <code>travellers</code> array was empty or omitted from the request body.</td>
+            </tr>
+            <tr>
+              <td><code>400 Bad Request</code></td>
+              <td><code>Exactly one traveller must be marked isLead</code></td>
+              <td>Ensure exactly one traveller in the array has <code>isLead: true</code>.</td>
+            </tr>
+            <tr>
+              <td><code>400 Bad Request</code></td>
+              <td><code>quantity must be an integer &gt;= 1</code></td>
+              <td>Quantity provided was zero or negative. Must be an integer &gt;= 1.</td>
+            </tr>
+            <tr>
+              <td><code>400 Bad Request</code></td>
+              <td><code>travellers[0].travellerId must be a valid ObjectId</code></td>
+              <td>Provided traveller ID is not a valid 24-character hexadecimal MongoDB ObjectId.</td>
+            </tr>
+            <tr>
+              <td><code>400 Bad Request</code></td>
+              <td><code>A Package must contain at least 2 Offer components...</code></td>
+              <td>Opt-outs reduced active offers below minimum 2. Keep at least 2 components (e.g. Flight + Hotel).</td>
+            </tr>
+            <tr>
+              <td><code>400 Bad Request</code></td>
+              <td><code>Offer '...' is mandatory and cannot be excluded</code></td>
+              <td>Attempted to opt out of a non-optional item (<code>isOptional: false</code>).</td>
+            </tr>
+            <tr>
+              <td><code>400 Bad Request</code></td>
+              <td><code>Offer '...' cannot be swapped</code></td>
+              <td>Attempted to swap an offer that has <code>allowSwap: false</code>.</td>
+            </tr>
+            <tr>
+              <td><code>400 Bad Request</code></td>
+              <td><code>Replacement offer ... not found or inactive</code></td>
+              <td>The target replacement offer ID does not exist or has <code>isActive: false</code>.</td>
+            </tr>
+            <tr>
+              <td><code>400 Bad Request</code></td>
+              <td><code>Stock reservation failed: ...</code></td>
+              <td>Insufficient stock units remaining for a bundled flight or hotel offer.</td>
+            </tr>
+            <tr>
+              <td><code>401 Unauthorized</code></td>
+              <td><code>Authentication token missing / Invalid token</code></td>
+              <td>Pass a valid JWT customer token in the <code>Authorization: Bearer &lt;token&gt;</code> header.</td>
+            </tr>
+            <tr>
+              <td><code>404 Not Found</code></td>
+              <td><code>Package not found or inactive</code></td>
+              <td>The requested Package ID does not exist or has <code>isActive: false</code> / <code>isPublic: false</code>.</td>
+            </tr>
+            <tr>
+              <td><code>404 Not Found</code></td>
+              <td><code>Booking not found</code></td>
+              <td>The requested Booking ID does not exist or does not belong to the authenticated user.</td>
+            </tr>
+            <tr>
+              <td><code>500 Server Error</code></td>
+              <td><code>Internal Server Error</code></td>
+              <td>Unexpected server failure. Check backend application logs.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#030712',
+        primaryColor: '#6366f1',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#818cf8',
+        lineColor: '#38bdf8',
+        secondaryColor: '#0f172a',
+        tertiaryColor: '#1e293b'
+      }
+    });
+
+    function copyCode(btn) {
+      const pre = btn.closest('.code-wrapper').querySelector('pre code');
+      if (pre) {
+        navigator.clipboard.writeText(pre.innerText).then(() => {
+          const originalText = btn.innerText;
+          btn.innerText = 'Copied!';
+          btn.style.borderColor = '#10b981';
+          btn.style.color = '#a7f3d0';
+          setTimeout(() => {
+            btn.innerText = originalText;
+            btn.style.borderColor = '';
+            btn.style.color = '';
+          }, 2000);
+        });
+      }
+    }
+
+    function filterMenu() {
+      const q = document.getElementById('apiSearch').value.toLowerCase();
+      const items = document.querySelectorAll('.nav-sections .nav-item');
+      items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        if (text.includes(q)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Highlight active section on scroll
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('.endpoint-card, .section-block');
+      let current = '';
+      sections.forEach(sec => {
+        const top = sec.offsetTop - 100;
+        if (window.pageYOffset >= top) {
+          current = sec.getAttribute('id');
+        }
+      });
+
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === '#' + current) {
+          item.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
